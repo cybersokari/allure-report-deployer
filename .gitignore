@@ -1,0 +1,6 @@
+allure-firebase.iml
+.idea
+*/node_modules
+worker/allure-*
+worker/lib
+service-account.json

@@ -1,0 +1,39 @@
+services:
+  firebase:
+    image: goatlab/firebase-emulator:1.2-arm64
+    container_name: emulator
+    ports:
+      - "9199:9199" # Storage
+      - "4001:3000" # UI
+      - "4000:4000" # UI
+    command: ["firebase", "emulators:start", "--only", "storage,logging", "--project", "finna-app", '--config', "./startfirebase.json"]
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "localhost:4400/emulators"]
+      interval: 10s
+      start_period: 10s
+      retries: 3
+      timeout: 5s
+  allure-cloud:
+    tty: true
+    build:
+      dockerfile: Dockerfile
+      context: .
+    container_name: allure-deployer
+    environment:
+      FIREBASE_STORAGE_EMULATOR_HOST: 127.0.0.1:9199 # Dev
+      GOOGLE_APPLICATION_CREDENTIALS: ${PWD}/service-account.json
+      STORAGE_BUCKET: "finna-app.appspot.com"
+#      FIREBASE_SITE_ID: 'finna-app' # Optional
+      TTL_SECS: 45
+      DEBUG: true
+    volumes:
+#      - ./worker:/app #dev only. This cleans the /app dir
+      - ${PWD}/service-account.json:${PWD}/service-account.json:ro
+      - /Users/sokari/IdeaProjects/appium/reports/ios/allure-results:/allure-results
+    cpus: 1
+    mem_limit: 2048m
+    network_mode: service:firebase
+    depends_on:
+      firebase:
+        condition: service_healthy
