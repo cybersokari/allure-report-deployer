@@ -23,7 +23,7 @@ services:
     environment:
       DEBUG: true # Dev mode
       FIREBASE_STORAGE_EMULATOR_HOST: 127.0.0.1:9199 # Dev mode
-#      GOOGLE_APPLICATION_CREDENTIALS: ${PWD}/service-account.json
+      GOOGLE_APPLICATION_CREDENTIALS: ${PWD}/service-account.json
       STORAGE_BUCKET: "fir-demo-project.appspot.com"
       WEBSITE_ID: 'fir-demo-project'
       WEBSITE_EXPIRES: 30d
