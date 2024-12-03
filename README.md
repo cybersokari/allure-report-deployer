@@ -22,21 +22,21 @@ This [Docker image](https://hub.docker.com/r/sokari/allure-docker-deploy) is for
 2. **Google Cloud Storage Bucket**:
     - A storage bucket to store test results and reports.
 
-3. **Firebase Hosting Site**:
-    - A configured Firebase Hosting site (default or custom).
+3. **Website ID**:
+    - A unique identifier for your hosted report website in Firebase (for example, feature_mission-2-mars).
 
 ---
 
 ## Environment Variables
 
-| Variable                     | Description                                                                 | Default          |
-|------------------------------|-----------------------------------------------------------------------------|------------------|
-| `GOOGLE_APPLICATION_CREDENTIALS` | Path to the GCP service account JSON file (required).                   | None             |
-| `STORAGE_BUCKET`             | Google Cloud Storage bucket name (required if using cloud storage).         | None             |
-| `FIREBASE_SITE_ID`           | Firebase Hosting site ID (required if using Firebase Hosting).              | None             |
-| `TTL_SECS`                   | Time to wait (in seconds) before generating and uploading the report.       | 45               |
+| Variable                         | Description                                                                                             | Default          |
+|----------------------------------|---------------------------------------------------------------------------------------------------------|------------------|
+| `GOOGLE_APPLICATION_CREDENTIALS` | Path to the GCP service account JSON file (required).                                                   | None             |
+| `STORAGE_BUCKET`                 | Google Cloud Storage bucket name (required if using cloud storage).                                     | None             |
+| `WEBSITE_ID`                     | A unique identifier of your choice  (required if using Firebase Hosting).                               | None             |
+| `TTL_SECS`                       | Time to wait (in seconds) after last file is detected before generating and uploading the report. | 45               |
 
-**Note**: `STORAGE_BUCKET` or `FIREBASE_SITE_ID` must be provided. Both can be configured if you want to enable all functionalities.
+**Note**: `STORAGE_BUCKET` or `WEBSITE_ID` must be provided. Both can be configured if you want to enable all functionalities.
 
 ---
 
@@ -46,14 +46,17 @@ This [Docker image](https://hub.docker.com/r/sokari/allure-docker-deploy) is for
 2. Configure required environment variables:
    - `GOOGLE_APPLICATION_CREDENTIALS`: Path to your GCP credentials file.
    - `STORAGE_BUCKET`: The name of your Google Cloud Storage bucket (if using cloud storage).
-   - `FIREBASE_SITE_ID`: Custom Firebase Hosting site ID (if using Firebase Hosting).
+   - `WEBSITE_ID`: A unique identifier for the Firebase Hosting site. This ID will be used to construct the URL for the test report website. (if using Firebase Hosting).
 3. Optionally, configure:
-   - `TTL_SECS`: Delay in seconds before generating and uploading the report (default: 45 seconds).
+   - `TTL_SECS`: The number of seconds to wait before deploying a report after the last file is detected (default: 45 seconds).
 4. The container will watch for updates in the `/allure-results` directory. Once no new files are detected within the `TTL_SECS` timeframe, it will:
    - Upload results to the specified Google Cloud Storage bucket (if `STORAGE_BUCKET` is provided).
-   - Host the generated Allure report on Firebase Hosting (if `FIREBASE_SITE_ID` is provided).
+   - Host the generated Allure report on Firebase Hosting (if `WEBSITE_ID` is provided).
    - Perform both actions if both environment variables are set.
 5. [Report history and retries](https://allurereport.org/docs/history-and-retries/#history-and-retries) are auto enabled as `allure-report/history` directory is saved in storage after report generation.
+6. Your hosted Allure Report website is powered by Firebase hosting [preview channel](https://firebase.google.com/docs/hosting/test-preview-deploy?hl=en&authuser=0#preview-channels) which is ephemeral with a 7 days expiry by default. It can be adjusted with a `WEBSITE_EXPIRES` env variable in the docker run command or docker-compose file. Use `h` for hours, `d` for days, and `w` for weeks (for example, `12h`, `7d`, `2w`, respectively). Max duration is 30 days.
+
+
 ---
 
 ## Getting Started
@@ -69,7 +72,8 @@ docker run -d \
   -e GOOGLE_APPLICATION_CREDENTIALS=/credentials/gcp-key.json \
   -e STORAGE_BUCKET=my-test-results-bucket \
   -e TTL_SECS=60 \
-  -e FIREBASE_SITE_ID=my-custom-site-id \
+  -e WEBSITE_ID=my-custom-site-id \
+  -e WEBSITE_EXPIRES=2d \
   -v /path/to/allure-results:/allure-results \
   -v /path/to/gcp-key.json:/credentials/gcp-key.json \
   sokari/allure-docker-deploy
@@ -87,16 +91,20 @@ services:
       GOOGLE_APPLICATION_CREDENTIALS: /service-account.json
       STORAGE_BUCKET: your-storage-bucket
       # Uncomment the line below to enable Firebase Hosting
-      # FIREBASE_SITE_ID: your-firebase-site-id
+      # WEBSITE_ID: your-firebase-site-id
+      # WEBSITE_EXPIRES: 2d
       TTL_SECS: 60
 ```
 
-### Step 3: View the Hosted Report
+### Step 3: View the hosted Allure Report
 
-After the report is generated, the URL to your hosted report will be output in the logs. Share it with your team!
-You can also use `<FIREBASE_SITE_ID>.web.app`, which is the [default URL generated by Firebase.](https://firebase.google.com/docs/hosting/test-preview-deploy#view-changes)
+After the report is generated, the URL to your hosted report will be output in the logs as `hosting:channel: Channel URL`. Share it with your team!
 
-Example Use Case
+<div style="text-align: left"><img src="assets/firebase-hosting-cli.png" height="220" alt="Firebase CLI console output"></div>
+
+You can also find the website URL in your Firebase Console Dashboard.
+
+## Example Use Case
 
 	1.	Run your tests locally.
 	2.	Output test results to /allure-results.
@@ -104,13 +112,6 @@ Example Use Case
 	4.	Once the test run is complete, an Allure report is generated and hosted on Firebase.
 	5.	Share the report URL with stakeholders for review.
 
-Logs and Debugging
-
-View container logs:
-
-```shell
-docker logs <your-container-id>
-```
 
 License
 

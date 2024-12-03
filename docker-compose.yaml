@@ -6,7 +6,7 @@ services:
       - "9199:9199" # Storage
       - "4001:3000" # UI
       - "4000:4000" # UI
-    command: ["firebase", "emulators:start", "--only", "storage,logging", "--project", "finna-app", '--config', "./startfirebase.json"]
+    command: ["firebase", "emulators:start", "--only", "storage,logging", "--project", "fir-demo-project", '--config', "./startfirebase.json"]
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "localhost:4400/emulators"]
@@ -23,9 +23,10 @@ services:
     environment:
       DEBUG: true # Dev mode
       FIREBASE_STORAGE_EMULATOR_HOST: 127.0.0.1:9199 # Dev mode
-      GOOGLE_APPLICATION_CREDENTIALS: ${PWD}/service-account.json
+#      GOOGLE_APPLICATION_CREDENTIALS: ${PWD}/service-account.json
       STORAGE_BUCKET: "fir-demo-project.appspot.com"
-      FIREBASE_SITE_ID: 'fir-demo-project'
+      WEBSITE_ID: 'fir-demo-project'
+      WEBSITE_EXPIRES: 30d
       TTL_SECS: 45
     volumes:
 #      - ./worker:/app #dev only. This overrides the /app dir

@@ -4,13 +4,13 @@ import {StringBuilder} from "./string-builder";
 import * as fsSync from "fs";
 import * as path from "node:path";
 import * as util from 'node:util'
+import {websiteId} from "../index";
 const exec = util.promisify(require('child_process').exec)
 
-async function createFirebaseJson(site: string) {
+async function createFirebaseJson() {
     const hosting = {
         "hosting": {
             "public": ".",
-            "site": site,
             "ignore": [
                 "firebase.json",
                 "**/.*",
@@ -51,15 +51,18 @@ async function publishToFireBaseHosting() {
     }
     console.log(`Deploying to Firebase...`)
     const builder = new StringBuilder()
-    builder.append('firebase deploy').append(' ')
+    builder.append('firebase hosting:channel:deploy').append(' ')
         .append(`--config ${REPORTS_DIR}/firebase.json`).append(' ')
-        .append(`--project ${process.env.FIREBASE_SITE_ID ?? process.env.FIREBASE_PROJECT_ID!}`)
+        .append(`--project ${process.env.FIREBASE_PROJECT_ID}`).append(' ')
+        .append('--no-authorized-domains').append(' ')
+        .append(websiteId!)
     const {stdout} = await exec(builder.toString())
     console.log(stdout)
 }
 
 export async function deploy ()  {
-    await createFirebaseJson(process.env.FIREBASE_SITE_ID ?? process.env.FIREBASE_PROJECT_ID!)
+    await createFirebaseJson()
+    // Grant execution permission to website files
     await changePermissionsRecursively(REPORTS_DIR, 0o755)
     await publishToFireBaseHosting()
 }

@@ -21,12 +21,12 @@ class ReportBuilder {
         this.timeOut  = setTimeout(this.buildReport, this.ttl * 1000)
     }
 
-    public async buildReport(deployToHosting = true){
+    private async buildReport(deployToHosting = true){
         const destination = `${STAGING_PATH}/history`
         const source = `${REPORTS_DIR}/history`
         try {
             await exec(`rm -rf ${destination} && mkdir -p ${destination}`)
-            fs.cpSync(source, destination, {preserveTimestamps: true, recursive: true})
+            fs.cpSync(source, destination, {preserveTimestamps: true, recursive: true, errorOnExist: false})
         } catch (e) {
             console.log(`Allure history cloning failed: ${e}`)
         }
