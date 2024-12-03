@@ -1,8 +1,9 @@
 name: Docker hub
 on:
   push:
-    branches:
-      - main
+    tags:
+      ["v*.**"]
+    
 jobs:
   deploy:
     runs-on: ubuntu-latest

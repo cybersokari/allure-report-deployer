@@ -1,8 +1,9 @@
-# Allure Docker Deploy
-
 ![Deployment](https://github.com/cybersokari/allure-docker-deploy/actions/workflows/deploy.yaml/badge.svg?branch=main)
 
-**Allure Docker Deploy** is a lightweight Docker image designed for testers who want to store and share their Allure test reports in the cloud. With minimal setup, this image enables local test results to be uploaded to a cloud storage bucket, generate a hosted Allure report, and share it via a Firebase-hosted website.
+# Allure Docker Deploy
+***Test locally, report globally.***
+
+This [Docker image](https://hub.docker.com/r/sokari/allure-docker-deploy) is for testers who test locally but want to store and share their [Allure](https://allurereport.org/) test reports in the cloud. With minimal setup, this image enables local test results to be uploaded to a cloud storage bucket, generate a hosted Allure report, and share it via a [Firebase-hosted website](https://firebase.google.com/docs/hosting).
 
 ---
 
@@ -15,7 +16,7 @@
 
 ## Requirements
 1. **Google Cloud Credentials**:
-    - Set up a [Google Cloud service account](https://firebase.google.com/docs/admin/setup#initialize_the_sdk_in_non-google_environments) with access to your storage bucket and Firebase Hosting.
+    - Set up a Google Cloud [service account](https://firebase.google.com/docs/admin/setup#initialize_the_sdk_in_non-google_environments) with access to your storage bucket and Firebase Hosting.
     - Download the `service-account-file.json` JSON file that the `GOOGLE_APPLICATION_CREDENTIALS` env will point to.
 
 2. **Google Cloud Storage Bucket**:
