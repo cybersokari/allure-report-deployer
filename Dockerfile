@@ -12,5 +12,4 @@ RUN mkdir "allure-results"
 COPY worker/.  /app/
 RUN npm install && npm run build
 
-COPY scripts/. /
 CMD ["/bin/sh", "/start.sh"]
