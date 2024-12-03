@@ -1,9 +1,10 @@
-import {RESULTS_PATH} from "../index";
+import {STAGING_PATH} from "../index";
 const allure = require('allure-commandline')
-import util = require('node:util')
-import {changePermissionsRecursively, createFirebaseJson} from "./util";
-import {StringBuilder} from "./string-builder";
 import * as fs from "node:fs";
+import {deploy} from "./site-builder";
+import util = require('node:util')
+import * as path from "node:path";
+import * as fsSync from "fs";
 const exec = util.promisify(require('child_process').exec)
 
 export const REPORTS_DIR = 'allure-report'
@@ -20,8 +21,8 @@ class ReportBuilder {
         this.timeOut  = setTimeout(this.buildReport, this.ttl * 1000)
     }
 
-    public async buildReport(){
-        const destination = `${RESULTS_PATH}/history`
+    public async buildReport(deployToHosting = true){
+        const destination = `${STAGING_PATH}/history`
         const source = `${REPORTS_DIR}/history`
         try {
             await exec(`rm -rf ${destination} && mkdir -p ${destination}`)
@@ -32,7 +33,7 @@ class ReportBuilder {
         // Generate new Allure report
         const generation = allure([
             'generate',
-            RESULTS_PATH,
+            STAGING_PATH,
             '--report-dir',
             REPORTS_DIR,
             '--clean',
@@ -41,29 +42,24 @@ class ReportBuilder {
             if (exitCode !== 0) {
                 console.error('Failed to generate Allure report')
             } {
+                if(!deployToHosting) return
                 try {
-                    const config = await createFirebaseJson(process.env.FIREBASE_SITE_ID ?? process.env.FIREBASE_PROJECT_ID!)
-                    await changePermissionsRecursively(REPORTS_DIR, 0o755)
-                    await deploy(config)
+                    await deploy()
                 }catch (e) {
                     console.log(`Hosting deployment failed: ${e}`)
                 }
             }
         })
     }
-}
 
-export async function deploy (config: string)  {
-    if(process.env.DEBUG) {
-        console.warn('Skipping deployment because to DEBUG set to true')
-        return
+    public moveFileToStaging(sourceFilePath: any){
+        try {
+            const destinationFilePath = path.join(STAGING_PATH, path.basename(sourceFilePath));
+            fsSync.mkdirSync(path.dirname(destinationFilePath), { recursive: true });
+            fsSync.copyFileSync(sourceFilePath, destinationFilePath);
+        }catch (e) {
+            console.warn(`Failed to move ${path.basename(sourceFilePath)} to staging area: ${e}`)
+        }
     }
-    console.log(`Deploying to Firebase with config at: ${config}`)
-    const builder = new StringBuilder()
-    builder.append('firebase deploy').append(' ')
-        .append(`--config ${REPORTS_DIR}/firebase.json`).append(' ')
-        .append(`--project ${process.env.FIREBASE_SITE_ID ?? process.env.FIREBASE_PROJECT_ID!}`)
-    const {stdout} = await exec(builder.toString())
-    console.log(stdout)
 }
 export default new ReportBuilder()
