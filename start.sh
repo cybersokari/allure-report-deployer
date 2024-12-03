@@ -1,5 +1,13 @@
 #!/bin/bash
-# The env variables are to be set by docker
+
+# Exit immediately if a command exits with a non-zero status
+set -e
+
+if [[ -z "$FIREBASE_SITE_ID" ]] && [[ -z "$STORAGE_BUCKET" ]]; then
+    echo "Error: Either FIREBASE_SITE_ID or STORAGE_BUCKET must be set" >&2
+    exit 1
+fi
+
 if [ -z "$GOOGLE_APPLICATION_CREDENTIALS" ]; then
   echo "GOOGLE_APPLICATION_CREDENTIALS env is not set."
   exit 1

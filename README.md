@@ -7,17 +7,16 @@
 ---
 
 ## Key Features
-- **Cloud Storage Integration**: Upload and preserve test results in a Google Cloud Storage bucket.
-- **Firebase Hosting**: Generate and host Allure reports on a website for easy sharing with stakeholders.
+- **Cloud Storage Integration**: Save Allure test results and history in a Google Cloud Storage bucket.
+- **Firebase Hosting**: Auto generate and host Allure reports on a website for easy sharing with stakeholders.
 - **TTL-Optimized Deployment**: Configurable delay before deployment to ensure all test results are finalized.
-- **Custom Firebase Hosting Site**: Override the default Firebase site ID for hosting.
 
 ---
 
 ## Requirements
 1. **Google Cloud Credentials**:
-    - Set up a Google Cloud service account with access to your storage bucket and Firebase Hosting.
-    - Download the `GOOGLE_APPLICATION_CREDENTIALS` JSON file.
+    - Set up a [Google Cloud service account](https://firebase.google.com/docs/admin/setup#initialize_the_sdk_in_non-google_environments) with access to your storage bucket and Firebase Hosting.
+    - Download the `service-account-file.json` JSON file that the `GOOGLE_APPLICATION_CREDENTIALS` env will point to.
 
 2. **Google Cloud Storage Bucket**:
     - A storage bucket to store test results and reports.
@@ -27,27 +26,33 @@
 
 ---
 
-## How It Works
-1. Mount your test results directory (`/allure-results`) to the container.
-2. Configure required environment variables:
-    - `GOOGLE_APPLICATION_CREDENTIALS`: Path to your GCP credentials file.
-    - `STORAGE_BUCKET`: The name of your Google Cloud Storage bucket.
-3. Optionally, configure:
-    - `TTL_SECS`: Delay in seconds before generating and uploading the report (default: 45 seconds).
-    - `FIREBASE_SITE_ID`: Custom Firebase Hosting site ID.
-4. The container watches for updates in the `/allure-results` directory. Once no new files are detected within the `TTL_SECS` timeframe, it generates and deploys the Allure report.
-
----
-
 ## Environment Variables
 
 | Variable                     | Description                                                                 | Default          |
 |------------------------------|-----------------------------------------------------------------------------|------------------|
 | `GOOGLE_APPLICATION_CREDENTIALS` | Path to the GCP service account JSON file (required).                   | None             |
-| `STORAGE_BUCKET`             | Google Cloud Storage bucket name (required).                                | None             |
+| `STORAGE_BUCKET`             | Google Cloud Storage bucket name (required if using cloud storage).         | None             |
+| `FIREBASE_SITE_ID`           | Firebase Hosting site ID (required if using Firebase Hosting).              | None             |
 | `TTL_SECS`                   | Time to wait (in seconds) before generating and uploading the report.       | 45               |
-| `FIREBASE_SITE_ID`           | Firebase Hosting site ID to override the default site in the credentials.   | Default site ID  |
 
+**Note**: `STORAGE_BUCKET` or `FIREBASE_SITE_ID` must be provided. Both can be configured if you want to enable all functionalities.
+
+---
+
+## How It Works
+
+1. Mount your test results directory (`/allure-results`) to the container.
+2. Configure required environment variables:
+   - `GOOGLE_APPLICATION_CREDENTIALS`: Path to your GCP credentials file.
+   - `STORAGE_BUCKET`: The name of your Google Cloud Storage bucket (if using cloud storage).
+   - `FIREBASE_SITE_ID`: Custom Firebase Hosting site ID (if using Firebase Hosting).
+3. Optionally, configure:
+   - `TTL_SECS`: Delay in seconds before generating and uploading the report (default: 45 seconds).
+4. The container will watch for updates in the `/allure-results` directory. Once no new files are detected within the `TTL_SECS` timeframe, it will:
+   - Upload results to the specified Google Cloud Storage bucket (if `STORAGE_BUCKET` is provided).
+   - Host the generated Allure report on Firebase Hosting (if `FIREBASE_SITE_ID` is provided).
+   - Perform both actions if both environment variables are set.
+5. [Report history and retries](https://allurereport.org/docs/history-and-retries/#history-and-retries) are auto enabled as `allure-report/history` directory is saved in storage after report generation.
 ---
 
 ## Getting Started
@@ -68,11 +73,27 @@ docker run -d \
   -v /path/to/gcp-key.json:/credentials/gcp-key.json \
   sokari/allure-docker-deploy
 ```
-
+Docker compose example:
+```yaml
+services:  
+  allure:
+    image: sokari/allure-docker-deploy
+    container_name: deploy-service
+    volumes:
+      - /path/to/allure-results:/allure-results
+      - /path/to/service-account.json:/service-account.json
+    environment:
+      GOOGLE_APPLICATION_CREDENTIALS: /service-account.json
+      STORAGE_BUCKET: your-storage-bucket
+      # Uncomment the line below to enable Firebase Hosting
+      # FIREBASE_SITE_ID: your-firebase-site-id
+      TTL_SECS: 60
+```
 
 ### Step 3: View the Hosted Report
 
 After the report is generated, the URL to your hosted report will be output in the logs. Share it with your team!
+You can also use `<FIREBASE_SITE_ID>.web.app`, which is the [default URL generated by Firebase.](https://firebase.google.com/docs/hosting/test-preview-deploy#view-changes)
 
 Example Use Case
 
@@ -86,7 +107,13 @@ Logs and Debugging
 
 View container logs:
 
-`docker logs <container_id>`
+```shell
+docker logs <your-container-id>
+```
+
+License
+
+This project is licensed under the [MIT License](https://opensource.org/licenses/MIT). See the LICENSE file for details.
 
 Contributing
 

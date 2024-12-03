@@ -21,14 +21,14 @@ services:
       context: .
     container_name: allure-deployer
     environment:
-      FIREBASE_STORAGE_EMULATOR_HOST: 127.0.0.1:9199 # Dev
+      DEBUG: true # Dev mode
+      FIREBASE_STORAGE_EMULATOR_HOST: 127.0.0.1:9199 # Dev mode
       GOOGLE_APPLICATION_CREDENTIALS: ${PWD}/service-account.json
-      STORAGE_BUCKET: "finna-app.appspot.com"
-#      FIREBASE_SITE_ID: 'finna-app' # Optional
+      STORAGE_BUCKET: "fir-demo-project.appspot.com"
+      FIREBASE_SITE_ID: 'fir-demo-project'
       TTL_SECS: 45
-      DEBUG: true
     volumes:
-#      - ./worker:/app #dev only. This cleans the /app dir
+#      - ./worker:/app #dev only. This overrides the /app dir
       - ${PWD}/service-account.json:${PWD}/service-account.json:ro
       - /Users/sokari/IdeaProjects/appium/reports/ios/allure-results:/allure-results
     cpus: 1
