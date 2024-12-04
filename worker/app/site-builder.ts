@@ -4,7 +4,7 @@ import {StringBuilder} from "./string-builder";
 import * as fsSync from "fs";
 import * as path from "node:path";
 import * as util from 'node:util'
-import {websiteId} from "../index";
+import {cloudStorage, websiteId} from "../index";
 const exec = util.promisify(require('child_process').exec)
 
 async function createFirebaseJson() {
@@ -65,5 +65,8 @@ export async function deploy ()  {
     // Grant execution permission to website files
     await changePermissionsRecursively(REPORTS_DIR, 0o755)
     await publishToFireBaseHosting()
+    await cloudStorage?.uploadResultsToStorage()
 }
+
+
 

@@ -11,9 +11,9 @@ RUN npm install -g firebase-tools
 RUN mkdir "allure-results"
 # Copy app files and install deps
 COPY worker/.  /app/
-RUN npm install && npm run build
+#RUN npm install && npm run build
 # Remove .ts files
-RUN rm -rf app
+#RUN rm -rf app
 
 COPY start.sh /
 CMD ["/bin/sh", "/start.sh"]

@@ -1,4 +1,5 @@
 import * as fsSync from 'fs'
+import * as path from "node:path";
 
 export const getProjectIdFromCredentialsFile = () => {
     try {
@@ -14,6 +15,24 @@ export const getProjectIdFromCredentialsFile = () => {
 
 export function logError(...e: any){
     console.log(e)
+}
+
+export function getAllFiles(dirPath : string, arrayOfFiles : string[] = []) {
+
+    try {
+        const files = fsSync.readdirSync(dirPath);
+        files.forEach((file: any) => {
+            const filePath = path.join(dirPath, file);
+            if (fsSync.statSync(filePath).isDirectory()) {
+                arrayOfFiles = getAllFiles(filePath, arrayOfFiles);
+            } else {
+                arrayOfFiles.push(filePath);
+            }
+        });
+    }catch (e) {
+        console.warn(e);
+    }
+    return arrayOfFiles;
 }
 
 
