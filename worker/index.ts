@@ -11,15 +11,15 @@ const storageBucket = process.env.STORAGE_BUCKET
 export const websiteId = process.env.WEBSITE_ID;
 
 /**
- * Download remote files if FIREBASE_SITE_ID is provided.
+ * Download remote files if WEBSITE_ID is provided.
  * Start the file watcher.
  * On new file in at /allure-results mounted path,
  * 1. Upload files to cloud storage if STORAGE_BUCKET is provided
- * 2. Move files to STAGING_PATH and set ttl for hosting if FIREBASE_SITE_ID is provided
+ * 2. Move files to STAGING_PATH and set ttl for hosting if WEBSITE_ID is provided
  */
 function main(): void {
     if(!storageBucket && !websiteId){
-        console.warn('FIREBASE_SITE_ID or STORAGE_BUCKET is required');
+        console.warn('WEBSITE_ID or STORAGE_BUCKET is required');
         return
     }
     process.env.FIREBASE_PROJECT_ID = getProjectIdFromCredentialsFile()
@@ -40,7 +40,7 @@ function main(): void {
         }
     });
     if(!websiteId){
-        console.log('Report publishing disabled because FIREBASE_SITE_ID is null ');
+        console.log('Report publishing disabled because WEBSITE_ID is null ');
     }
     if(!storageBucket){
         console.log('Cloud storage file upload disabled because STORAGE_BUCKET is null ');
