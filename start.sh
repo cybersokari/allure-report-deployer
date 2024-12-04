@@ -3,8 +3,8 @@
 # Exit immediately if a command exits with a non-zero status
 set -e
 
-if [[ -z "$FIREBASE_SITE_ID" ]] && [[ -z "$STORAGE_BUCKET" ]]; then
-    echo "Error: Either FIREBASE_SITE_ID or STORAGE_BUCKET must be set" >&2
+if [[ -z "$WEBSITE_ID" ]] && [[ -z "$STORAGE_BUCKET" ]]; then
+    echo "Error: Either WEBSITE_ID or STORAGE_BUCKET must be set" >&2
     exit 1
 fi
 
