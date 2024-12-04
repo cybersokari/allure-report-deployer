@@ -45,7 +45,7 @@ async function changePermissionsRecursively(dirPath: string, mode: fsSync.Mode) 
 }
 
 async function publishToFireBaseHosting() {
-    if(process.env.DEBUG) {
+    if(process.env.DEBUG === 'true') {
         console.warn('Skipping deployment because to DEBUG set to true')
         return
     }
