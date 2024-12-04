@@ -1,11 +1,9 @@
-import {STAGING_PATH} from "../index";
+import {MOUNTED_PATH, STAGING_PATH} from "../index";
 const allure = require('allure-commandline')
 import * as fs from "node:fs";
 import {deploy} from "./site-builder";
-import util = require('node:util')
 import * as path from "node:path";
 import * as fsSync from "fs";
-const exec = util.promisify(require('child_process').exec)
 
 export const REPORTS_DIR = 'allure-report'
 class ReportBuilder {
@@ -21,11 +19,12 @@ class ReportBuilder {
         this.timeOut  = setTimeout(this.buildReport, this.ttl * 1000)
     }
 
-    private async buildReport(deployToHosting = true){
+    public buildReport(deployOnSuccess = true){
         const destination = `${STAGING_PATH}/history`
         const source = `${REPORTS_DIR}/history`
         try {
-            await exec(`rm -rf ${destination} && mkdir -p ${destination}`)
+            fs.rmSync(destination, { recursive: true, force: true })
+            fs.mkdirSync(destination, { recursive: true })
             fs.cpSync(source, destination, {preserveTimestamps: true, recursive: true, errorOnExist: false})
         } catch (e) {
             console.log(`Allure history cloning failed: ${e}`)
@@ -38,15 +37,17 @@ class ReportBuilder {
             REPORTS_DIR,
             '--clean',
         ])
+
         generation.on('exit', async function (exitCode: number) {
             if (exitCode !== 0) {
                 console.error('Failed to generate Allure report')
             } {
-                if(!deployToHosting) return
-                try {
-                    await deploy()
-                }catch (e) {
-                    console.log(`Hosting deployment failed: ${e}`)
+                if(deployOnSuccess){
+                    try {
+                        await deploy()
+                    }catch (e) {
+                        console.log(`Hosting deployment failed: ${e}`)
+                    }
                 }
             }
         })
@@ -61,5 +62,19 @@ class ReportBuilder {
             console.warn(`Failed to move ${path.basename(sourceFilePath)} to staging area: ${e}`)
         }
     }
+    public moveFilesToStaging(sourceFilesPath: any){
+        try {
+            fsSync.mkdirSync(STAGING_PATH, { recursive: true });
+            fsSync.readdirSync(sourceFilesPath).forEach((filePath) => {
+                console.log(`Found file ${filePath} in ${sourceFilesPath}`);
+                const sourceFilePath = path.join(MOUNTED_PATH, filePath);
+                const destinationFilePath = path.join(STAGING_PATH, path.basename(filePath));
+                fsSync.copyFileSync(sourceFilePath, destinationFilePath);
+            })
+        }catch (e) {
+            console.warn(`Failed to move files in ${sourceFilesPath} to staging area: ${e}`)
+        }
+    }
+
 }
 export default new ReportBuilder()
