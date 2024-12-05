@@ -2,6 +2,9 @@ name: Github Actions usecase
 on:
   workflow_dispatch:
     inputs:
+      storage-bucket:
+        description: 'Your Firebase (GCP) storage bucket'
+        required: true
       keep-retries:
         description: 'Backup results to keep retries' 
         required: false
@@ -43,7 +46,7 @@ jobs:
         with:
           args: >
             -e GOOGLE_APPLICATION_CREDENTIALS=/credentials/gcp-key.json
-            -e STORAGE_BUCKET=my-test-results-bucket
+            -e STORAGE_BUCKET=${{github.event.inputs.storage-bucket}}
             -e WEBSITE_ID=${{ github.event.inputs.website-id }}
             -e WEBSITE_EXPIRES=${{ github.event.inputs.website-expires }}
             -e KEEP_RETRIES=${{ github.event.inputs.keep-retries }}
