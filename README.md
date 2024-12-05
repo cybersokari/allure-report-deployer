@@ -148,21 +148,16 @@ Nevertheless, you have free 5GB of storage before you will incur any charges_
 
 ---
 
-## Where to find your hosted report URL
-| Platform  | Report URL output location       |
-|-----------|----------------------------------|
-| GitHub    | Logs, GitHub Actions job summary |
-| Localhost | Logs                             |
-| Gitlab    | Logs                             |
+## Where to find your hosted test report URL
+| Platform  | Report URL output location                    |
+|-----------|-----------------------------------------------|
+| GitHub    | Logs, GitHub Actions job summary, Slack (WIP) |
+| Gitlab    | Logs, Slack (WIP)                             |
+| Localhost | Logs                                          |
 ### Logs example
 <div style="text-align: left"><img src="assets/firebase-hosting-cli.png" height="220" alt="Firebase CLI console output"></div>
 
-### URL in GitHub Actions job summary
-### URL in Firebase Console
-You can also find the website URL in your Firebase Console Dashboard.
-
-#### URL to Slack (Coming soon)
-
+_You can also find the URL in your Firebase Console Dashboard._
 
 ## Comparison: Docker Deploy vs Allure GitHub Actions Integration
 
