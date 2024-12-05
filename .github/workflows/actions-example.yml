@@ -25,6 +25,8 @@ on:
 jobs:
   generate-publish:
     runs-on: ubuntu-latest
+    env:
+      GCP_SECRETS: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
     steps:
       - uses: actions/checkout@v3
       - name: Run Tests
@@ -33,7 +35,7 @@ jobs:
 
       - name: Write GCP Credentials
         run: |
-          echo "${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}" > ${{ github.workspace }}/gcp-key.json && cat ${{ github.workspace }}/gcp-key.json
+          echo "$GCP_SECRETS" > ${{ github.workspace }}/gcp-key.json
 
       - name: Authenticate Docker Hub
         uses: docker/login-action@v3
