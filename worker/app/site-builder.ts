@@ -46,26 +46,53 @@ async function changePermissionsRecursively(dirPath: string, mode: fsSync.Mode) 
 
 async function publishToFireBaseHosting() {
     if(process.env.DEBUG === 'true') {
-        console.warn('Skipping deployment because to DEBUG set to true')
+        console.warn('DEBUG=true: Skipping live deployment')
         return
     }
-    console.log(`Deploying to Firebase...`)
+    console.log(`Deploying Allure report site...`)
     const builder = new StringBuilder()
     builder.append('firebase hosting:channel:deploy').append(' ')
         .append(`--config ${REPORTS_DIR}/firebase.json`).append(' ')
         .append(`--project ${process.env.FIREBASE_PROJECT_ID}`).append(' ')
         .append('--no-authorized-domains').append(' ')
         .append(websiteId!)
-    const {stdout} = await exec(builder.toString())
-    console.log(stdout)
+    const {stdout, stderr} = await exec(builder.toString())
+
+    if(stderr && !stdout) {
+        console.error(`Error from hosting: ${stderr}`)
+    }
+    // Try to extract
+    const regex = /hosting:channel: Channel URL.*\((.*?)\):\s+(https?:\/\/\S+)/;
+    const match = stdout.match(regex);
+
+    if (match && match[2]) {
+        const url = match[2]
+        console.log(`Allure test report URL: ${url}`)
+        if(process.env.GITHUB_WORKFLOW){ // Add URL to GitHub workflow summary
+            builder.clear()
+            builder.append(`echo "Allure test report URL: ${url}"`).append(' ')
+                .append('>>').append(' ').append('$GITHUB_STEP_SUMMARY')
+            try {
+                await exec(builder.toString())
+            }catch (e) {/**Ignore**/}
+        }
+    } else {
+        console.warn('Could not parse URL from hosting.')
+        console.log(stdout)
+    }
 }
 
 export async function deploy ()  {
     await createFirebaseJson()
     // Grant execution permission to website files
-    await changePermissionsRecursively(REPORTS_DIR, 0o755)
-    await publishToFireBaseHosting()
-    await cloudStorage?.uploadResultsToStorage()
+    changePermissionsRecursively(REPORTS_DIR, 0o755)
+        .then(async ()=> {
+            await Promise.all([
+                publishToFireBaseHosting(),
+                cloudStorage?.uploadResultsToStorage()
+            ])
+        })
+
 }
 
 

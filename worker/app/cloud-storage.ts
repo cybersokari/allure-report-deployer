@@ -31,22 +31,23 @@ export class CloudStorage {
         }
     }
 
-    public async downloadRemoteFilesToStaging({historyOnly = false}): Promise<void> {
+    // Download remote files to staging area
+    public async stageRemoteFiles(): Promise<any> {
         try {
-            const [files] = await this.bucket.getFiles({prefix: historyOnly ? `${storageHomeDir}/history/` : `${storageHomeDir}/`});
-            try {
-                fs.mkdirSync(STAGING_PATH); // This should already exist from the image if the step is intact
-            } catch (e) {
-            }
+            const [files] = await this.bucket.getFiles({prefix: `${storageHomeDir}/`});
 
-            for (let file of files) {
+            fs.mkdirSync(STAGING_PATH, {recursive: true}); // recursive, dont throw is exist
+
+            for (const file of files) {
                 // Remove the preceding storageHomeDir path from the downloaded file
                 const destination = path.join(STAGING_PATH, file.name.replace(`${storageHomeDir}/`, ''));
                 await file.download({destination, validation: process.env.CI === 'true'});
                 console.log(`Downloaded ${file.name}`);
             }
+            return files
         } catch (error) {
             console.error('Download error:', error);
+            return error
         }
     }
 
