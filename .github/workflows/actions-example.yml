@@ -52,10 +52,10 @@ jobs:
           -e KEEP_HISTORY=${{ github.event.inputs.keep-history }} \
           -v ${{ github.workspace }}/assets/allure-results:/allure-results \
           -v ${{ github.workspace }}/gcp-key.json:/credentials/gcp-key.json \
-          sokari/allure-docker-deploy ls /allure-results
+          sokari/allure-docker-deploy:latest ls /allure-results
 
       - name: Deploy Allure Report to Firebase
-        uses: docker://sokari/allure-docker-deploy
+        uses: docker://sokari/allure-docker-deploy:latest
         with:
           args: >
             -e GOOGLE_APPLICATION_CREDENTIALS=/credentials/gcp-key.json
