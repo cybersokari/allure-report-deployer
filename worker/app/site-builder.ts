@@ -5,6 +5,7 @@ import * as fsSync from "fs";
 import * as path from "node:path";
 import * as util from 'node:util'
 import {cloudStorage, websiteId} from "../index";
+import {validateWebsiteExpires} from "./util";
 const exec = util.promisify(require('child_process').exec)
 
 async function createFirebaseJson() {
@@ -56,6 +57,14 @@ async function publishToFireBaseHosting() {
         .append(`--project ${process.env.FIREBASE_PROJECT_ID}`).append(' ')
         .append('--no-authorized-domains').append(' ')
         .append(websiteId!)
+
+    const expires = process.env.WEBSITE_EXPIRES
+    if(expires && validateWebsiteExpires(expires)) {
+        builder.append(' ')
+            .append('--expires')
+            .append(' ')
+            .append(expires)
+    }
     const {stdout, stderr} = await exec(builder.toString())
 
     if(stderr && !stdout) {
