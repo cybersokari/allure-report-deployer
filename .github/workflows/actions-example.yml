@@ -40,6 +40,19 @@ jobs:
         with:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
+      
+      - name: Debug Container
+        run: |
+          docker run --rm \
+          -e GOOGLE_APPLICATION_CREDENTIALS=/credentials/gcp-key.json \
+          -e STORAGE_BUCKET=my-test-results-bucket \
+          -e WEBSITE_ID=${{ github.event.inputs.website-id }} \
+          -e WEBSITE_EXPIRES=${{ github.event.inputs.website-expires }} \
+          -e KEEP_RETRIES=${{ github.event.inputs.keep-retries }} \
+          -e KEEP_HISTORY=${{ github.event.inputs.keep-history }} \
+          -v ${{ github.workspace }}/assets/allure-results:/allure-results \
+          -v ${{ github.workspace }}/gcp-key.json:/credentials/gcp-key.json \
+          sokari/allure-docker-deploy ls /allure-results
 
       - name: Deploy Allure Report to Firebase
         uses: docker://sokari/allure-docker-deploy
