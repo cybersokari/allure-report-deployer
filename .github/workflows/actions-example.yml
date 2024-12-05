@@ -33,7 +33,7 @@ jobs:
 
       - name: Write GCP Credentials
         run: |
-          echo "${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}" > ${{ github.workspace }}/gcp-key.json
+          echo "${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}" > ${{ github.workspace }}/gcp-key.json && cat ${{ github.workspace }}/gcp-key.json
 
       - name: Authenticate Docker Hub
         uses: docker/login-action@v3
