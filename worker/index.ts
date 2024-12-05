@@ -7,7 +7,7 @@ import ReportBuilder from "./app/report-builder";
 import {CloudStorage} from "./app/cloud-storage";
 
 export const MOUNTED_PATH = '/allure-results'
-export const HOME_DIR = process.env.WORK_DIR
+export const HOME_DIR = '/app'
 export const STAGING_PATH = `${HOME_DIR}/allure-results`;
 export const websiteId = process.env.WEBSITE_ID;
 export const keepHistory = process.env.KEEP_HISTORY?.toLowerCase() === 'true'

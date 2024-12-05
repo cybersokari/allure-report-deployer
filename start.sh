@@ -41,4 +41,4 @@ if [ -n "$TTL_SECS" ]; then
   fi
 fi
 
-node ./lib/index.js
+node /app/lib/index.js
