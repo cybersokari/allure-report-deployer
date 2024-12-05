@@ -7,13 +7,14 @@ USER root
 RUN apk add openjdk17-jre
 # Firebase Hosting
 RUN npm install -g firebase-tools
-# Create results staging directory
-RUN mkdir "allure-results"
+# Mount dir /allure-results
+# Staging dir /app/allure-results
+RUN mkdir "allure-results" # create staging
 # Copy app files and install deps
 COPY worker/.  /app/
-#RUN npm install && npm run build
-# Remove .ts files
-#RUN rm -rf app
+RUN npm install && npm run build
+## Remove .ts files
+RUN rm -rf app
 
 COPY start.sh /
 CMD ["/bin/sh", "/start.sh"]

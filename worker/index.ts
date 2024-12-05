@@ -36,17 +36,28 @@ function main(): void {
             awaitWriteFinish: true
         }).on('add', (filePath: string) => {
             console.log(`New result file: ${filePath}`);
+            // Upload file async if storage is enabled
             cloudStorage?.uploadFileToStorage(filePath)
             if(websiteId){
-                ReportBuilder.moveFilesToStaging([filePath])
-                ReportBuilder.setTtl()
+                ReportBuilder
+                    .stageFiles([filePath])
+                    .then((rb)=> rb.setTtl())
             }
         });
         console.log('Waiting for new files at /allure-results ...');
     } else {
-        // Run job once
-        ReportBuilder.moveFilesToStaging(getAllFiles(MOUNTED_PATH))
-        ReportBuilder.buildReport()
+        if(cloudStorage){
+            (async ()=> {
+                await Promise.all([
+                    cloudStorage.stageRemoteFiles(),
+                    ReportBuilder.stageFiles(getAllFiles(MOUNTED_PATH))
+                ])
+                await ReportBuilder.buildAndHost()
+            })()
+        } else {
+            ReportBuilder.stageFiles(getAllFiles(MOUNTED_PATH))
+                .then((rb)=> rb.buildAndHost())
+        }
     }
     if(!websiteId){
         console.log('Report publishing disabled because WEBSITE_ID is null ');

@@ -3,6 +3,7 @@ const allure = require('allure-commandline')
 import {deploy} from "./site-builder";
 import * as path from "node:path";
 import * as fsSync from "fs";
+import * as fs from 'fs/promises'
 
 export const REPORTS_DIR = 'allure-report'
 class ReportBuilder {
@@ -15,14 +16,14 @@ class ReportBuilder {
 
     public setTtl(){
         clearTimeout(this.timeOut)
-        this.timeOut  = setTimeout(this.buildReport, this.ttl * 1000)
+        this.timeOut  = setTimeout(this.buildAndHost, this.ttl * 1000)
     }
 
-    public async buildReport(deployOnSuccess = true) {
+    public async buildAndHost() {
 
         if (cloudStorage && keepHistory) {
             try {
-                await cloudStorage.downloadRemoteFilesToStaging({historyOnly: false})
+                await cloudStorage.stageRemoteFiles()
             }catch (e) {
                 console.log(`Downloading from Storage failed: ${e}`)
             }
@@ -51,30 +52,28 @@ class ReportBuilder {
                 console.error('Failed to generate Allure report')
             }
             {
-                if (deployOnSuccess) {
-                    try {
-                        await deploy()
-                    } catch (e) {
-                        console.log(`Hosting deployment failed: ${e}`)
-                    }
+                try {
+                    await deploy()
+                } catch (e) {
+                    console.log(`Hosting deployment failed: ${e}`)
                 }
             }
         })
     }
 
-    private moveFileToStaging(sourceFilePath: any){
-        try {
-            const destinationFilePath = path.join(STAGING_PATH, path.basename(sourceFilePath));
-            fsSync.mkdirSync(path.dirname(destinationFilePath), {recursive: true});// recursive, don't throw
-            fsSync.copyFileSync(sourceFilePath, destinationFilePath);
-        }catch (e) {
-            console.warn(`Failed to move ${path.basename(sourceFilePath)} to staging area: ${e}`)
-        }
-    }
-    public moveFilesToStaging(files: string[]){
+    // Move from '/allure-results' mount to staging
+    public async stageFiles(files: string[]) {
         for (const file of files) {
-            this.moveFileToStaging(file);
+            try {
+                const destinationFilePath = path.join(STAGING_PATH, path.basename(file));
+                await fs.mkdir(path.dirname(destinationFilePath), {recursive: true});// recursive, don't throw
+                await fs.copyFile(file, destinationFilePath);
+            } catch (e) {
+                console.warn(`Failed to move ${path.basename(file)} to staging area: ${e}`)
+            }
+
         }
+        return this
     }
 
 }
