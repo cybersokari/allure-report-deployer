@@ -26,7 +26,7 @@ services:
       GOOGLE_APPLICATION_CREDENTIALS: ${PWD}/service-account.json
       STORAGE_BUCKET: "fir-demo-project.appspot.com"
       WEBSITE_ID: 'fir-demo-project'
-      WEBSITE_EXPIRES: 30d
+      WEBSITE_EXPIRES: 12h
       KEEP_HISTORY: true # Default is true when STORAGE_BUCKET is provided
       KEEP_RETRIES: false # Default is false
       WATCH_MODE: true

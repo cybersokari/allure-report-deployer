@@ -117,9 +117,9 @@ services:
 | `GOOGLE_APPLICATION_CREDENTIALS` | Path to the GCP service account JSON file (required).                                                                               | None    |
 | `STORAGE_BUCKET`                 | Google Cloud Storage bucket name (required if using cloud storage).                                                                 | None    |
 | `WEBSITE_ID`                     | A unique identifier of your choice to identify the Test Report website.                                                             | None    |
-| `WEBSITE_EXPIRES`                | Duration before the generated website is disabled. Can be between 1d to 30d                                                         | 7d      |
-| `KEEP_HISTORY`                   | Enable Allure Report history feature                                                                                                | true    |
-| `KEEP_RETRIES`                   | Enable Allure Report retries feature                                                                                                | false   |
+| `WEBSITE_EXPIRES`                | Duration before the generated website is disabled. Can be between an hour to 30 days. Examples: 1h, 2d, 3w                          | 7d      |
+| `KEEP_HISTORY`                   | Backup `reports/history` directory after report generation                                                                                                | true    |
+| `KEEP_RETRIES`                   | Backup files in the `allure-results` directory after report generation                                                                                                | false   |
 | `WATCH_MODE`                     | Keep the container running to auto deploy new test reports and results (Ignored in when env is CI)                                  | false   |
 | `TTL_SECS`                       | Time to wait (in seconds) after last file is detected before generating and uploading the report. Only works when `WATCH_MODE=true` | 45      |
 

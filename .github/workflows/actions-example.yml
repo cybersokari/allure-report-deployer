@@ -1,0 +1,47 @@
+name: Github Actions usecase
+on:
+  workflow_dispatch:
+    inputs:
+      keep-retries:
+        description: 'Backup results to keep retries' 
+        required: false
+        default: 'false'
+      keep-history:
+        description: 'Backup history'
+        required: false
+        default: 'true'
+      website-id:
+        description: 'Unique identifier for the site. Default is example-site'
+        required: false
+        default: 'example-site'
+      website-expires:
+        description: 'Report site expiry. Example: 1h, 2d or 3w. Max is 30d'
+        required: false
+        default: '1h'
+
+jobs:
+  generate-publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Run Tests
+        run: |
+          echo 'No test to run, using existing assets/allure-results from this repository'
+      - name: Authenticate Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Deploy Allure Report to Firebase
+        uses: docker://sokari/allure-docker-deploy
+        with:
+          args:  |
+              -e GOOGLE_APPLICATION_CREDENTIALS=/credentials/gcp-key.json \
+              -e STORAGE_BUCKET=my-test-results-bucket \
+              -e WEBSITE_ID=${{github.event.inputs.website-id}} \
+              -e WEBSITE_EXPIRES=${{github.event.inputs.website-expires}} \
+              -e KEEP_RETRIES=${{github.event.inputs.keep-retries}} \
+              -e KEEP_HISTORY=${{github.event.inputs.keep-history}} \
+              -v ${{ github.workspace }}/assets/allure-results:/allure-results \
+              -v ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}:/credentials/gcp-key.json \
