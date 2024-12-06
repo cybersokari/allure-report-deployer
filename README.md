@@ -10,7 +10,6 @@
 
 # Allure Docker Deploy
 
----
 
 ![Deployment](https://github.com/cybersokari/allure-docker-deploy/actions/workflows/deploy.yaml/badge.svg?branch=main)
 ![](https://img.shields.io/docker/pulls/sokari/allure-docker-deploy)
@@ -22,8 +21,6 @@ This [Docker image](https://hub.docker.com/r/sokari/allure-docker-deploy) lets y
 Works in both CI and local environments with minimal setup, utilizing [Firebase Hosting](https://firebase.google.com/docs/hosting). A free Firebase plan is sufficient to get started.
 
 
----
-
 ## Key Features
 
 - **Cloud Storage**: Automatically backs up Allure test results and history in a Google Cloud Storage bucket.
@@ -31,7 +28,6 @@ Works in both CI and local environments with minimal setup, utilizing [Firebase 
 - **Slack Integration**: _(Coming Soon)_ Notify team members with preview URLs directly in Slack after each test run.
 - **Continuous Deployment**: In Watch Mode, the container detects changes, generates reports, and uploads them automatically. Suitable for testing locally.
 
----
 
 ## Use Cases
 
@@ -138,7 +134,6 @@ services:
 3. **Website ID**:
    - Use a unique identifier for each hosted report. Example: `feature_mission-2-jupiter`).
 
----
 
 
 ## How it works
@@ -160,9 +155,7 @@ services:
    - Set `KEEP_RETRIES` to back up files every file in the `/allure-results` mount directory after report generation.
    - Disabled if not `STORAGE_BUCKET` is provided
 
-
----
-
+    
 ## Environment Variables
 
 | Variable                         | Description                                                                                                                         | Default |
@@ -178,21 +171,20 @@ services:
 
 **Note**: Either `STORAGE_BUCKET` or `WEBSITE_ID` must be provided. Both can be configured if you want to enable all functionalities.
 
----
 
 
-## Comparison: Allure Docker Deploy vs The Official GitHub Actions Integration
+## Comparison: Allure Docker Deploy vs Other tools
 
-| Feature                                   | Allure Docker Deploy                                                                                       | [Allure GitHub Actions Integration](https://allurereport.org/docs/integrations-github/) |
-|-------------------------------------------|------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------|
-| **Unique URLs for each deployment**       | ✅ Yes, every deployment generates a unique ephemeral URL for the test report.                              | ❌ No, reports are deployed to a single GitHub Pages URL, overwriting previous reports.  |
-| **Report history and retries**            | ✅ Keeps complete history and retries by saving test result files to Cloud Storage for future reports.      | ❌ Limited; only report history is retrieved from the previous GitHub Pages deployment.  |
-| **Cloud Storage backup**                  | ✅ Automatically backs up test result files to Google Cloud Storage.                                        | ❌ No backup functionality; relies on GitHub repositories for report storage.            |
-| **Direct deployment without Git commits** | ✅ Deploys directly to Firebase Hosting without committing generated reports to Git.                        | ❌ Requires committing generated reports to GitHub Pages.                                |
-| **Further analysis capabilities**         | ✅ Allows access to all saved test result files for additional analysis beyond the Allure-generated report. | ❌ No such functionality provided.                                                       |
-| **Slack notifications**                   | 🚧 Planned (Coming Soon).                                                                                  | ❌ Not supported.                                                                        |
+| Feature                                   | Allure Docker Deploy                                                                                       | Other tools                                                                            |
+|-------------------------------------------|------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------|
+| **Unique URLs for each deployment**       | ✅ Yes, every deployment generates a unique ephemeral URL for the test report.                              | ❌ No, reports are deployed to a single GitHub Pages URL, overwriting previous reports. |
+| **Report history and retries**            | ✅ Keeps complete history and retries by saving test result files to Cloud Storage for future reports.      | ❌ Limited; only report history is retrieved from the previous GitHub Pages deployment. |
+| **Cloud Storage backup**                  | ✅ Automatically backs up test result files to Google Cloud Storage.                                        | ❌ No backup functionality; relies on GitHub repositories for report storage.           |
+| **Direct deployment without Git commits** | ✅ Deploys directly to Firebase Hosting without committing generated reports to Git.                        | ❌ Requires committing generated reports to GitHub Pages.                               |
+| **Further analysis capabilities**         | ✅ Allows access to all saved test result files for additional analysis beyond the Allure-generated report. | ❌ No such functionality provided.                                                      |
+| **Slack notifications**                   | 🚧 Planned (Coming Soon).                                                                                  | ❌ Not supported.                                                                       |
 
----
+
 
 ## License
 

@@ -5,6 +5,7 @@ import {changePermissionsRecursively, createFirebaseJson, publishToFireBaseHosti
 import * as path from "node:path";
 import * as fs from 'fs/promises'
 import counter from "./counter";
+import pLimit from 'p-limit';
 
 
 class ReportBuilder {
@@ -24,9 +25,8 @@ class ReportBuilder {
     }
 
     public async generate() {
-
         // History files can exist in reports directory in WATCH_MODE
-        // due to multiple call to generateAndHost, so we try to move
+        // due to multiple call to generate, so we try to move
         // the files to /allure-results/history to include the history in the
         // upcoming report due to `allure generate --clean` command
         if (process.env.WATCH_MODE === 'true') {
@@ -53,11 +53,10 @@ class ReportBuilder {
             REPORTS_DIR,
             '--clean',
         ])
-        let success = false
+
         await new Promise((resolve, reject) => {
             generation.on('exit', async function (exitCode: number) {
-                success = exitCode === 0
-                if (success) {
+                if (exitCode === 0) {
                     resolve('success')
                 } else {
                     console.warn('Failed to generate Allure report')
@@ -68,18 +67,24 @@ class ReportBuilder {
     }
 
     // Move from '/allure-results' mount to staging
-    public async stageFiles(files: string[]) {
-        for (const file of files) {
-            try {
-                const destinationFilePath = path.join(STAGING_PATH, path.basename(file));
-                await fs.mkdir(path.dirname(destinationFilePath), {recursive: true});// recursive, don't throw
-                await fs.copyFile(file, destinationFilePath);
-                await counter.incrementFilesProcessed()
-            } catch (e) {
-                console.warn(`Failed to move ${path.basename(file)} to staging area: ${e}`)
-            }
-
+    public async stageFiles(files: AsyncGenerator<string> | string[], concurrency = 5) {
+        const limit = pLimit(concurrency);
+        const tasks = [];
+        for await (const file of files) {
+            tasks.push(
+                limit(async () => {
+                    try {
+                        const destinationFilePath = path.join(STAGING_PATH, path.basename(file));
+                        await fs.mkdir(path.dirname(destinationFilePath), {recursive: true});// recursive, don't throw
+                        await fs.copyFile(file, destinationFilePath);
+                        await counter.incrementFilesProcessed()
+                    } catch (e) {
+                        console.warn(`Failed to move ${path.basename(file)} to staging area: ${e}`)
+                    }
+                })
+            )
         }
+        await Promise.all(tasks)
         return this
     }
 
