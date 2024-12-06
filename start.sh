@@ -32,6 +32,12 @@ if [ ! -d "$MOUNT_POINT" ]; then
     exit 1
 fi
 
+GITHUB_SUMMARY_FILE="/github/summary.txt"
+if [ ! -d "$GITHUB_SUMMARY_FILE" ]; then
+  export GITHUB_SUMMARY_FILE
+  echo "Git summary file directory mounted"
+fi
+
 if [ -n "$TTL_SECS" ]; then
   if ! [[ "$TTL_SECS" -eq "$TTL_SECS" && "$TTL_SECS" -ge 0 ]]; then
     echo "Error: $TTL_SECS must be a positive number"

@@ -10,10 +10,12 @@ export const MOUNTED_PATH = '/allure-results'
 export const HOME_DIR = '/app'
 export const STAGING_PATH = `${HOME_DIR}/allure-results`;
 export const REPORTS_DIR = `${HOME_DIR}/allure-report`
-export const websiteId = process.env.WEBSITE_ID;
-export const cloudStorage = process.env.STORAGE_BUCKET ? new CloudStorage(process.env.STORAGE_BUCKET) : null;
-export const keepHistory = process.env.KEEP_HISTORY?.toLowerCase() === 'true' && cloudStorage !== null
-export const keepRetires = process.env.KEEP_RETRIES?.toLowerCase() === 'true' && cloudStorage !== null
+export const websiteId = process.env.WEBSITE_ID || null;
+const STORAGE_BUCKET = process.env.STORAGE_BUCKET || null;
+export const cloudStorage = STORAGE_BUCKET ? CloudStorage.getInstance(STORAGE_BUCKET) : null;
+export const keepHistory = process.env.KEEP_HISTORY?.toLowerCase() === 'true'
+export const keepRetires = process.env.KEEP_RETRIES?.toLowerCase() === 'true'
+const watchMode = process.env.WATCH_MODE?.toLowerCase() === 'true';
 
 /**
  * Download remote files if WEBSITE_ID is provided.
@@ -29,12 +31,14 @@ function main(): void {
     }
     process.env.FIREBASE_PROJECT_ID = getProjectIdFromCredentialsFile()
 
-    if (process.env.WATCH_MODE?.toLowerCase() === 'true' && process.env.GITHUB !== 'true') {
+    if (watchMode) {
         //
         chokidar.watch('/allure-results', {
             ignored: '^(?!.*\\.(json|png|jpeg|jpg|gif|properties|log|webm)$).*$',
             persistent: true,
             awaitWriteFinish: true,
+            usePolling: true, // Avoid unnecessary polling
+            depth: 2, // Limit recursive depth
         }).on('add', (filePath: string) => {
             // console.log(`New result file: ${filePath}`);
             if (websiteId) {

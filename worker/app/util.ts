@@ -18,23 +18,30 @@ export function logError(...e: any) {
     console.log(e)
 }
 
-export async function getAllFiles(dirPath: string, arrayOfFiles: string[] = []): Promise<string[]> {
-    try {
-        const files = await fs.readdir(dirPath);
-        for (const file of files) {
-            const filePath = path.join(dirPath, file);
-            const stats = await fs.stat(filePath);
-            if (stats.isDirectory()) {
-                arrayOfFiles = await getAllFiles(filePath, arrayOfFiles);
-            } else {
-                arrayOfFiles.push(filePath);
+
+export async function getAllFiles(dirPath: string): Promise<string[]> {
+    const stack = [dirPath];
+    const files: string[] = [];
+
+    while (stack.length > 0) {
+        const currentDir = stack.pop()!;
+        try {
+            const entries = await fs.readdir(currentDir, { withFileTypes: true });
+            for (const entry of entries) {
+                const fullPath = path.join(currentDir, entry.name);
+                if (entry.isDirectory()) {
+                    stack.push(fullPath);
+                } else {
+                    files.push(fullPath);
+                }
             }
+        } catch (err) {
+            console.warn(`Error processing directory: ${currentDir}`, err);
         }
-    } catch (e) {
-        console.warn(e);
     }
-    return arrayOfFiles;
+    return files;
 }
+
 
 export function validateWebsiteExpires(expires: string): boolean {
     // Check if input is empty

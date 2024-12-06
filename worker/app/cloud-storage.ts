@@ -8,10 +8,15 @@ import {getAllFiles} from "./util";
 const storageHomeDir = 'allure-results'
 
 export class CloudStorage {
-    private bucket: Bucket;
+    public static bucket: Bucket
+    public static instance: CloudStorage
 
-    constructor(storageBucket: string) {
-        this.bucket = admin.initializeApp({storageBucket: storageBucket}).storage().bucket();
+    public static getInstance(storageBucket: string){
+        if(!CloudStorage.instance){
+            CloudStorage.bucket = admin.initializeApp({storageBucket: storageBucket}).storage().bucket();
+            CloudStorage.instance = new CloudStorage()
+        }
+        return CloudStorage.instance
     }
 
     public async uploadFiles(files: string[]): Promise<void> {
@@ -24,7 +29,7 @@ export class CloudStorage {
             }
             try {
                 console.log(`Uploading ${destinationFilePath} to storage`)
-                await this.bucket.upload(filePath, {
+                await CloudStorage.bucket.upload(filePath, {
                     validation: process.env.DEBUG !== 'true',
                     destination: `${storageHomeDir}/${destinationFilePath}`,
                 });
@@ -37,7 +42,7 @@ export class CloudStorage {
     // Download remote files to staging area
     public async stageRemoteFiles(): Promise<any> {
         try {
-            const [files] = await this.bucket.getFiles({prefix: `${storageHomeDir}/`});
+            const [files] = await CloudStorage.bucket.getFiles({prefix: `${storageHomeDir}/`});
 
             await fs.mkdir(STAGING_PATH, {recursive: true}); // recursive, dont throw is exist
 
