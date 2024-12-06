@@ -83,17 +83,6 @@ async function publishToFireBaseHosting() {
     if (match && match[2]) {
         const url = match[2]
         console.log(`Allure test report URL: ${url}`)
-        const githubSummaryFile = process.env.GITHUB_SUMMARY_FILE
-        if (githubSummaryFile) { // Add URL to GitHub workflow summary
-            builder.clear()
-            builder.append(`echo "Allure test report URL :globe_with_meridians: : ${url}"`).append(' ')
-                .append('>>').append(' ').append(`${githubSummaryFile}`)
-            try {
-                await exec(builder.toString())
-            } catch (e) {
-                console.warn('Failed to write site URL to GitHub job summary')
-            }
-        }
     } else {
         console.warn('Could not parse URL from hosting.')
         console.log(stdout)
