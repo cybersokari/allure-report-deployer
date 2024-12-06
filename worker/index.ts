@@ -6,6 +6,7 @@ import {
 import ReportBuilder from "./app/report-builder";
 import {CloudStorage} from "./app/cloud-storage";
 import counter from "./app/counter";
+import {writeGitHubSummary} from "./app/site-builder";
 
 export const MOUNTED_PATH = '/allure-results'
 export const HOME_DIR = '/app'
@@ -72,10 +73,15 @@ function main(): void {
                     ReportBuilder.stageFiles(await getAllFiles(MOUNTED_PATH)),
                     cloudStorage?.stageRemoteFiles()
                 ])
-                await ReportBuilder.generateAndHost()
+                const url = await ReportBuilder.generateAndHost()
                 if(keepHistory){
                     await cloudStorage?.uploadHistory()
                 }
+                const summaryPath = process.env.GITHUB_SUMMARY_FILE
+                if(url && summaryPath){
+                    writeGitHubSummary({summaryPath, url})
+                }
+
             })()
         }
     }

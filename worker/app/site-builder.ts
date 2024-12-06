@@ -85,35 +85,27 @@ async function publishToFireBaseHosting() {
     if (match && match[2]) {
         const url = match[2]
         console.log(`Allure test report URL: ${url}`)
-
-        const summaryPath = process.env.GITHUB_SUMMARY_FILE
-        if (summaryPath) {
-            writeGitHubSummary({summaryPath : summaryPath, url : url} )
-        }
+        return url as string
     } else {
         console.warn('Could not parse URL from hosting.')
         console.log(stdout)
+        return null
     }
 
 }
 
-function writeGitHubSummary({summaryPath = '', url = ''}) {
+export function writeGitHubSummary({summaryPath = '', url = ''}) {
 
     const summaryContent = `
-## ✅ Allure Docker Deploy Summary
+### Allure Docker Deploy 🚀
 
-### 📝 Report URL:
-[View the Test Report Here](${url})
+**📝 Test Report URL: ${url}**
 
-### 📂 Files Uploaded:
-**${counter.filesUploaded} files** were successfully uploaded.
+**📂 Files uploaded: ${counter.filesUploaded}**
 
-### 🔍 Files processed: ::
-**${counter.filesProcessed} files** were successfully uploaded.
+**🔍 Files processed: ${counter.filesProcessed}**
 
-### ⏱️ Process Duration:
-The process took **${timer.getElapsedTime()}** to complete.
----
+**⏱️ Duration: ${timer.getElapsedSeconds()} seconds**
 `;
     if (!summaryPath) {
         console.warn('GITHUB_STEP_SUMMARY is not defined. Are you running inside a GitHub Action?');
@@ -130,7 +122,7 @@ export async function deploy() {
     await createFirebaseJson()
     // Grant execution permission to website files
     await changePermissionsRecursively(REPORTS_DIR, 0o755)
-    await publishToFireBaseHosting()
+    return await publishToFireBaseHosting()
 }
 
 
