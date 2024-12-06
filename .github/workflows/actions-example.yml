@@ -51,6 +51,6 @@ jobs:
           -e WEBSITE_EXPIRES=${{ github.event.inputs.website-expires }} \
           -e KEEP_RETRIES=${{ github.event.inputs.keep-retries }} \
           -e KEEP_HISTORY=${{ github.event.inputs.keep-history }} \
-          -v {{ github.workspace }}/assets/allure-results:/allure-results \
+          -v ${{ github.workspace }}/assets/allure-results:/allure-results \
           -v ${{ github.workspace }}/gcp-key.json:/credentials/gcp-key.json \
           sokari/allure-docker-deploy:latest
