@@ -40,5 +40,5 @@ if [ -n "$TTL_SECS" ]; then
     echo "TTL_SECS set to $TTL_SECS"
   fi
 fi
-
+echo 'Starting the app'
 node /app/lib/index.js

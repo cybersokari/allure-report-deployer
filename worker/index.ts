@@ -28,7 +28,7 @@ function main(): void {
     }
     process.env.FIREBASE_PROJECT_ID = getProjectIdFromCredentialsFile()
 
-    if(process.env.WATCH_MODE?.toLowerCase() === 'true' && process.env.CI !== 'true'){
+    if(process.env.WATCH_MODE?.toLowerCase() === 'true' && process.env.GITHUB !== 'true'){
         //
         chokidar.watch('/allure-results', {
             ignored: '^(?!.*\\.(json|png|jpeg|jpg|gif|properties|log|webm)$).*$',
