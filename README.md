@@ -49,7 +49,7 @@ jobs:
         -e WEBSITE_EXPIRES=3d \
         -e KEEP_HISTORY=true \
         -e KEEP_RETRIES=true \
-        -e GITHUB=true
+        -v $GITHUB_STEP_SUMMARY:/github/summary.txt \ 
         -v ${{ github.workspace }}/allure-results:/allure-results \
         -v ${{ secrets.GCP_CREDENTIALS_FILE_PATH }}:/credentials/gcp-key.json \
         sokari/allure-docker-deploy:latest
@@ -58,6 +58,7 @@ jobs:
 Tips:
 1. Use a different value `WEBSITE_ID` in every test run. `${{ github.ref }}` is a good example. 
 2. Set the WEBSITE_EXPIRES value appropriately to deallocate old test run sites. 
+3. Mount the `$GITHUB_STEP_SUMMARY` file to see your test report URL in GitHub Actions job summary
 ### Local test runs
 #### Step 1: Pull the Docker Image
 ```bash
@@ -150,11 +151,11 @@ Nevertheless, you have free 5GB of storage before you will incur any charges_
 ---
 
 ## Where to find your hosted test report URL
-| Platform  | Report URL output location          |
-|-----------|-------------------------------------|
-| GitHub    | Logs, Firebase console, Slack (WIP) |
-| Gitlab    | Logs, Firebase console, Slack (WIP) |
-| Localhost | Logs, Firebase console              |
+| Platform  | Report URL output location       |
+|-----------|----------------------------------|
+| GitHub    | Logs, GitHub Actions job summary |
+| Gitlab    | Logs                             |
+| Localhost | Logs                             |
 ### URL in logs example
 <div style="text-align: left"><img src="assets/ci-report-url-ss.png" height="220" alt="Firebase CLI console output"></div>
 

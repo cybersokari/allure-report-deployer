@@ -5,6 +5,7 @@ import {
 } from "./app/util";
 import ReportBuilder from "./app/report-builder";
 import {CloudStorage} from "./app/cloud-storage";
+import counter from "./app/counter";
 
 export const MOUNTED_PATH = '/allure-results'
 export const HOME_DIR = '/app'
@@ -25,6 +26,7 @@ const watchMode = process.env.WATCH_MODE?.toLowerCase() === 'true';
  * 2. Move files to STAGING_PATH and set ttl for hosting if WEBSITE_ID is provided
  */
 function main(): void {
+    counter.startTimer()
     if (!cloudStorage && !websiteId) {
         console.warn('WEBSITE_ID or STORAGE_BUCKET is required');
         return
