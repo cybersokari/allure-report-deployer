@@ -46,16 +46,19 @@ export async function getAllFiles(dirPath: string): Promise<string[]> {
 export function validateWebsiteExpires(expires: string): boolean {
     // Check if input is empty
     if (!expires) {
-        console.error('Error: WEBSITE_EXPIRES cannot be empty');
         return false;
     }
+
+    if(expires.trim().length > 3){
+        return false;
+    }
+
 
     // Regex to validate format: number followed by h/d/w
     const validFormatRegex = /^(\d+)([hdw])$/;
     const match = expires.match(validFormatRegex);
 
     if (!match) {
-        console.error('Error: Invalid WEBSITE_EXPIRES format. Use format like 12h, 7d, or 2w');
         return false;
     }
 

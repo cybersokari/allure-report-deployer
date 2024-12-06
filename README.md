@@ -1,7 +1,21 @@
+<a href="https://allurereport.org/docs/">
+<img id="allure" src="assets/allure-logo.png" alt="Allure Logo" height="150">
+</a>
+<a href="https://docs.docker.com/">
+<img id="docker" src="assets/docker-logo.png" alt="Docker Logo" height="150">
+</a>
+<a href="https://firebase.google.com/docs">
+<img id="firebase"  src="assets/firebase-logo.png" alt="Firebase Logo" height="150">
+</a>
+
+# Allure Docker Deploy
+
+---
+
 ![Deployment](https://github.com/cybersokari/allure-docker-deploy/actions/workflows/deploy.yaml/badge.svg?branch=main)
 ![](https://img.shields.io/docker/pulls/sokari/allure-docker-deploy)
-# Allure Docker Deploy
-_An easy-to-use Docker solution for sharing and backing up Allure test reports_
+
+_An easy-to-use serverless Docker solution for sharing and backing up Allure test reports_
 
 This [Docker image](https://hub.docker.com/r/sokari/allure-docker-deploy) lets you share [Allure test reports](https://allurereport.org/) seamlessly via an ephemeral URL. It also backs up all report history and retries to Firebase Cloud Storage, enabling unique URLs for each test run and previewing previous reports.
 

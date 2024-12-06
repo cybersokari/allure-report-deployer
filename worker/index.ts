@@ -73,7 +73,8 @@ function main(): void {
                     ReportBuilder.stageFiles(await getAllFiles(MOUNTED_PATH)),
                     cloudStorage?.stageRemoteFiles()
                 ])
-                const url = await ReportBuilder.generateAndHost()
+                await ReportBuilder.generate()
+                const url = await ReportBuilder.host()
                 if(keepHistory){
                     await cloudStorage?.uploadHistory()
                 }

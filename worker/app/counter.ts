@@ -1,14 +1,24 @@
+import { Mutex } from 'async-mutex';
 class Counter {
     private startTime: number | null = null;
     private processed = 0
     private uploaded = 0
 
-    incrementFilesProcessed() {
-        this.processed ++
+    // Mutex for protecting critical sections
+    private mutex = new Mutex();
+
+    async incrementFilesProcessed(): Promise<void> {
+        await this.mutex.runExclusive(() => {
+            this.processed++;
+        });
     }
-    incrementFilesUploaded() {
-        this.uploaded++
+
+    async incrementFilesUploaded(): Promise<void> {
+        await this.mutex.runExclusive(() => {
+            this.uploaded++;
+        });
     }
+
     get filesUploaded(){
         return this.uploaded
     }

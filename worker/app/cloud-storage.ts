@@ -34,7 +34,7 @@ export class CloudStorage {
                     validation: process.env.DEBUG !== 'true',
                     destination: `${storageHomeDir}/${destinationFilePath}`,
                 });
-                counter.incrementFilesUploaded()
+                await counter.incrementFilesUploaded()
             } catch (error) {
                 console.error(`Failed to upload ${filePath}:`, error);
             }
