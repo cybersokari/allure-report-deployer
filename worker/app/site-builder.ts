@@ -5,6 +5,8 @@ import * as path from "node:path";
 import * as util from 'node:util'
 import {REPORTS_DIR, websiteId} from "../index";
 import {validateWebsiteExpires} from "./util";
+import timer from "./counter";
+import counter from "./counter";
 
 const exec = util.promisify(require('child_process').exec)
 
@@ -83,9 +85,44 @@ async function publishToFireBaseHosting() {
     if (match && match[2]) {
         const url = match[2]
         console.log(`Allure test report URL: ${url}`)
+
+        const summaryPath = process.env.GITHUB_SUMMARY_FILE
+        if (summaryPath) {
+            writeGitHubSummary({summaryPath : summaryPath, url : url} )
+        }
     } else {
         console.warn('Could not parse URL from hosting.')
         console.log(stdout)
+    }
+
+}
+
+function writeGitHubSummary({summaryPath = '', url = ''}) {
+
+    const summaryContent = `
+## ✅ Allure Docker Deploy Summary
+
+### 📝 Report URL:
+[View the Test Report Here](${url})
+
+### 📂 Files Uploaded:
+**${counter.filesUploaded} files** were successfully uploaded.
+
+### 🔍 Files processed: ::
+**${counter.filesProcessed} files** were successfully uploaded.
+
+### ⏱️ Process Duration:
+The process took **${timer.getElapsedTime()}** to complete.
+---
+`;
+    if (!summaryPath) {
+        console.warn('GITHUB_STEP_SUMMARY is not defined. Are you running inside a GitHub Action?');
+    }
+    try {
+        fsSync.writeFileSync(summaryPath, summaryContent, {flag: 'a'}); // Append to the file
+        console.log('Summary written to $GITHUB_STEP_SUMMARY');
+    } catch (err) {
+        console.warn('Failed to write to $GITHUB_STEP_SUMMARY:', err);
     }
 }
 

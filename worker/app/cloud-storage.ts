@@ -4,6 +4,7 @@ import {keepHistory, REPORTS_DIR, STAGING_PATH} from "../index";
 import * as admin from "firebase-admin";
 import {Bucket} from '@google-cloud/storage'
 import {getAllFiles} from "./util";
+import counter from "./counter";
 
 const storageHomeDir = 'allure-results'
 
@@ -33,6 +34,7 @@ export class CloudStorage {
                     validation: process.env.DEBUG !== 'true',
                     destination: `${storageHomeDir}/${destinationFilePath}`,
                 });
+                counter.incrementFilesUploaded()
             } catch (error) {
                 console.error(`Failed to upload ${filePath}:`, error);
             }

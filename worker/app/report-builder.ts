@@ -4,6 +4,7 @@ const allure = require('allure-commandline')
 import {deploy} from "./site-builder";
 import * as path from "node:path";
 import * as fs from 'fs/promises'
+import counter from "./counter";
 
 
 class ReportBuilder {
@@ -77,6 +78,7 @@ class ReportBuilder {
                 const destinationFilePath = path.join(STAGING_PATH, path.basename(file));
                 await fs.mkdir(path.dirname(destinationFilePath), {recursive: true});// recursive, don't throw
                 await fs.copyFile(file, destinationFilePath);
+                counter.incrementFilesProcessed()
             } catch (e) {
                 console.warn(`Failed to move ${path.basename(file)} to staging area: ${e}`)
             }
