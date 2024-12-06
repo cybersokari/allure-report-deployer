@@ -21,19 +21,18 @@ services:
       context: .
     container_name: allure-deployer
     environment:
-#      DEBUG: true # Dev mode
+      DEBUG: true # Dev mode
       FIREBASE_STORAGE_EMULATOR_HOST: 127.0.0.1:9199 # Dev mode
       GOOGLE_APPLICATION_CREDENTIALS: ${PWD}/service-account.json
       STORAGE_BUCKET: "fir-demo-project.appspot.com"
       WEBSITE_ID: 'fir-demo-project'
       WEBSITE_EXPIRES: 12h
-      GITHUB: true
       KEEP_HISTORY: true # Default is true when STORAGE_BUCKET is provided
       KEEP_RETRIES: false # Default is false
-      WATCH_MODE: false
+      WATCH_MODE: true
       TTL_SECS: 4
     volumes:
-#      - ./worker:/app #dev only. This overrides the /app dir
+#      - ./worker:/app #devs only. This overrides the /app dir
       - ${PWD}/gcp-key.json:${PWD}/service-account.json:ro
       - /Users/sokari/IdeaProjects/appium/reports/ios/allure-results:/allure-results
     cpus: 1

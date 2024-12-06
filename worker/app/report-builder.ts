@@ -41,7 +41,6 @@ class ReportBuilder {
                 console.log(`No history files to move`)
             }
         }
-
         // Generate new Allure report
         const generation = allure([
             'generate',
@@ -50,18 +49,25 @@ class ReportBuilder {
             REPORTS_DIR,
             '--clean',
         ])
-
-        generation.on('exit', async function (exitCode: number) {
-            if (exitCode !== 0) {
-                console.error('Failed to generate Allure report')
-            } else {
-                try {
-                    await deploy()
-                } catch (e) {
-                    console.log(`Hosting deployment failed: ${e}`)
+        let success = false
+        await new Promise((resolve, reject) => {
+            generation.on('exit', async function (exitCode: number) {
+                success = exitCode == 0
+                if (success) {
+                    resolve('success')
+                } else {
+                    console.warn('Failed to generate Allure report')
+                    reject('Failed to generate Allure report')
                 }
-            }
+            })
         })
+        if (success){
+            try {
+                await deploy()
+            } catch (e) {
+                console.log(`Hosting deployment failed: ${e}`)
+            }
+        }
     }
 
     // Move from '/allure-results' mount to staging
