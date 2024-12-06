@@ -13,13 +13,13 @@ It works in both CI and local environments, requiring minimal setup. The generat
 - **Cloud Storage**: Save Allure test results and history in a Google Cloud Storage bucket.
 - **Test Report preview URL**: Generates and hosts Allure reports on a website for easy sharing with stakeholders, powered by Firebase Hosting
 - **Slack notification** Review Test report preview URL in Slack after every test run (Coming soon)
-- **Watch Mode**: Continuously detects test results and takes action (backup to storage and publish report website): Enable this for non-CI environments because it keeps the container running.
+- **Watch Mode**: Continuously detects test results and takes action (backup to storage and publish report website): Only enable this when running this image locally.
 ---
 
 ## Use cases
 ### GitHub Actions
 ```yaml
-name: Example CI Pipeline with Allure Docker Deploy
+name: Allure Docker Deploy
 on:
   push:
     branches:
@@ -33,25 +33,27 @@ jobs:
       run: |
         # Run your tests and output results to a directory
         mkdir -p ./allure-results
-        ./gradlew test --output-dir ./allure-results
-           - name: Authenticate Docker Hub
+    - name: Authenticate Docker Hub
     - uses: docker/login-action@v3
       with:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
         
-    - name: Deploy Allure Report to Firebase
-      uses: docker://sokari/allure-docker-deploy
-      with:
-         args:  |
-            -e GOOGLE_APPLICATION_CREDENTIALS=/credentials/gcp-key.json \
-            -e STORAGE_BUCKET=my-test-results-bucket \
-#            -e WEBSITE_ID=my-custom-site-id \
-            -e WEBSITE_ID=${{ github.ref }} \
-            -e WEBSITE_EXPIRES=3d \
-            -e KEEP_RETRIES=true \
-            -v ${{ github.workspace }}/allure-results:/allure-results \
-            -v ${{ secrets.GCP_CREDENTIALS_FILE_PATH }}:/credentials/gcp-key.json \
+    - name: Allure Docker Deploy to Firebase
+      run: |
+        docker run --rm \
+        -e GOOGLE_APPLICATION_CREDENTIALS=/credentials/gcp-key.json \
+        -e STORAGE_BUCKET=my-test-results-bucket \
+#        -e WEBSITE_ID=my-custom-site-id \
+        -e WEBSITE_ID=${{ github.ref }} \
+        -e WEBSITE_EXPIRES=3d \
+        -e KEEP_HISTORY=true \
+        -e KEEP_RETRIES=true \
+        -e GITHUB=true
+        -v ${{ github.workspace }}/allure-results:/allure-results \
+        -v ${{ secrets.GCP_CREDENTIALS_FILE_PATH }}:/credentials/gcp-key.json \
+        sokari/allure-docker-deploy:latest
+            
 ```
 Tips:
 1. Use a different value `WEBSITE_ID` in every test run. `${{ github.ref }}` is a good example. 
@@ -118,9 +120,9 @@ services:
 | `STORAGE_BUCKET`                 | Google Cloud Storage bucket name (required if using cloud storage).                                                                 | None    |
 | `WEBSITE_ID`                     | A unique identifier of your choice to identify the Test Report website.                                                             | None    |
 | `WEBSITE_EXPIRES`                | Duration before the generated website is disabled. Can be between an hour to 30 days. Examples: 1h, 2d, 3w                          | 7d      |
-| `KEEP_HISTORY`                   | Backup `reports/history` directory after report generation                                                                                                | true    |
-| `KEEP_RETRIES`                   | Backup files in the `allure-results` directory after report generation                                                                                                | false   |
-| `WATCH_MODE`                     | Keep the container running to auto deploy new test reports and results (Ignored in when env is CI)                                  | false   |
+| `KEEP_HISTORY`                   | Backup `reports/history` directory after report generation                                                                          | true    |
+| `KEEP_RETRIES`                   | Backup files in the `allure-results` directory after report generation                                                              | false   |
+| `WATCH_MODE`                     | Keep the container running to auto deploy new test reports and results                                                              | false   |
 | `TTL_SECS`                       | Time to wait (in seconds) after last file is detected before generating and uploading the report. Only works when `WATCH_MODE=true` | 45      |
 
 **Note**: Either `STORAGE_BUCKET` or `WEBSITE_ID` must be provided. Both can be configured if you want to enable all functionalities.
@@ -149,13 +151,14 @@ Nevertheless, you have free 5GB of storage before you will incur any charges_
 ---
 
 ## Where to find your hosted test report URL
-| Platform  | Report URL output location                    |
-|-----------|-----------------------------------------------|
-| GitHub    | Logs, GitHub Actions job summary, Slack (WIP) |
-| Gitlab    | Logs, Slack (WIP)                             |
-| Localhost | Logs                                          |
-### Logs example
-<div style="text-align: left"><img src="assets/firebase-hosting-cli.png" height="220" alt="Firebase CLI console output"></div>
+| Platform  | Report URL output location       |
+|-----------|----------------------------------|
+| GitHub    | Logs, GitHub Actions job summary |
+| Gitlab    | Logs                             |
+| Localhost | Logs                             |
+_NOTE: URL in GitHub jobs summary require you to set `GITHUB=true` as environment variable in the GitHub docker run command_
+### URL in logs example
+<div style="text-align: left"><img src="assets/ci-report-url-ss.png" height="220" alt="Firebase CLI console output"></div>
 
 _You can also find the URL in your Firebase Console Dashboard._
 

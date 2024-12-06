@@ -77,7 +77,7 @@ async function publishToFireBaseHosting() {
     if (match && match[2]) {
         const url = match[2]
         console.log(`Allure test report URL: ${url}`)
-        if(process.env.GITHUB_WORKFLOW){ // Add URL to GitHub workflow summary
+        if(process.env.GITHUB?.toLowerCase() === 'true'){ // Add URL to GitHub workflow summary
             builder.clear()
             builder.append(`echo "Allure test report URL: ${url}"`).append(' ')
                 .append('>>').append(' ').append('$GITHUB_STEP_SUMMARY')
