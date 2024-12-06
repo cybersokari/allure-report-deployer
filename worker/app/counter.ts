@@ -17,21 +17,12 @@ class Counter {
     startTimer(): void {
         this.startTime = Date.now();
     }
-
-    getElapsedTime(): string {
+    getElapsedSeconds(): number {
         if (!this.startTime) {
-            return "Timer has not been started.";
+            throw "Timer has not been started.";
         }
         const elapsed = Date.now() - this.startTime;
-        return this.formatDuration(elapsed / 1000); // Convert to seconds
-    }
-
-    // Format elapsed time into a readable string
-    private formatDuration(seconds: number): string {
-        const hours = Math.floor(seconds / 3600);
-        const minutes = Math.floor((seconds % 3600) / 60);
-        const remainingSeconds = Math.floor(seconds % 60);
-        return `${hours}h ${minutes}m ${remainingSeconds}s`;
+        return elapsed / 1000
     }
 }
 

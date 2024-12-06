@@ -64,11 +64,12 @@ class ReportBuilder {
         })
         if (success){
             try {
-                await deploy()
+                return await deploy()
             } catch (e) {
                 console.log(`Hosting deployment failed: ${e}`)
             }
         }
+        return null
     }
 
     // Move from '/allure-results' mount to staging
