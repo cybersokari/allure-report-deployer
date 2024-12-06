@@ -12,7 +12,9 @@ RUN npm install -g firebase-tools
 RUN mkdir "allure-results" # create staging
 # Copy app files and install deps
 COPY worker/.  /app/
-RUN npm install && npm run build
+RUN npm install -g typescript
+RUN npm install --omit=dev && npm run build
+RUN npm uninstall -g typescript
 ## Remove .ts files
 RUN rm -rf app
 
