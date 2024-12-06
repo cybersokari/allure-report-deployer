@@ -1,4 +1,5 @@
 import * as fsSync from 'fs'
+import * as fs from 'fs/promises'
 import * as path from "node:path";
 
 export const getProjectIdFromCredentialsFile = () => {
@@ -6,30 +7,30 @@ export const getProjectIdFromCredentialsFile = () => {
         const credentialsContent = JSON.parse(
             fsSync.readFileSync(process.env.GOOGLE_APPLICATION_CREDENTIALS!, 'utf8')
         );
-        return  credentialsContent.project_id
+        return credentialsContent.project_id
     } catch (error) {
         console.error('Failed to get project_id from Google credentials:', error);
         throw error;
     }
 }
 
-export function logError(...e: any){
+export function logError(...e: any) {
     console.log(e)
 }
 
-export function getAllFiles(dirPath : string, arrayOfFiles : string[] = []) {
-
+export async function getAllFiles(dirPath: string, arrayOfFiles: string[] = []): Promise<string[]> {
     try {
-        const files = fsSync.readdirSync(dirPath);
-        files.forEach((file: any) => {
+        const files = await fs.readdir(dirPath);
+        for (const file of files) {
             const filePath = path.join(dirPath, file);
-            if (fsSync.statSync(filePath).isDirectory()) {
-                arrayOfFiles = getAllFiles(filePath, arrayOfFiles);
+            const stats = await fs.stat(filePath);
+            if (stats.isDirectory()) {
+                arrayOfFiles = await getAllFiles(filePath, arrayOfFiles);
             } else {
                 arrayOfFiles.push(filePath);
             }
-        });
-    }catch (e) {
+        }
+    } catch (e) {
         console.warn(e);
     }
     return arrayOfFiles;
@@ -69,15 +70,7 @@ export function validateWebsiteExpires(expires: string): boolean {
         default:
             return false;
     }
-
-    // Check if days exceed 30
-    if (days > 30) {
-        console.error('Error: Expiration cannot exceed 30 days');
-        return false;
-    }
-
-    console.log(`Valid expiration: ${expires}`);
-    return true;
+    return days <= 30
 }
 
 

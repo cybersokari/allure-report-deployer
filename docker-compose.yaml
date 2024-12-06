@@ -27,13 +27,14 @@ services:
       STORAGE_BUCKET: "fir-demo-project.appspot.com"
       WEBSITE_ID: 'fir-demo-project'
       WEBSITE_EXPIRES: 12h
+      GITHUB: true
       KEEP_HISTORY: true # Default is true when STORAGE_BUCKET is provided
       KEEP_RETRIES: false # Default is false
-      WATCH_MODE: true
+      WATCH_MODE: false
       TTL_SECS: 4
     volumes:
-      - ./worker:/app #dev only. This overrides the /app dir
-      - ${PWD}/service-account.json:${PWD}/service-account.json:ro
+#      - ./worker:/app #dev only. This overrides the /app dir
+      - ${PWD}/gcp-key.json:${PWD}/service-account.json:ro
       - /Users/sokari/IdeaProjects/appium/reports/ios/allure-results:/allure-results
     cpus: 1
     mem_limit: 2048m

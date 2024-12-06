@@ -14,9 +14,8 @@ on:
         required: false
         default: 'true'
       website-id:
-        description: 'Unique identifier for the site. Default is example-site'
+        description: 'Unique identifier for the site'
         required: false
-        default: 'example-site'
       website-expires:
         description: 'Report site expiry. Example: 1h, 2d or 3w. Max is 30d'
         required: false
@@ -28,7 +27,7 @@ jobs:
     env:
       GCP_SECRETS: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4.1.5
       - name: Run Tests
         run: |
           echo 'No test to run, using existing assets/allure-results from this repository'
@@ -48,7 +47,7 @@ jobs:
           docker run --rm \
           -e GOOGLE_APPLICATION_CREDENTIALS=/credentials/gcp-key.json \
           -e STORAGE_BUCKET=${{github.event.inputs.storage-bucket}} \
-          -e WEBSITE_ID=${{ github.event.inputs.website-id }}-1 \
+          -e WEBSITE_ID=${{ github.event.inputs.website-id }} \
           -e WEBSITE_EXPIRES=${{ github.event.inputs.website-expires }} \
           -e KEEP_RETRIES=${{ github.event.inputs.keep-retries }} \
           -e KEEP_HISTORY=${{ github.event.inputs.keep-history }} \

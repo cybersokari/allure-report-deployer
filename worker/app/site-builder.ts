@@ -1,11 +1,11 @@
-import {REPORTS_DIR} from "./report-builder";
 import * as fs from "fs/promises";
 import {StringBuilder} from "./string-builder";
 import * as fsSync from "fs";
 import * as path from "node:path";
 import * as util from 'node:util'
-import {cloudStorage, websiteId} from "../index";
+import {REPORTS_DIR, websiteId} from "../index";
 import {validateWebsiteExpires} from "./util";
+
 const exec = util.promisify(require('child_process').exec)
 
 async function createFirebaseJson() {
@@ -20,9 +20,9 @@ async function createFirebaseJson() {
     }
     try {
         const configDir = `${REPORTS_DIR}/firebase.json`
-        await fs.writeFile(configDir, JSON.stringify(hosting), {mode: 0o755, encoding: 'utf-8'} )
+        await fs.writeFile(configDir, JSON.stringify(hosting), {mode: 0o755, encoding: 'utf-8'})
         return configDir
-    }catch (e) {
+    } catch (e) {
         console.info(`firebase.json write failed: ${e}`)
         throw e
     }
@@ -46,7 +46,7 @@ async function changePermissionsRecursively(dirPath: string, mode: fsSync.Mode) 
 }
 
 async function publishToFireBaseHosting() {
-    if(process.env.DEBUG === 'true') {
+    if (process.env.DEBUG === 'true') {
         console.warn('DEBUG=true: Skipping live deployment')
         return
     }
@@ -58,16 +58,22 @@ async function publishToFireBaseHosting() {
         .append('--no-authorized-domains').append(' ')
         .append(websiteId!)
 
+    // Website expiration setup
+    builder.append(' ')
+        .append('--expires')
+        .append(' ')
     const expires = process.env.WEBSITE_EXPIRES
-    if(expires && validateWebsiteExpires(expires)) {
-        builder.append(' ')
-            .append('--expires')
-            .append(' ')
-            .append(expires)
+    if (expires && validateWebsiteExpires(expires)) {
+        console.log(`WEBSITE_EXPIRES set to ${expires}`)
+        builder.append(expires)
+    } else {
+        console.log('No valid WEBSITE_EXPIRES provided, defaults to 7d')
+        builder.append('7d')
     }
+
     const {stdout, stderr} = await exec(builder.toString())
 
-    if(stderr && !stdout) {
+    if (stderr && !stdout) {
         console.error(`Error from hosting: ${stderr}`)
     }
     // Try to extract
@@ -77,13 +83,15 @@ async function publishToFireBaseHosting() {
     if (match && match[2]) {
         const url = match[2]
         console.log(`Allure test report URL: ${url}`)
-        if(process.env.GITHUB?.toLowerCase() === 'true'){ // Add URL to GitHub workflow summary
+        if (process.env.GITHUB?.toLowerCase() === 'true') { // Add URL to GitHub workflow summary
             builder.clear()
-            builder.append(`echo "Allure test report URL: ${url}"`).append(' ')
+            builder.append(`echo "Allure test report URL :globe_with_meridians: : ${url}"`).append(' ')
                 .append('>>').append(' ').append('$GITHUB_STEP_SUMMARY')
             try {
                 await exec(builder.toString())
-            }catch (e) {/**Ignore**/}
+            } catch (e) {
+                console.warn('Failed to write site URL to GitHub job summary')
+            }
         }
     } else {
         console.warn('Could not parse URL from hosting.')
@@ -91,17 +99,11 @@ async function publishToFireBaseHosting() {
     }
 }
 
-export async function deploy ()  {
+export async function deploy() {
     await createFirebaseJson()
     // Grant execution permission to website files
-    changePermissionsRecursively(REPORTS_DIR, 0o755)
-        .then(async ()=> {
-            await Promise.all([
-                publishToFireBaseHosting(),
-                cloudStorage?.uploadResultsToStorage()
-            ])
-        })
-
+    await changePermissionsRecursively(REPORTS_DIR, 0o755)
+    await publishToFireBaseHosting()
 }
 
 

@@ -9,10 +9,11 @@ import {CloudStorage} from "./app/cloud-storage";
 export const MOUNTED_PATH = '/allure-results'
 export const HOME_DIR = '/app'
 export const STAGING_PATH = `${HOME_DIR}/allure-results`;
+export const REPORTS_DIR = `${HOME_DIR}/allure-report`
 export const websiteId = process.env.WEBSITE_ID;
-export const keepHistory = process.env.KEEP_HISTORY?.toLowerCase() === 'true'
-export const keepRetires = process.env.KEEP_RETRIES?.toLowerCase() === 'true'
-export const cloudStorage  =  process.env.STORAGE_BUCKET ? new CloudStorage(process.env.STORAGE_BUCKET) : null;
+export const cloudStorage = process.env.STORAGE_BUCKET ? new CloudStorage(process.env.STORAGE_BUCKET) : null;
+export const keepHistory = process.env.KEEP_HISTORY?.toLowerCase() === 'true' && cloudStorage !== null
+export const keepRetires = process.env.KEEP_RETRIES?.toLowerCase() === 'true' && cloudStorage !== null
 
 /**
  * Download remote files if WEBSITE_ID is provided.
@@ -22,57 +23,74 @@ export const cloudStorage  =  process.env.STORAGE_BUCKET ? new CloudStorage(proc
  * 2. Move files to STAGING_PATH and set ttl for hosting if WEBSITE_ID is provided
  */
 function main(): void {
-    if(!cloudStorage && !websiteId){
+    if (!cloudStorage && !websiteId) {
         console.warn('WEBSITE_ID or STORAGE_BUCKET is required');
         return
     }
     process.env.FIREBASE_PROJECT_ID = getProjectIdFromCredentialsFile()
 
-    if(process.env.WATCH_MODE?.toLowerCase() === 'true' && process.env.GITHUB !== 'true'){
+    if (process.env.WATCH_MODE?.toLowerCase() === 'true' && process.env.GITHUB !== 'true') {
         //
         chokidar.watch('/allure-results', {
             ignored: '^(?!.*\\.(json|png|jpeg|jpg|gif|properties|log|webm)$).*$',
             persistent: true,
-            awaitWriteFinish: true
+            awaitWriteFinish: true,
         }).on('add', (filePath: string) => {
-            console.log(`New result file: ${filePath}`);
-            // Upload file async if storage is enabled
-            cloudStorage?.uploadFileToStorage(filePath)
-            if(websiteId){
-                ReportBuilder
-                    .stageFiles([filePath])
-                    .then((rb)=> rb.setTtl())
+            // console.log(`New result file: ${filePath}`);
+            if (websiteId) {
+                (async () => {
+                    await ReportBuilder.stageFiles([filePath])
+                    ReportBuilder.setTtl()
+                })()
+            }
+            if(cloudStorage){
+                (async () => {
+                    await cloudStorage.uploadFiles([filePath])
+                })()
             }
         });
-        console.log('Waiting for new files at /allure-results ...');
+        console.log(`Waiting for new files at ${MOUNTED_PATH}`);
     } else {
-        if(cloudStorage){
-            (async ()=> {
-                await Promise.all([
-                    cloudStorage.stageRemoteFiles(),
-                    ReportBuilder.stageFiles(getAllFiles(MOUNTED_PATH))
-                ])
-                await ReportBuilder.buildAndHost()
+
+        if (cloudStorage && keepRetires) {
+            // Start uploading results for retries because
+            // unlike history files, we do not need to wait for `allure generate`
+            (async () => {
+                await cloudStorage.uploadResults()
             })()
-        } else {
-            ReportBuilder.stageFiles(getAllFiles(MOUNTED_PATH))
-                .then((rb)=> rb.buildAndHost())
+        }
+        if(websiteId){
+            (async () => {
+                // Stage files, generateAndHost then upload history if enabled
+                await Promise.all([
+                    ReportBuilder.stageFiles(await getAllFiles(MOUNTED_PATH)),
+                    cloudStorage?.stageRemoteFiles()
+                ])
+                await ReportBuilder.generateAndHost()
+                if(keepHistory){
+                    await cloudStorage?.uploadHistory()
+                }
+            })()
         }
     }
-    if(!websiteId){
-        console.log('Report publishing disabled because WEBSITE_ID is null ');
+    if (!websiteId) {
+        console.log('Report publishing disabled because WEBSITE_ID is not provided');
     }
-    if(!cloudStorage){
-        console.log('Cloud storage file upload disabled because STORAGE_BUCKET is null');
-        if(keepHistory){
-            console.log('KEEP_HISTORY is ignored because STORAGE_BUCKET is null');
+    if (cloudStorage) {
+        if (keepHistory && keepRetires) {
+            console.log(`KEEP_HISTORY and KEEP_RETRIES enabled`)
+        } else if (!keepHistory && !keepRetires) {
+            console.log(`KEEP_HISTORY and KEEP_RETRIES disabled`)
+        } else if (keepHistory) {
+            console.log(`KEEP_HISTORY enabled`)
+        } else if (keepRetires) {
+            console.log(`KEEP_RETRIES enabled`)
         }
-        if(keepRetires){
-            console.log('KEEP_RETRIES is ignored because STORAGE_BUCKET is null');
-        }
+    } else {
+        console.log('STORAGE_BUCKET is not provided, KEEP_HISTORY and KEEP_RETRIES disabled');
     }
 }
 
-if(require.main === module){
+if (require.main === module) {
     main()
 }
