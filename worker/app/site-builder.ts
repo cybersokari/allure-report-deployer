@@ -10,7 +10,7 @@ import counter from "./counter";
 
 const exec = util.promisify(require('child_process').exec)
 
-async function createFirebaseJson() {
+export async function createFirebaseJson() {
     const hosting = {
         "hosting": {
             "public": ".",
@@ -30,7 +30,7 @@ async function createFirebaseJson() {
     }
 }
 
-async function changePermissionsRecursively(dirPath: string, mode: fsSync.Mode) {
+export async function changePermissionsRecursively(dirPath: string, mode: fsSync.Mode) {
     await fs.chmod(dirPath, mode);
 
     const files = await fs.readdir(dirPath);
@@ -47,7 +47,7 @@ async function changePermissionsRecursively(dirPath: string, mode: fsSync.Mode) 
     }
 }
 
-async function publishToFireBaseHosting() {
+export async function publishToFireBaseHosting() {
     if (process.env.DEBUG === 'true') {
         console.warn('DEBUG=true: Skipping live deployment')
         return
@@ -118,12 +118,6 @@ export function writeGitHubSummary({summaryPath = '', url = ''}) {
     }
 }
 
-export async function deploy() {
-    await createFirebaseJson()
-    // Grant execution permission to website files
-    await changePermissionsRecursively(REPORTS_DIR, 0o755)
-    return await publishToFireBaseHosting()
-}
 
 
 

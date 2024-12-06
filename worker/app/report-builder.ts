@@ -1,7 +1,7 @@
 import {REPORTS_DIR, STAGING_PATH} from "../index";
 
 const allure = require('allure-commandline')
-import {deploy} from "./site-builder";
+import {changePermissionsRecursively, createFirebaseJson, publishToFireBaseHosting} from "./site-builder";
 import * as path from "node:path";
 import * as fs from 'fs/promises'
 import counter from "./counter";
@@ -17,10 +17,13 @@ class ReportBuilder {
 
     public setTtl() {
         clearTimeout(this.timeOut)
-        this.timeOut = setTimeout(this.generateAndHost, this.ttl * 1000)
+        this.timeOut = setTimeout(async () => {
+            await this.generate()
+            return await this.host()
+        }, this.ttl * 1000)
     }
 
-    public async generateAndHost() {
+    public async generate() {
 
         // History files can exist in reports directory in WATCH_MODE
         // due to multiple call to generateAndHost, so we try to move
@@ -53,7 +56,7 @@ class ReportBuilder {
         let success = false
         await new Promise((resolve, reject) => {
             generation.on('exit', async function (exitCode: number) {
-                success = exitCode == 0
+                success = exitCode === 0
                 if (success) {
                     resolve('success')
                 } else {
@@ -62,14 +65,6 @@ class ReportBuilder {
                 }
             })
         })
-        if (success){
-            try {
-                return await deploy()
-            } catch (e) {
-                console.log(`Hosting deployment failed: ${e}`)
-            }
-        }
-        return null
     }
 
     // Move from '/allure-results' mount to staging
@@ -79,13 +74,20 @@ class ReportBuilder {
                 const destinationFilePath = path.join(STAGING_PATH, path.basename(file));
                 await fs.mkdir(path.dirname(destinationFilePath), {recursive: true});// recursive, don't throw
                 await fs.copyFile(file, destinationFilePath);
-                counter.incrementFilesProcessed()
+                await counter.incrementFilesProcessed()
             } catch (e) {
                 console.warn(`Failed to move ${path.basename(file)} to staging area: ${e}`)
             }
 
         }
         return this
+    }
+
+    public async host() {
+        await createFirebaseJson()
+        // Grant execution permission to website files
+        await changePermissionsRecursively(REPORTS_DIR, 0o755)
+        return await publishToFireBaseHosting()
     }
 
 }
