@@ -1,6 +1,5 @@
 import * as chokidar from 'chokidar';
-import {
-    getAllFiles,
+import {getAllFilesStream,
     getProjectIdFromCredentialsFile,
 } from "./app/util";
 import ReportBuilder from "./app/report-builder";
@@ -59,32 +58,35 @@ function main(): void {
         console.log(`Waiting for new files at ${MOUNTED_PATH}`);
     } else {
 
-        if (cloudStorage && keepRetires) {
-            // Start uploading results for retries because
-            // unlike history files, we do not need to wait for `allure generate`
-            (async () => {
-                await cloudStorage.uploadResults()
-            })()
-        }
-        if(websiteId){
-            (async () => {
+        (async () => {
+            let url
+            if(websiteId){
                 // Stage files, generateAndHost then upload history if enabled
                 await Promise.all([
-                    ReportBuilder.stageFiles(await getAllFiles(MOUNTED_PATH)),
+                    ReportBuilder.stageFiles(getAllFilesStream(MOUNTED_PATH)),
                     cloudStorage?.stageRemoteFiles()
                 ])
                 await ReportBuilder.generate()
-                const url = await ReportBuilder.host()
+                url = await ReportBuilder.host()
                 if(keepHistory){
                     await cloudStorage?.uploadHistory()
                 }
-                const summaryPath = process.env.GITHUB_SUMMARY_FILE
-                if(url && summaryPath){
-                    writeGitHubSummary({summaryPath, url})
-                }
 
-            })()
-        }
+            }
+            if (cloudStorage && keepRetires) {
+                // While it makes sense to kick off Uploads while generating Allure reports,
+                //since they dont depend on each other, there sean to be a lock problem when done
+                // concurrently. Started after implementing p-limit in file upload
+                await cloudStorage.uploadResults()
+            }
+
+            const summaryPath = process.env.GITHUB_SUMMARY_FILE
+            if(url && summaryPath){
+                writeGitHubSummary({summaryPath, url})
+            }
+
+        })()
+
     }
     if (!websiteId) {
         console.log('Report publishing disabled because WEBSITE_ID is not provided');

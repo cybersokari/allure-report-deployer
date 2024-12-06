@@ -14,33 +14,20 @@ export const getProjectIdFromCredentialsFile = () => {
     }
 }
 
-export function logError(...e: any) {
-    console.log(e)
-}
 
 
-export async function getAllFiles(dirPath: string): Promise<string[]> {
-    const stack = [dirPath];
-    const files: string[] = [];
-
-    while (stack.length > 0) {
-        const currentDir = stack.pop()!;
-        try {
-            const entries = await fs.readdir(currentDir, { withFileTypes: true });
-            for (const entry of entries) {
-                const fullPath = path.join(currentDir, entry.name);
-                if (entry.isDirectory()) {
-                    stack.push(fullPath);
-                } else {
-                    files.push(fullPath);
-                }
-            }
-        } catch (err) {
-            console.warn(`Error processing directory: ${currentDir}`, err);
+export async function* getAllFilesStream(dir: string): AsyncGenerator<string> {
+    const entries = await fs.readdir(dir, { withFileTypes: true });
+    for (const entry of entries) {
+        const fullPath = path.join(dir, entry.name);
+        if (entry.isDirectory()) {
+            yield* getAllFilesStream(fullPath);
+        } else {
+            yield fullPath;
         }
     }
-    return files;
 }
+
 
 
 export function validateWebsiteExpires(expires: string): boolean {
@@ -48,8 +35,8 @@ export function validateWebsiteExpires(expires: string): boolean {
     if (!expires) {
         return false;
     }
-
-    if(expires.trim().length > 3){
+    const length = expires.trim().length
+    if(length < 2 || length > 3){
         return false;
     }
 
