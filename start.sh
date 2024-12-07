@@ -33,7 +33,7 @@ if [ ! -d "$MOUNT_POINT" ]; then
 fi
 
 GITHUB_SUMMARY_FILE="/github/summary.txt"
-if [ ! -d "$GITHUB_SUMMARY_FILE" ]; then
+if [ ! -f "$GITHUB_SUMMARY_FILE" ]; then
   export GITHUB_SUMMARY_FILE
   echo "Git summary file directory mounted"
 fi

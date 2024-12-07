@@ -4,7 +4,6 @@ class Counter {
     private processed = 0
     private uploaded = 0
 
-    // Mutex for protecting critical sections
     private mutex = new Mutex();
 
     async incrementFilesProcessed(): Promise<void> {

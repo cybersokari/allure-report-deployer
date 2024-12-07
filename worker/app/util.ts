@@ -31,10 +31,7 @@ export async function* getAllFilesStream(dir: string): AsyncGenerator<string> {
 
 
 export function validateWebsiteExpires(expires: string): boolean {
-    // Check if input is empty
-    if (!expires) {
-        return false;
-    }
+
     const length = expires.trim().length
     if(length < 2 || length > 3){
         return false;

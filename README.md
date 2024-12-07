@@ -75,8 +75,14 @@ jobs:
             
 ```
 
-**URL preview in GitHub Actions summary**
-<div style="text-align: left"><img src="assets/example-github-summary.png" height="300" alt="GitHub Action Summary"></div>
+**URL preview in GitHub Actions job summary**
+<div style="text-align: left"><img src="assets/example-github-summary.png" alt="URL preview in GitHub Actions summary"></div>
+
+**Test result files in Firebase Storage**
+<div><img src="assets/storage-dashboard.png" alt="Test result files in Firebase Storage"></div>
+
+**Test report example site**
+<div><img src="assets/site.png" alt="Test report example site"></div>
 
 Tips
 1.	Use unique values for `WEBSITE_ID` (e.g., `${{ github.ref }}`) to avoid overwriting reports.
@@ -123,7 +129,8 @@ services:
       TTL_SECS: 60
 ```
 
-**URL preview in console**
+
+#### URL preview in console
 <div style="text-align: left"><img src="assets/ci-report-url-ss.png" height="300" alt="Firebase CLI console output"></div>
 
 

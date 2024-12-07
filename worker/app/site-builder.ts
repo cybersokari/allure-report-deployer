@@ -5,7 +5,6 @@ import * as path from "node:path";
 import * as util from 'node:util'
 import {DEBUG, REPORTS_DIR, websiteId} from "../index";
 import {validateWebsiteExpires} from "./util";
-import timer from "./counter";
 import counter from "./counter";
 
 const exec = util.promisify(require('child_process').exec)
@@ -105,7 +104,7 @@ export function writeGitHubSummary({summaryPath = '', url = ''}) {
 
 **🔍 Files processed: ${counter.filesProcessed}**
 
-**⏱️ Duration: ${timer.getElapsedSeconds()} seconds**
+**⏱️ Duration: ${counter.getElapsedSeconds()} seconds**
 `;
     if (!summaryPath) {
         console.warn('GITHUB_STEP_SUMMARY is not defined. Are you running inside a GitHub Action?');
