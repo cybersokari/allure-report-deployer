@@ -1,19 +1,19 @@
 import * as chokidar from 'chokidar';
-import {getAllFilesStream,
-    getProjectIdFromCredentialsFile,
+import {
+    getAllFilesStream, publishToFireBaseHosting,
 } from "./app/util";
 import ReportBuilder from "./app/report-builder";
 import {CloudStorage} from "./app/cloud-storage";
 import counter from "./app/counter";
-import {writeGitHubSummary} from "./app/site-builder";
+import notifier from "./app/notifier";
 
-export const DEBUG = process.env.DEBUG === "true" || false;
+export const DEBUG = process.env.FIREBASE_STORAGE_EMULATOR_HOST !== undefined || false;
 export const MOUNTED_PATH = '/allure-results'
 export const HOME_DIR = '/app'
 export const STAGING_PATH = `${HOME_DIR}/allure-results`;
 export const REPORTS_DIR = `${HOME_DIR}/allure-report`
 export const websiteId = process.env.WEBSITE_ID || null;
-const STORAGE_BUCKET = process.env.STORAGE_BUCKET || null;
+export const STORAGE_BUCKET = process.env.STORAGE_BUCKET || null;
 export const cloudStorage = STORAGE_BUCKET ? CloudStorage.getInstance(STORAGE_BUCKET) : null;
 export const keepHistory = process.env.KEEP_HISTORY?.toLowerCase() === 'true'
 export const keepRetires = process.env.KEEP_RETRIES?.toLowerCase() === 'true'
@@ -26,21 +26,20 @@ const watchMode = process.env.WATCH_MODE?.toLowerCase() === 'true';
  * 1. Upload files to cloud storage if STORAGE_BUCKET is provided
  * 2. Move files to STAGING_PATH and set ttl for hosting if WEBSITE_ID is provided
  */
-function main(): void {
+export function main(): void {
     counter.startTimer()
     if (!cloudStorage && !websiteId) {
         console.warn('WEBSITE_ID or STORAGE_BUCKET is required');
         return
     }
-    process.env.FIREBASE_PROJECT_ID = getProjectIdFromCredentialsFile()
 
     if (watchMode) {
-        //
+
         chokidar.watch('/allure-results', {
             ignored: '^(?!.*\\.(json|png|jpeg|jpg|gif|properties|log|webm)$).*$',
             persistent: true,
             awaitWriteFinish: true,
-            usePolling: true, // Avoid unnecessary polling
+            usePolling: true,
             depth: 2, // Limit recursive depth
         }).on('add', (filePath: string) => {
             // console.log(`New result file: ${filePath}`);
@@ -58,7 +57,6 @@ function main(): void {
         });
         console.log(`Waiting for new files at ${MOUNTED_PATH}`);
     } else {
-
         (async () => {
 
             let url
@@ -69,7 +67,7 @@ function main(): void {
                     cloudStorage?.stageRemoteFiles()
                 ])
                 await ReportBuilder.generate()
-                url = await ReportBuilder.host()
+                url = await publishToFireBaseHosting()
                 if(keepHistory){
                     await cloudStorage?.uploadHistory()
                 }
@@ -80,28 +78,16 @@ function main(): void {
             }
             const summaryPath = process.env.GITHUB_SUMMARY_FILE
             if(url && summaryPath){
-                writeGitHubSummary({summaryPath, url})
+                notifier.printGithubSummary({mountedFilePath: summaryPath, url: url})
             }
-
+            const token = process.env.SLACK_TOKEN;
+            const conversationId = process.env.SLACK_CHANNEL_ID;
+            if(conversationId && token){
+                await notifier.SendSlackMsg({conversationId: conversationId, token: token, url: url})
+            }
         })()
-
     }
-    if (!websiteId) {
-        console.log('Report publishing disabled because WEBSITE_ID is not provided');
-    }
-    if (cloudStorage) {
-        if (keepHistory && keepRetires) {
-            console.log(`KEEP_HISTORY and KEEP_RETRIES enabled`)
-        } else if (!keepHistory && !keepRetires) {
-            console.log(`KEEP_HISTORY and KEEP_RETRIES disabled`)
-        } else if (keepHistory) {
-            console.log(`KEEP_HISTORY enabled`)
-        } else if (keepRetires) {
-            console.log(`KEEP_RETRIES enabled`)
-        }
-    } else {
-        console.log('STORAGE_BUCKET is not provided, KEEP_HISTORY and KEEP_RETRIES disabled');
-    }
+    notifier.printStats()
 }
 
 if (require.main === module) {

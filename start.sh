@@ -35,7 +35,7 @@ fi
 GITHUB_SUMMARY_FILE="/github/summary.txt"
 if [ ! -f "$GITHUB_SUMMARY_FILE" ]; then
   export GITHUB_SUMMARY_FILE
-  echo "Git summary file directory mounted"
+  echo "Running on GitHub. Summary will be available in a bit"
 fi
 
 if [ -n "$TTL_SECS" ]; then

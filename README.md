@@ -29,7 +29,7 @@ Works in both CI and local environments with minimal setup, utilizing [Firebase 
 
 - **Cloud Storage**: Automatically backs up Allure test results and history in a Google Cloud Storage bucket.
 - **Preview URLs**: Generates ephemeral Allure report URLs hosted on Firebase for easy sharing with stakeholders.
-- **Slack Integration**: _(Coming Soon)_ Notify team members with preview URLs directly in Slack after each test run.
+- **Slack Integration**: Notify team members with preview URLs directly in Slack after each test run.
 - **Continuous Deployment**: In Watch Mode, the container detects changes, generates reports, and uploads them automatically. Suitable for testing locally.
 
 
@@ -75,13 +75,28 @@ jobs:
             
 ```
 
-**URL preview in GitHub Actions job summary**
+---
+
+#### View your report details in GitHub Actions job summary
+
 <div style="text-align: left"><img src="assets/example-github-summary.png" alt="URL preview in GitHub Actions summary"></div>
 
-**Test result files in Firebase Storage**
+---
+
+#### Receive build success update in Slack
+
+<div style="text-align: left"><img src="assets/slack-bot.png" alt="URL preview in GitHub Actions summary"></div>
+
+---
+
+#### View your test result file on the Firebase Developer console
+
 <div><img src="assets/storage-dashboard.png" alt="Test result files in Firebase Storage"></div>
 
-**Test report example site**
+---
+
+#### Test report example site
+
 <div><img src="assets/site.png" alt="Test report example site"></div>
 
 Tips
@@ -179,6 +194,8 @@ services:
 | `KEEP_RETRIES`                   | Backup files in the `allure-results` directory after report generation                                                              | false   |
 | `WATCH_MODE`                     | Keep the container running to auto deploy new test reports and results                                                              | false   |
 | `TTL_SECS`                       | Time to wait (in seconds) after last file is detected before generating and uploading the report. Only works when `WATCH_MODE=true` | 45      |
+| `SLACK_TOKEN`                    | Your Slack Bot token                                                                                                                | None    |
+| `SLACK_CHANNEL_ID`               | The ID of the channel or conversation you want to receive your status                                                               | None    |
 
 **Note**: Either `STORAGE_BUCKET` or `WEBSITE_ID` must be provided. Both can be configured if you want to enable all functionalities.
 
@@ -193,7 +210,7 @@ services:
 | **Cloud Storage backup**                  | ✅ Automatically backs up test result files to Google Cloud Storage.                                        | ❌ No backup functionality; relies on GitHub repositories for report storage.           |
 | **Direct deployment without Git commits** | ✅ Deploys directly to Firebase Hosting without committing generated reports to Git.                        | ❌ Requires committing generated reports to GitHub Pages.                               |
 | **Further analysis capabilities**         | ✅ Allows access to all saved test result files for additional analysis beyond the Allure-generated report. | ❌ No such functionality provided.                                                      |
-| **Slack notifications**                   | 🚧 Planned (Coming Soon).                                                                                  | ❌ Not supported.                                                                       |
+| **Slack notifications**                   | ✅ Receive your test report URL in Slack                                                                    | ❌ Not supported.                                                                       |
 
 
 

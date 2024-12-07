@@ -51,6 +51,8 @@ jobs:
           -e WEBSITE_EXPIRES=${{ github.event.inputs.website-expires }} \
           -e KEEP_RETRIES=${{ github.event.inputs.keep-retries }} \
           -e KEEP_HISTORY=${{ github.event.inputs.keep-history }} \
+          -e SLACK_TOKEN=${{secrets.SLACK_TOKEN}} \
+          -e SLACK_CHANNEL_ID=${{secrets.SLACK_CHANNEL_ID}} \
           -v $GITHUB_STEP_SUMMARY:/github/summary.txt \
           -v ${{ github.workspace }}/assets/allure-results:/allure-results \
           -v ${{ github.workspace }}/gcp-key.json:/credentials/gcp-key.json \

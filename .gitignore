@@ -4,3 +4,4 @@ allure-firebase.iml
 worker/allure-*
 worker/lib
 credentials/gcp-key.json
+.env.slack
