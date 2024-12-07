@@ -1,6 +1,6 @@
 import * as path from "node:path";
 import * as fs from "fs/promises"
-import {REPORTS_DIR, STAGING_PATH} from "../index";
+import {DEBUG, MOUNTED_PATH, REPORTS_DIR, STAGING_PATH} from "../index";
 import * as admin from "firebase-admin";
 import {Bucket} from '@google-cloud/storage'
 import {getAllFilesStream} from "./util";
@@ -35,8 +35,7 @@ export class CloudStorage {
                 try {
                     console.log(`Uploading ${destinationFilePath} to storage`)
                     await CloudStorage.bucket.upload(filePath, {
-
-                        validation: process.env.DEBUG !== 'true',
+                        validation: !DEBUG,
                         destination: `${storageHomeDir}/${destinationFilePath}`,
                     });
                     await counter.incrementFilesUploaded()
@@ -63,7 +62,7 @@ export class CloudStorage {
                 downloadPromises.push(limit(async () => {
                     // Remove the preceding storageHomeDir path from the downloaded file
                     const destination = path.join(STAGING_PATH, file.name.replace(`${storageHomeDir}/`, ''));
-                    await file.download({destination, validation: process.env.DEBUG !== 'true'});
+                    await file.download({destination, validation: !DEBUG});
                     console.log(`Downloaded ${file.name}`);
                 }))
             }
@@ -84,7 +83,7 @@ export class CloudStorage {
     public async uploadResults() {
         // try to delete any history file in STAGING_PATH/history
         // await fs.rm(`${STAGING_PATH}/history`, {recursive: true,force: true});
-        const files = getAllFilesStream(STAGING_PATH)
+        const files = getAllFilesStream(MOUNTED_PATH)
         await this.uploadFiles(files)
     }
 }

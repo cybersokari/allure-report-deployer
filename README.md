@@ -1,12 +1,16 @@
-<a href="https://allurereport.org/docs/">
-<img id="allure" src="assets/allure-logo.png" alt="Allure Logo" height="150">
-</a>
-<a href="https://docs.docker.com/">
-<img id="docker" src="assets/docker-logo.png" alt="Docker Logo" height="150">
-</a>
-<a href="https://firebase.google.com/docs">
-<img id="firebase"  src="assets/firebase-logo.png" alt="Firebase Logo" height="150">
-</a>
+<div style="display: flex; justify-content: space-evenly; align-items: center; margin-bottom: 20px;">
+    <a id="allure" href="https://allurereport.org/docs/">
+        <img src="assets/allure-logo.png" alt="Allure Logo" height="100">
+    </a>
+    <a id="docker" href="https://docs.docker.com/">
+        <img src="assets/docker-logo.png" alt="Docker Logo" height="100">
+    </a>
+    <a id="firebase" href="https://firebase.google.com/docs">
+        <img src="assets/firebase-logo.png" alt="Firebase Logo" height="100">
+    </a>
+</div>
+
+
 
 # Allure Docker Deploy
 

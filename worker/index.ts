@@ -7,6 +7,7 @@ import {CloudStorage} from "./app/cloud-storage";
 import counter from "./app/counter";
 import {writeGitHubSummary} from "./app/site-builder";
 
+export const DEBUG = process.env.DEBUG === "true" || false;
 export const MOUNTED_PATH = '/allure-results'
 export const HOME_DIR = '/app'
 export const STAGING_PATH = `${HOME_DIR}/allure-results`;
@@ -59,6 +60,7 @@ function main(): void {
     } else {
 
         (async () => {
+
             let url
             if(websiteId){
                 // Stage files, generateAndHost then upload history if enabled
@@ -71,15 +73,11 @@ function main(): void {
                 if(keepHistory){
                     await cloudStorage?.uploadHistory()
                 }
-
             }
+
             if (cloudStorage && keepRetires) {
-                // While it makes sense to kick off Uploads while generating Allure reports,
-                //since they dont depend on each other, there sean to be a lock problem when done
-                // concurrently. Started after implementing p-limit in file upload
                 await cloudStorage.uploadResults()
             }
-
             const summaryPath = process.env.GITHUB_SUMMARY_FILE
             if(url && summaryPath){
                 writeGitHubSummary({summaryPath, url})

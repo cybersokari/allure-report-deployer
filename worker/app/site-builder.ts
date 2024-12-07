@@ -3,7 +3,7 @@ import {StringBuilder} from "./string-builder";
 import * as fsSync from "fs";
 import * as path from "node:path";
 import * as util from 'node:util'
-import {REPORTS_DIR, websiteId} from "../index";
+import {DEBUG, REPORTS_DIR, websiteId} from "../index";
 import {validateWebsiteExpires} from "./util";
 import timer from "./counter";
 import counter from "./counter";
@@ -48,7 +48,7 @@ export async function changePermissionsRecursively(dirPath: string, mode: fsSync
 }
 
 export async function publishToFireBaseHosting() {
-    if (process.env.DEBUG === 'true') {
+    if (DEBUG) {
         console.warn('DEBUG=true: Skipping live deployment')
         return
     }
@@ -99,7 +99,7 @@ export function writeGitHubSummary({summaryPath = '', url = ''}) {
     const summaryContent = `
 ### Allure Docker Deploy 🚀
 
-**📝 Test Report URL: ${url}**
+**📝 Test Report URL:** ${url}
 
 **📂 Files uploaded: ${counter.filesUploaded}**
 
