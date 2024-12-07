@@ -55,7 +55,7 @@ export class CloudStorage {
                 console.log(`No files found in folder: ${storageHomeDir}/`);
                 return;
             }
-            await fs.mkdir(STAGING_PATH, {recursive: true}); // recursive, dont throw is exist
+            await fs.mkdir(STAGING_PATH, {recursive: true}); // recursive, dont throw if exist
             const limit = pLimit(concurrency);
             const downloadPromises = [];
             for (const file of files) {
