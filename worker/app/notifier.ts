@@ -108,6 +108,7 @@ class Notifier {
         const result = await web.chat.postMessage({
             channel: cred.conversationId,
             blocks: blocks,
+            text: 'Your Allure report is ready.'
         });
 
         console.log('Message sent: ', result.ts);
