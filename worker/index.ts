@@ -76,9 +76,9 @@ export function main(): void {
             if (cloudStorage && keepRetires) {
                 await cloudStorage.uploadResults()
             }
-            const summaryPath = process.env.GITHUB_SUMMARY_FILE
+            const summaryPath = process.env.GITHUB_STEP_SUMMARY
             if(url && summaryPath){
-                notifier.printGithubSummary({mountedFilePath: summaryPath, url: url})
+                await notifier.printGithubSummary({mountedFilePath: summaryPath, url: url})
             }
             const token = process.env.SLACK_TOKEN;
             const conversationId = process.env.SLACK_CHANNEL_ID;

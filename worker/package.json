@@ -5,7 +5,7 @@
     "lint": "eslint --ext .js,.ts .",
     "build": "tsc",
     "build:watch": "tsc --watch",
-    "test": "tsc && cucumber-js"
+    "test": "tsc --project test.tsconfig.json && npx cucumber-js"
   },
   "engines": {
     "node": "22"

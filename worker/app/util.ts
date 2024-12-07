@@ -3,7 +3,7 @@ import * as fs from 'fs/promises'
 import * as path from "node:path";
 import util from "node:util";
 const exec = util.promisify(require('child_process').exec)
-import {REPORTS_DIR, websiteId} from "../index";
+import {DEBUG, REPORTS_DIR, websiteId} from "../index";
 import {StringBuilder} from "./string-builder";
 
 export const getProjectIdFromCredentialsFile = async () => {
@@ -88,10 +88,10 @@ export async function changePermissionsRecursively(dirPath: string, mode: fsSync
 }
 
 export async function publishToFireBaseHosting(): Promise<string| undefined> {
-    // if (DEBUG) {
-    //     console.warn('DEBUG=true: Skipping live deployment')
-    //     return
-    // }
+    if (DEBUG) {
+        console.warn('DEBUG=true: Skipping live deployment')
+        return
+    }
     const hosting = {
         "hosting": {
             "public": ".",

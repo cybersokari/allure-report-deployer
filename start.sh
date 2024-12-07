@@ -32,9 +32,9 @@ if [ ! -d "$MOUNT_POINT" ]; then
     exit 1
 fi
 
-GITHUB_SUMMARY_FILE="/github/summary.txt"
-if [ ! -f "$GITHUB_SUMMARY_FILE" ]; then
-  export GITHUB_SUMMARY_FILE
+GITHUB_STEP_SUMMARY="/github/summary.txt"
+if [ -f "$GITHUB_STEP_SUMMARY" ]; then
+  export GITHUB_STEP_SUMMARY
   echo "Running on GitHub. Summary will be available in a bit"
 fi
 

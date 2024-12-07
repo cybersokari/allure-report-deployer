@@ -13,8 +13,7 @@
 
   "compileOnSave": true,
   "include": [
-    "index.ts",
-    "app/*.ts",
+    "test"
   ],
-  "exclude": ["test"]
+  "exclude": ["app"]
 }
