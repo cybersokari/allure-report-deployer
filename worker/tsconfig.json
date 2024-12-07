@@ -7,11 +7,14 @@
     "sourceMap": true,
     "strict": true,
     "target": "es2017",
-    "allowSyntheticDefaultImports": true
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true
   },
+
   "compileOnSave": true,
   "include": [
     "index.ts",
-    "app/*.ts"
-  ]
+    "app/*.ts",
+    "test/step_definitions/*.ts"
+  ],
 }

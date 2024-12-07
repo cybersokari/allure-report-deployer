@@ -1,0 +1,77 @@
+{
+  "blocks": [
+    {
+      "type": "section",
+      "text": {
+        "type": "mrkdwn",
+        "text": "*Your Allure report is ready* :female-teacher:"
+      }
+    },
+    {
+      "type": "context",
+      "elements": [
+        {
+          "type": "mrkdwn",
+          "text": ":file_folder:  *Files uploaded:* 54"
+        }
+      ]
+    },
+    {
+      "type": "context",
+      "elements": [
+        {
+          "type": "mrkdwn",
+          "text": ":mag:  *Files processed:* 49"
+        }
+      ]
+    },
+    {
+      "type": "context",
+      "elements": [
+        {
+          "type": "mrkdwn",
+          "text": ":stopwatch:  *Duration:* 11.206 seconds"
+        }
+      ]
+    },
+    {
+      "type": "actions",
+      "elements": [
+        {
+          "type": "button",
+          "text": {
+            "type": "plain_text",
+            "text": "View report",
+            "emoji": true
+          },
+          "value": "click_me_123"
+        },
+        {
+          "type": "button",
+          "text": {
+            "type": "plain_text",
+            "text": "View files in storage",
+            "emoji": true
+          },
+          "value": "click_me_123",
+          "url": "https://google.com"
+        }
+      ]
+    },
+    {
+      "type": "actions",
+      "elements": [
+        {
+          "type": "button",
+          "text": {
+            "type": "plain_text",
+            "text": "Star us on GitHub :smile:",
+            "emoji": true
+          },
+          "value": "click_me_123",
+          "action_id": "actionId-0"
+        }
+      ]
+    }
+  ]
+}

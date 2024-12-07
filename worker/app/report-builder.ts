@@ -1,11 +1,11 @@
 import {REPORTS_DIR, STAGING_PATH} from "../index";
 
 const allure = require('allure-commandline')
-import {changePermissionsRecursively, createFirebaseJson, publishToFireBaseHosting} from "./site-builder";
 import * as path from "node:path";
 import * as fs from 'fs/promises'
 import counter from "./counter";
 import pLimit from 'p-limit';
+import {publishToFireBaseHosting} from "./util";
 
 
 class ReportBuilder {
@@ -20,7 +20,7 @@ class ReportBuilder {
         clearTimeout(this.timeOut)
         this.timeOut = setTimeout(async () => {
             await this.generate()
-            return await this.host()
+            await publishToFireBaseHosting()
         }, this.ttl * 1000)
     }
 
@@ -86,13 +86,6 @@ class ReportBuilder {
         }
         await Promise.all(tasks)
         return this
-    }
-
-    public async host() {
-        await createFirebaseJson()
-        // Grant execution permission to website files
-        await changePermissionsRecursively(REPORTS_DIR, 0o755)
-        return await publishToFireBaseHosting()
     }
 
 }

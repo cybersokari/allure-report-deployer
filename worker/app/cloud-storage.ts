@@ -81,8 +81,6 @@ export class CloudStorage {
     }
 
     public async uploadResults() {
-        // try to delete any history file in STAGING_PATH/history
-        // await fs.rm(`${STAGING_PATH}/history`, {recursive: true,force: true});
         const files = getAllFilesStream(MOUNTED_PATH)
         await this.uploadFiles(files)
     }
