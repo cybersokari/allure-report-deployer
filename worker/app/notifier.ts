@@ -3,6 +3,8 @@ import {cloudStorage, keepHistory, keepRetires, STORAGE_BUCKET, websiteId} from 
 import {WebClient} from '@slack/web-api';
 import {StringBuilder} from "./string-builder";
 import * as fs from "node:fs";
+import ansiEscapes from "ansi-escapes";
+import chalk from "chalk";
 import credential from "./credential";
 
 type SlackCredentials = {
@@ -17,7 +19,15 @@ type SlackCredentials = {
  * Handles notifications related to report generation and file processing.
  * Supports Slack notifications, GitHub summary updates, and general stats logging.
  */
-class Notifier {
+export class Notifier {
+
+    get dashboardUrl(){
+        return new StringBuilder().
+        append("https://console.firebase.google.com/project")
+            .append(`/${(credential.projectId)}`)
+            .append(`/storage/${STORAGE_BUCKET}/files`)
+            .toString()
+    }
 
     /**
      * Sends a message to a Slack channel with details about the report.
@@ -43,7 +53,7 @@ class Notifier {
                     "elements": [
                         {
                             "type": "mrkdwn",
-                            "text": ":file_folder:  *Files uploaded:* 54"
+                            "text": `:file_folder:  *Files uploaded:* ${counter.filesUploaded}`
                         }
                     ]
                 },
@@ -52,7 +62,7 @@ class Notifier {
                     "elements": [
                         {
                             "type": "mrkdwn",
-                            "text": ":mag:  *Files processed:* 49"
+                            "text": `:mag:  *Files processed:* ${counter.filesProcessed}`
                         }
                     ]
                 },)
@@ -62,7 +72,7 @@ class Notifier {
             "elements": [
                 {
                     "type": "mrkdwn",
-                    "text": ":stopwatch:  *Duration:* 11.206 seconds"
+                    "text": `:stopwatch:  *Duration:* ${counter.getElapsedSeconds()} seconds`
                 }
             ]
         })
@@ -83,8 +93,6 @@ class Notifier {
             })
         }
         if(cloudStorage){
-
-            const firebaseDashboardUrl = `https://console.firebase.google.com/project/${credential.projectId}/storage/${STORAGE_BUCKET}/files`
             blocks.push({
                 "type": "actions",
                 "elements": [
@@ -95,7 +103,7 @@ class Notifier {
                             "text": "View files in storage",
                             "emoji": true
                         },
-                        "url": firebaseDashboardUrl
+                        "url": this.dashboardUrl
                     }
                 ]
             })
@@ -129,7 +137,7 @@ class Notifier {
      * Includes the report link, processing stats, and duration.
      * @param data - Contains the report URL and file path for summary
      */
-    public async printGithubSummary(data: { mountedFilePath: string, url: string | undefined }): Promise<void> {
+    public async printGithubSummary(data: { mountedFilePath: string, url: string | undefined}): Promise<void> {
         const lineBreak = '</br>'
         const builder = new StringBuilder()
         builder.append(`**Your Allure report is ready 📈**}`)
@@ -139,8 +147,7 @@ class Notifier {
                 .append(lineBreak).append(lineBreak)
         }
         if (cloudStorage) {
-            const firebaseDashboardUrl = `https://console.firebase.google.com/project/${credential.projectId}/storage/${STORAGE_BUCKET}/files`
-            builder.append(`**[View files](${firebaseDashboardUrl})**`)
+            builder.append(`**[View files](${this.dashboardUrl})**`)
                 .append(lineBreak).append(lineBreak)
 
             builder.append(`📂 Files uploaded: ${counter.filesUploaded}`)
@@ -179,6 +186,18 @@ class Notifier {
             console.log('STORAGE_BUCKET is not provided, KEEP_HISTORY and KEEP_RETRIES disabled');
         }
     }
+
+    printSummaryToConsole(data: {url: string | null}): void {
+        if(data.url){
+            console.log('Allure test report URL')
+            console.log(ansiEscapes.link(chalk.blue(data.url), data.url));
+        }
+        if(cloudStorage){
+            const dashboardUrl = this.dashboardUrl
+            console.log('View files in Storage')
+            console.log(ansiEscapes.link(chalk.blue(dashboardUrl), dashboardUrl));
+        }
+    }
 }
 
-export default new Notifier();
+

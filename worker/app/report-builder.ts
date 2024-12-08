@@ -6,6 +6,7 @@ import * as fs from 'fs/promises'
 import counter from "./counter";
 import pLimit from 'p-limit';
 import {publishToFireBaseHosting} from "./util";
+import {Notifier} from "./notifier";
 
 /**
  * ReportBuilder Class
@@ -16,6 +17,7 @@ import {publishToFireBaseHosting} from "./util";
 class ReportBuilder {
     private timeOut: NodeJS.Timeout | undefined
     private readonly ttl: number
+    private notifier = new Notifier()
 
     constructor() {
         this.ttl = Number.parseInt(process.env.TTL_SECS ?? '45')
@@ -29,7 +31,10 @@ class ReportBuilder {
         clearTimeout(this.timeOut)
         this.timeOut = setTimeout(async () => {
             const path = await this.generate()
-            await publishToFireBaseHosting(path)
+            const url = await publishToFireBaseHosting(path)
+            if (url) {
+                this.notifier.printSummaryToConsole({url: url})
+            }
         }, this.ttl * 1000)
     }
 
