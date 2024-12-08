@@ -21,13 +21,15 @@ _An easy-to-use serverless Docker solution for sharing and backing up [Allure te
 
 ## **Table of Contents**
 
-1. [Quick Start](#quick-start)
+1. [Quick Start](#-quick-start)
 2. [Key Features](#-key-features)
 3. [Use Cases](#-use-cases)
     - [GitHub Actions](#-github-actions-integration)
     - [Local Test Runs](#-local-test-runs)
 4. [How It Works](#-how-it-works)
-5. [Environment Variables](#-environment-variables)
+5. [Docker Image Configuration](#-docker-image-configuration)
+   - [Environment Variables](#-environment-variables)
+   - [Mount Volumes](#-mount-volumes)
 6. [Comparison with Other Tools](#-comparison-with-other-open-source-tools)
 7. [Troubleshooting and FAQs](#-troubleshooting-and-faqs)
 8. [License](#license)
@@ -36,7 +38,7 @@ _An easy-to-use serverless Docker solution for sharing and backing up [Allure te
 ---
 
 
-## **Quick Start**
+## 🚀 **Quick Start**
 
 To get started with **Allure Docker Deploy**, follow these steps:
 
@@ -81,7 +83,6 @@ jobs:
     - name: Deploy Allure Reports to Firebase
       run: |
         docker run --rm \
-          -e GOOGLE_APPLICATION_CREDENTIALS=/credentials/gcp-key.json \  # Path to your Google Cloud credentials
           -e STORAGE_BUCKET=my-test-results-bucket \                    # Specify your Firebase Storage bucket
           -e WEBSITE_ID=my-custom-site-id \                             # Use a unique ID for the report website
           -e WEBSITE_EXPIRES=3d \                                       # Set the report expiration (e.g., 3 days)
@@ -89,7 +90,7 @@ jobs:
           -e KEEP_RETRIES=true \                                        # Enable retry saving for failed tests
           -v $GITHUB_STEP_SUMMARY:/github/summary.txt \                 # Display test report URL in GitHub summary
           -v ${{ github.workspace }}/allure-results:/allure-results \  # Mount test results
-          -v ${{ secrets.GCP_CREDENTIALS_FILE_PATH }}:/credentials/gcp-key.json \ # Bind GCP credentials
+          -v ${{ secrets.GCP_CREDENTIALS_FILE_PATH }}:/credentials/key.json \ # Bind GCP credentials
           sokari/allure-docker-deploy:latest
             
 ```
@@ -135,14 +136,13 @@ docker pull sokari/allure-docker-deploy:latest
 #### 2. Run the Container
 ```shell
 docker run -d \
-  -e GOOGLE_APPLICATION_CREDENTIALS=/credentials/gcp-key.json \
   -e STORAGE_BUCKET=my-test-results-bucket \
   -e WEBSITE_ID=my-custom-site-id \
   -e WEBSITE_EXPIRES=2d \
   -e WATCH_MODE=true \
   -e TTL_SECS=60 \
   -v /path/to/allure-results:/allure-results \
-  -v /path/to/gcp-key.json:/credentials/gcp-key.json \
+  -v /path/to/gcp-key.json:/credentials/key.json \
   sokari/allure-docker-deploy
 ```
 ##### 3. You can also use `docker-compose.yaml`:
@@ -153,9 +153,8 @@ services:
     container_name: allure-deploy-service
     volumes:
       - /path/to/allure-results:/allure-results
-      - /path/to/service-account.json:/service-account.json
+      - /path/to/service-account.json:/credentials/key.json
     environment:
-      GOOGLE_APPLICATION_CREDENTIALS: /service-account.json
       STORAGE_BUCKET: your-storage-bucket
       KEEP_HISTORY: true # Default is true when STORAGE_BUCKET is provided
       KEEP_RETRIES: false # Default is false
@@ -198,11 +197,12 @@ Host the reports on Firebase with unique URLs.
 Store Allure report history and result files in Google Cloud Storage.
 
     
-## 🔧 Environment Variables
+## 🐳 **Docker Image Configuration**
+
+### 🔧 **Environment variables**
 
 | Variable                         | Description                                                                                                                         | Example                        | Default |
 |----------------------------------|-------------------------------------------------------------------------------------------------------------------------------------|--------------------------------|---------|
-| `GOOGLE_APPLICATION_CREDENTIALS` | Path to GCP service account file                                                                                                    | /path/to/creds.json            | None    |
 | `STORAGE_BUCKET`                 | Google Cloud Storage bucket name                                                                                                    | project-id.firebasestorage.app | None    |
 | `WEBSITE_ID`                     | Unique identifier for hosted reports                                                                                                | test-report-id                 | None    |
 | `WEBSITE_EXPIRES`                | Expiration duration for reports. Examples: 1h, 2d, 3w                                                                               | 29d                            | 7d      |
@@ -215,6 +215,21 @@ Store Allure report history and result files in Google Cloud Storage.
 
 **Note**: Either `STORAGE_BUCKET` or `WEBSITE_ID` must be provided. Both can be configured if you want to enable all functionalities.
 
+---
+
+### 🔧 **Mount Volumes**
+
+| Host                        | Container               | Description                                                                                                                          |
+|-----------------------------|-------------------------|--------------------------------------------------------------------------------------------------------------------------------------|
+| `/path/to/allure-results`   | `/allure-results`       | Allure test results.                                                                                                                 |
+| `/path/to/credentials.json` | `/credentials/key.json` | Google Cloud service account JSON file.                                                                                              |
+| `$GITHUB_STEP_SUMMARY`      | `/github/summary.txt`   | [GitHub Actions summary](https://github.blog/news-insights/product-news/supercharging-github-actions-with-job-summaries/) (optional) |
+
+**Notes**:
+- Ensure that the directories and files exist on your local machine or CI environment.
+- Use absolute paths to avoid errors with relative paths in Docker commands.
+
+---
 
 
 ## 🔄 **Comparison with other open-source tools**
@@ -233,7 +248,7 @@ Store Allure report history and result files in Google Cloud Storage.
 #### 1. Allure Report Website Deployment Fails
 - **Problem**: Issues with Google Cloud credentials or permissions.
 - **Solution**:
-   - Verify the path to your GOOGLE_APPLICATION_CREDENTIALS file is correct.
+   - Verify the path to your Google credentials is mounted to `/credentials/key.json` on the docker container.
    - Ensure the credentials file belongs to a service account with the required permissions for Firebase Hosting and Cloud Storage.
    - Run the following commands to test credentials:
 ```shell
@@ -250,12 +265,12 @@ gcloud firebase hosting:list
 ### ❓ FAQs
 
 #### Q1: Can I use this tool without Google Cloud Storage?
-- **A**: Yes, you can generate and share reports without using cloud storage. However, enabling STORAGE_BUCKET allows you to keep historical test data and retries.
+- **A**: Yes, you can generate and share reports without using cloud storage. However, enabling `STORAGE_BUCKET` allows you to keep historical test data and retries.
 
 ---
 
 #### Q2: What is the maximum expiration time for reports?
-- **A**: The WEBSITE_EXPIRES variable can be set for a maximum of 30 days (30d). For example:
+- **A**: The `WEBSITE_EXPIRES` variable can be set for a maximum of 30 days (30d). For example:
 ```shell
 -e WEBSITE_EXPIRES=30d
 ```
@@ -271,13 +286,10 @@ gcloud firebase hosting:list
 
 ---
 
-#### **Q4: Do I need a paid Firebase plan?**
-- **A**: No, the free Firebase plan is sufficient for most use cases. However, if your reports exceed the free limits, you may need to upgrade.
-
----
-
 #### Q5: What happens if I don’t set WEBSITE_ID?
 - **A**: If WEBSITE_ID is not set, reports will not be deployed to Firebase. You must provide a unique identifier for the hosted site.
+
+---
 
 #### Q6: How do I configure Slack notifications?
 - **A**: Set the following environment variables:
@@ -285,8 +297,12 @@ gcloud firebase hosting:list
   - `SLACK_CHANNEL_ID`: The ID of the channel where you want to send notifications.
   - Test the bot by sending a manual message before integrating with the container.
 
+---
+
 #### Q7: Can I merge results from multiple directories?
 - **A**: Not directly. You will need to merge allure-results directories manually before running the container.
+
+---
 
 #### Q8: Is Docker required to use this tool?
 - **A**: Yes, Docker is a core dependency for this project. Ensure Docker is installed and properly configured on your system.

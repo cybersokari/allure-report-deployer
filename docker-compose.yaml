@@ -22,7 +22,6 @@ services:
     env_file: .env.slack
     environment:
       FIREBASE_STORAGE_EMULATOR_HOST: 127.0.0.1:9199 # Dev mode
-      GOOGLE_APPLICATION_CREDENTIALS: ${PWD}/service-account.json
       STORAGE_BUCKET: "fir-demo-project.appspot.com"
       WEBSITE_ID: 'fir-demo-project'
       WEBSITE_EXPIRES: 12h
@@ -32,7 +31,7 @@ services:
       TTL_SECS: 6
     volumes:
       - ./worker:/app #Devs only. This overrides the /app dir
-      - ${PWD}/gcp-key.json:${PWD}/service-account.json:ro
+      - ${PWD}/gcp-key.json:/credentials/key.json:ro
       - /Users/sokari/IdeaProjects/appium/reports/ios/allure-results:/allure-results
     cpus: 1
     mem_limit: 2048m
