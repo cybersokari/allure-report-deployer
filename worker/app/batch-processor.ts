@@ -71,8 +71,6 @@ export class BatchProcessor {
         // Process only up to `maxQueueSize` files in each batch
         const filesToProcess = this.fileQueue.splice(0, this.maxQueueSize);
 
-        console.log(`Processing ${filesToProcess.length} files...`);
-
         try {
             const promises: Promise<any>[] = [];
             if (websiteId) {

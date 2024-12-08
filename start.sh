@@ -44,4 +44,4 @@ if [ -n "$TTL_SECS" ]; then
   fi
 fi
 echo 'Starting the app'
-node /app/lib/index.js
+node --disable-warning=ExperimentalWarning /app/lib/index.js

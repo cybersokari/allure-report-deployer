@@ -39,7 +39,7 @@ export class CloudStorage {
                     destinationFilePath = path.basename(filePath);
                 }
                 try {
-                    console.log(`Uploading ${destinationFilePath} to storage`)
+                    // console.log(`Uploading ${destinationFilePath} to storage`)
                     await CloudStorage.bucket.upload(filePath, {
                         validation: !DEBUG,
                         destination: `${storageHomeDir}/${destinationFilePath}`,
@@ -58,7 +58,7 @@ export class CloudStorage {
         try {
             const [files] = await CloudStorage.bucket.getFiles({prefix: `${storageHomeDir}/`});
             if (!files.length) {
-                console.log(`No files found in folder: ${storageHomeDir}/`);
+                console.log('No files to process from CloudStorage');
                 return;
             }
             await fs.mkdir(STAGING_PATH, {recursive: true}); // recursive, dont throw if exist
@@ -69,10 +69,10 @@ export class CloudStorage {
                     // Remove the preceding storageHomeDir path from the downloaded file
                     const destination = path.join(STAGING_PATH, file.name.replace(`${storageHomeDir}/`, ''));
                     await file.download({destination, validation: !DEBUG});
-                    console.log(`Downloaded ${file.name}`);
                 }))
             }
             await Promise.all(downloadPromises);
+            console.log(`${files.length} files downloaded CloudStorage`);
         } catch (error) {
             console.error('Download error:', error);
         }

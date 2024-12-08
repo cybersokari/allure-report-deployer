@@ -94,16 +94,23 @@ jobs:
           sokari/allure-docker-deploy:latest
             
 ```
+___
 
 #### 2. Generate Allure results
       Add a step that outputs Allure result files to `/allure-results` path in the workflow.
 
+___
+
 #### 3.	Run the Workflow:
       Push your changes to the main branch and let GitHub Actions do the rest!
+___
+
 #### 4.	View Report information:
       Check the job summary in GitHub Actions for the report URL.
 
 <div style="text-align: left"><img src="assets/example-github-summary.png" alt="URL preview in GitHub Actions summary"></div>
+
+___
 
 #### 5. Get notified in Slack 
       Add SLACK_TOKEN and SLACK_CHANNEL_ID as environment variable in the docker run command to receipt job
@@ -111,6 +118,7 @@ jobs:
 
 <div style="text-align: left"><img src="assets/slack-bot.png" alt="URL preview in GitHub Actions summary"></div>
 
+___
 
 #### 6. View your test result files on the Firebase Developer console
 
@@ -128,11 +136,15 @@ Tips
 2.	Configure `WEBSITE_EXPIRES` to manage the duration of hosted reports.
 3.	Mount `$GITHUB_STEP_SUMMARY` to display the test report URL in GitHub Actions job summaries.
 
+___
+
 ### 2. For local test runs
 #### 1. Pull the Docker Image
 ```bash
 docker pull sokari/allure-docker-deploy:latest
 ```
+___
+
 #### 2. Run the Container
 ```shell
 docker run -d \
@@ -145,6 +157,8 @@ docker run -d \
   -v /path/to/gcp-key.json:/credentials/key.json \
   sokari/allure-docker-deploy
 ```
+___
+
 ##### 3. You can also use `docker-compose.yaml`:
 ```yaml
 services:  
@@ -164,11 +178,12 @@ services:
       WATCH_MODE: true
       TTL_SECS: 60
 ```
+___
 
+#### 4. View test report URL in console
+<div style="text-align: left"><img src="assets/clean-console-add.png" height="300" alt="Firebase CLI console output"></div>
 
-#### 4. Receive test report URL in console
-<div style="text-align: left"><img src="assets/ci-report-url-ss.png" height="300" alt="Firebase CLI console output"></div>
-
+___
 
 ## 🔑 **Key Features**
 * **Cloud Storage**: Automatically backs up test results to Google Cloud Storage.
