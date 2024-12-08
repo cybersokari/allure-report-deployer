@@ -2,15 +2,17 @@ import * as fsSync from 'fs'
 import * as fs from 'fs/promises'
 import * as path from "node:path";
 import util from "node:util";
+
 const exec = util.promisify(require('child_process').exec)
 import {DEBUG, websiteId} from "../index";
 import {StringBuilder} from "./string-builder";
 import credential from "./credential";
-
+import ansiEscapes from 'ansi-escapes';
+import chalk from "chalk";
 
 
 export async function* getAllFilesStream(dir: string): AsyncGenerator<string> {
-    const entries = await fs.readdir(dir, { withFileTypes: true });
+    const entries = await fs.readdir(dir, {withFileTypes: true});
     for (const entry of entries) {
         const fullPath = path.join(dir, entry.name);
         if (entry.isDirectory()) {
@@ -30,7 +32,7 @@ export async function* getAllFilesStream(dir: string): AsyncGenerator<string> {
 export function validateWebsiteExpires(expires: string): boolean {
 
     const length = expires.length
-    if(length < 2 || length > 3){
+    if (length < 2 || length > 3) {
         return false;
     }
 
@@ -143,7 +145,9 @@ export async function publishToFireBaseHosting(configParentDir: string): Promise
 
     if (match && match[2]) {
         const url = match[2]
-        console.log(`Allure test report URL: ${url}`)
+
+        console.log('Allure test report URL')
+        console.log(ansiEscapes.link(chalk.blue(url), url));
         return url as string
     } else {
         console.warn('Could not parse URL from hosting.')
