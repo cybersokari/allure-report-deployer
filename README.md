@@ -255,6 +255,7 @@ See the [Quick Start](#local-test-runs) section for detailed instructions.
 
 
 <h2 id="troubleshooting-and-faqs">🛠️ Troubleshooting and FAQs</h2>
+
 ### 🛠️️ Troubleshooting
 #### 1. Allure Report Website Deployment Fails
 - **Problem**: Issues with Google Cloud credentials or permissions.
