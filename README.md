@@ -201,12 +201,10 @@ Run and preview your test reports locally using the Docker container.
 See the [Quick Start](#local-test-runs) section for detailed instructions.
 
 <h2 id="how-it-works">🛠️ How It Works</h2>
-1.	**Generate Reports:**
-Collect Allure results from your tests.
-2.	**Deploy Reports:**
-Host the reports on Firebase with unique URLs.
-3.	**Backup Results:**
-Store Allure report history and result files in Google Cloud Storage.
+
+* **Generate Reports:** Collect Allure results from your tests.
+* **Deploy Reports:** Host the reports on Firebase with unique URLs.
+* **Backup Results:** Store Allure report history and result files in Google Cloud Storage.
 
 
 <h2 id="docker-image-configuration">🐳 Docker Image Configuration</h2>
