@@ -8,19 +8,16 @@ if [[ -z "$WEBSITE_ID" ]] && [[ -z "$STORAGE_BUCKET" ]]; then
     exit 1
 fi
 
-if [ -z "$GOOGLE_APPLICATION_CREDENTIALS" ]; then
-  echo "GOOGLE_APPLICATION_CREDENTIALS env is not set."
-  exit 1
-else
-  echo "GOOGLE_APPLICATION_CREDENTIALS env is set to: $GOOGLE_APPLICATION_CREDENTIALS"
-fi
-
+GOOGLE_APPLICATION_CREDENTIALS="/credentials/key.json"
 if [ ! -f "$GOOGLE_APPLICATION_CREDENTIALS" ]; then
   echo "No file exists at: $GOOGLE_APPLICATION_CREDENTIALS Please mount the GOOGLE_APPLICATION_CREDENTIALS file"
   exit 1
 fi
 
-if [[ ! "$GOOGLE_APPLICATION_CREDENTIALS" =~ \.json$ ]]; then
+if [[ "$GOOGLE_APPLICATION_CREDENTIALS" =~ \.json$ ]]; then
+  export GOOGLE_APPLICATION_CREDENTIALS
+  echo "Credential key found at $GOOGLE_APPLICATION_CREDENTIALS"
+else
   echo "$GOOGLE_APPLICATION_CREDENTIALS is not a Google credential json file"
   exit 1
 fi
