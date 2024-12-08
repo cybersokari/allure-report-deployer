@@ -1,6 +1,6 @@
 import * as path from "node:path";
 import * as fs from "fs/promises"
-import {DEBUG, MOUNTED_PATH, REPORTS_DIR, STAGING_PATH} from "../index";
+import {DEBUG, fileProcessingConcurrency, MOUNTED_PATH, REPORTS_DIR, STAGING_PATH} from "../index";
 import * as admin from "firebase-admin";
 import {Bucket} from '@google-cloud/storage'
 import {getAllFilesStream} from "./util";
@@ -8,7 +8,13 @@ import counter from "./counter";
 import pLimit from "p-limit";
 
 const storageHomeDir = 'allure-results'
-
+/**
+ * CloudStorage Class
+ *
+ * Handles file upload and management for cloud-based storage (e.g., Firebase Storage).
+ * Provides methods for staging files, uploading files, and maintaining history or retries
+ * as required.
+ */
 export class CloudStorage {
     public static bucket: Bucket
     public static instance: CloudStorage
@@ -21,7 +27,7 @@ export class CloudStorage {
         return CloudStorage.instance
     }
 
-    public async uploadFiles(files: AsyncGenerator<string> | string[], concurrency = 5): Promise<void> {
+    public async uploadFiles(files: AsyncGenerator<string> | string[], {concurrency = 5}): Promise<void> {
         const limit = pLimit(concurrency);
         const tasks = [];
         for await (const filePath of files) {
@@ -48,7 +54,7 @@ export class CloudStorage {
     }
 
     // Download remote files to staging area
-    public async stageRemoteFiles(concurrency= 5): Promise<any> {
+    public async stageRemoteFiles({concurrency = 5}): Promise<any> {
         try {
             const [files] = await CloudStorage.bucket.getFiles({prefix: `${storageHomeDir}/`});
             if (!files.length) {
@@ -77,11 +83,11 @@ export class CloudStorage {
      */
     public async uploadHistory(): Promise<any> {
         const files = getAllFilesStream(`${REPORTS_DIR}/history`);
-        await this.uploadFiles(files)
+        await this.uploadFiles(files, {concurrency: fileProcessingConcurrency});
     }
 
     public async uploadResults() {
         const files = getAllFilesStream(MOUNTED_PATH)
-        await this.uploadFiles(files)
+        await this.uploadFiles(files, {concurrency: fileProcessingConcurrency});
     }
 }

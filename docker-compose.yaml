@@ -28,8 +28,8 @@ services:
       WEBSITE_EXPIRES: 12h
       KEEP_HISTORY: true # Default is true when STORAGE_BUCKET is provided
       KEEP_RETRIES: true # Default is false
-#      WATCH_MODE: true
-      TTL_SECS: 4
+      WATCH_MODE: true
+      TTL_SECS: 6
     volumes:
       - ./worker:/app #Devs only. This overrides the /app dir
       - ${PWD}/gcp-key.json:${PWD}/service-account.json:ro

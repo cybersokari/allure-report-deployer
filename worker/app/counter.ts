@@ -1,4 +1,11 @@
 import { Mutex } from 'async-mutex';
+/**
+ * Counter Class
+ *
+ * Provides thread-safe counters to track the number of files processed
+ * and uploaded, as well as timing functionalities to measure elapsed time.
+ * Utilizes a mutex for safe concurrent updates to shared counters.
+ */
 class Counter {
     private startTime: number | null = null;
     private processed = 0
