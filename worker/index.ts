@@ -6,6 +6,8 @@ import ReportBuilder from "./app/report-builder";
 import {CloudStorage} from "./app/cloud-storage";
 import counter from "./app/counter";
 import notifier from "./app/notifier";
+import credential from "./app/credential";
+import {BatchProcessor} from "./app/batch-processor";
 
 export const DEBUG = process.env.FIREBASE_STORAGE_EMULATOR_HOST !== undefined || false;
 export const MOUNTED_PATH = '/allure-results'
@@ -17,14 +19,17 @@ export const STORAGE_BUCKET = process.env.STORAGE_BUCKET || null;
 export const cloudStorage = STORAGE_BUCKET ? CloudStorage.getInstance(STORAGE_BUCKET) : null;
 export const keepHistory = process.env.KEEP_HISTORY?.toLowerCase() === 'true'
 export const keepRetires = process.env.KEEP_RETRIES?.toLowerCase() === 'true'
-const watchMode = process.env.WATCH_MODE?.toLowerCase() === 'true';
+export const watchMode = process.env.WATCH_MODE?.toLowerCase() === 'true' || false;
+export const fileProcessingConcurrency = watchMode ? 5 : 10
+
 
 /**
- * Download remote files if WEBSITE_ID is provided.
- * Start the file watcher.
- * On new file in at /allure-results mounted path,
- * 1. Upload files to cloud storage if STORAGE_BUCKET is provided
- * 2. Move files to STAGING_PATH and set ttl for hosting if WEBSITE_ID is provided
+ * Entry Point
+ *
+ * Initializes the application and sets up file monitoring, report generation,
+ * and notifications.
+ * Supports both watch mode (real-time updates) and
+ * batch processing of files.
  */
 export function main(): void {
     counter.startTimer()
@@ -32,9 +37,12 @@ export function main(): void {
         console.warn('WEBSITE_ID or STORAGE_BUCKET is required');
         return
     }
+    // Create it now, so that project_id will be available for
+    // Site deployment and messaging.
+    void credential.create()
 
     if (watchMode) {
-
+        const processor = new BatchProcessor()
         chokidar.watch('/allure-results', {
             ignored: '^(?!.*\\.(json|png|jpeg|jpg|gif|properties|log|webm)$).*$',
             persistent: true,
@@ -42,20 +50,9 @@ export function main(): void {
             usePolling: true,
             depth: 2, // Limit recursive depth
         }).on('add', (filePath: string) => {
-            // console.log(`New result file: ${filePath}`);
-            if (websiteId) {
-                (async () => {
-                    await ReportBuilder.stageFiles([filePath])
-                    ReportBuilder.setTtl()
-                })()
-            }
-            if(cloudStorage){
-                (async () => {
-                    await cloudStorage.uploadFiles([filePath])
-                })()
-            }
+            processor.add(filePath);
         });
-        console.log(`Waiting for new files at ${MOUNTED_PATH}`);
+        console.log("Watching for file additions...");
     } else {
         (async () => {
 
@@ -64,10 +61,10 @@ export function main(): void {
                 // Stage files, generateAndHost then upload history if enabled
                 await Promise.all([
                     ReportBuilder.stageFiles(getAllFilesStream(MOUNTED_PATH)),
-                    cloudStorage?.stageRemoteFiles()
+                    cloudStorage?.stageRemoteFiles({concurrency: fileProcessingConcurrency})
                 ])
-                await ReportBuilder.generate()
-                url = await publishToFireBaseHosting()
+                const path = await ReportBuilder.generate()
+                url = await publishToFireBaseHosting(path)
                 if(keepHistory){
                     await cloudStorage?.uploadHistory()
                 }
@@ -77,14 +74,17 @@ export function main(): void {
                 await cloudStorage.uploadResults()
             }
             const summaryPath = process.env.GITHUB_STEP_SUMMARY
-            if(url && summaryPath){
-                await notifier.printGithubSummary({mountedFilePath: summaryPath, url: url})
+            const promises = []
+            if(summaryPath){
+                promises.push(notifier.printGithubSummary({mountedFilePath: summaryPath, url: url}))
             }
             const token = process.env.SLACK_TOKEN;
             const conversationId = process.env.SLACK_CHANNEL_ID;
             if(conversationId && token){
-                await notifier.SendSlackMsg({conversationId: conversationId, token: token, url: url})
+                promises.push(notifier.SendSlackMsg({conversationId: conversationId, token: token, url: url}))
             }
+            await Promise.all(promises)
+
         })()
     }
     notifier.printStats()

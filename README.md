@@ -58,20 +58,19 @@ jobs:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
         
-    - name: Allure Docker Deploy to Firebase
+    - name: Deploy Allure Reports to Firebase
       run: |
         docker run --rm \
-        -e GOOGLE_APPLICATION_CREDENTIALS=/credentials/gcp-key.json \
-        -e STORAGE_BUCKET=my-test-results-bucket \
-#        -e WEBSITE_ID=my-custom-site-id \
-        -e WEBSITE_ID=${{ github.ref }} \
-        -e WEBSITE_EXPIRES=3d \
-        -e KEEP_HISTORY=true \
-        -e KEEP_RETRIES=true \
-        -v $GITHUB_STEP_SUMMARY:/github/summary.txt \ 
-        -v ${{ github.workspace }}/allure-results:/allure-results \
-        -v ${{ secrets.GCP_CREDENTIALS_FILE_PATH }}:/credentials/gcp-key.json \
-        sokari/allure-docker-deploy:latest
+          -e GOOGLE_APPLICATION_CREDENTIALS=/credentials/gcp-key.json \  # Path to your Google Cloud credentials
+          -e STORAGE_BUCKET=my-test-results-bucket \                    # Specify your Firebase Storage bucket
+          -e WEBSITE_ID=my-custom-site-id \                             # Use a unique ID for the report website
+          -e WEBSITE_EXPIRES=3d \                                       # Set the report expiration (e.g., 3 days)
+          -e KEEP_HISTORY=true \                                        # Retain historical test data
+          -e KEEP_RETRIES=true \                                        # Enable retry saving for failed tests
+          -v $GITHUB_STEP_SUMMARY:/github/summary.txt \                 # Display test report URL in GitHub summary
+          -v ${{ github.workspace }}/allure-results:/allure-results \  # Mount test results
+          -v ${{ secrets.GCP_CREDENTIALS_FILE_PATH }}:/credentials/gcp-key.json \ # Bind GCP credentials
+          sokari/allure-docker-deploy:latest
             
 ```
 

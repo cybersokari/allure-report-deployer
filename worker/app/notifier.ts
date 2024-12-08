@@ -2,8 +2,8 @@ import counter from "./counter";
 import {cloudStorage, keepHistory, keepRetires, STORAGE_BUCKET, websiteId} from "../index";
 import {WebClient} from '@slack/web-api';
 import {StringBuilder} from "./string-builder";
-import {getProjectIdFromCredentialsFile} from "./util";
 import * as fs from "node:fs";
+import credential from "./credential";
 
 type SlackCredentials = {
     token: string,
@@ -11,11 +11,21 @@ type SlackCredentials = {
     url?: string | undefined | null
 }
 
+/**
+ * Notifier Class
+ *
+ * Handles notifications related to report generation and file processing.
+ * Supports Slack notifications, GitHub summary updates, and general stats logging.
+ */
 class Notifier {
-    private lineBreak = '</br>'
 
-    public async SendSlackMsg(cred: SlackCredentials) {
-        const web = new WebClient(cred.token);
+    /**
+     * Sends a message to a Slack channel with details about the report.
+     * Includes report links, file processing stats, and additional buttons.
+     * @param slackCred - Slack credentials and channel information
+     */
+    public async SendSlackMsg(slackCred: SlackCredentials) {
+        const web = new WebClient(slackCred.token);
         // See: https://api.slack.com/methods/chat.postMessage
 
         const blocks = []
@@ -23,7 +33,7 @@ class Notifier {
             "type": "section",
             "text": {
                 "type": "mrkdwn",
-                "text": "*Your Allure report is ready* :female-teacher:"
+                "text": "*Your Allure report is ready* 📊"
             }
         })
         if (cloudStorage) {
@@ -56,7 +66,7 @@ class Notifier {
                 }
             ]
         })
-        if (cred.url) {
+        if (slackCred.url) {
             blocks.push({
                 "type": "actions",
                 "elements": [
@@ -67,14 +77,14 @@ class Notifier {
                             "text": "View report",
                             "emoji": true
                         },
-                        "url": cred.url
+                        "url": slackCred.url
                     }
                 ]
             })
         }
         if(cloudStorage){
-            const projectId = await getProjectIdFromCredentialsFile()
-            const firebaseDashboardUrl = `https://console.firebase.google.com/project/${projectId}/storage/${STORAGE_BUCKET}/files`
+
+            const firebaseDashboardUrl = `https://console.firebase.google.com/project/${credential.projectId}/storage/${STORAGE_BUCKET}/files`
             blocks.push({
                 "type": "actions",
                 "elements": [
@@ -106,7 +116,7 @@ class Notifier {
         })
 
         const result = await web.chat.postMessage({
-            channel: cred.conversationId,
+            channel: slackCred.conversationId,
             blocks: blocks,
             text: 'Your Allure report is ready.'
         });
@@ -114,27 +124,32 @@ class Notifier {
         console.log('Message sent: ', result.ts);
     }
 
+    /**
+     * Prints a summary of the report to GitHub actions Summary.
+     * Includes the report link, processing stats, and duration.
+     * @param data - Contains the report URL and file path for summary
+     */
     public async printGithubSummary(data: { mountedFilePath: string, url: string | undefined }): Promise<void> {
+        const lineBreak = '</br>'
         const builder = new StringBuilder()
-        builder.append(`**Your report is ready :female-teacher:** ${data.url}`)
-            .append(this.lineBreak).append(this.lineBreak)
+        builder.append(`**Your Allure report is ready 📈**}`)
+            .append(lineBreak).append(lineBreak)
         if (data.url) {
             builder.append(`**[View report](${data.url})**`)
-                .append(this.lineBreak).append(this.lineBreak)
+                .append(lineBreak).append(lineBreak)
         }
         if (cloudStorage) {
-            const projectId = await getProjectIdFromCredentialsFile()
-            const firebaseDashboardUrl = `https://console.firebase.google.com/project/${projectId}/storage/${STORAGE_BUCKET}/files`
+            const firebaseDashboardUrl = `https://console.firebase.google.com/project/${credential.projectId}/storage/${STORAGE_BUCKET}/files`
             builder.append(`**[View files](${firebaseDashboardUrl})**`)
-                .append(this.lineBreak).append(this.lineBreak)
+                .append(lineBreak).append(lineBreak)
 
             builder.append(`📂 Files uploaded: ${counter.filesUploaded}`)
-                .append(this.lineBreak).append(this.lineBreak)
+                .append(lineBreak).append(lineBreak)
                 .append(`🔍 Files processed: ${counter.filesProcessed}`)
-                .append(this.lineBreak).append(this.lineBreak)
+                .append(lineBreak).append(lineBreak)
         }
         builder
-            .append(`**⏱️ Duration: ${counter.getElapsedSeconds()} seconds**`)
+            .append(`⏱️ Duration: ${counter.getElapsedSeconds()} seconds`)
         try {
             fs.writeFileSync(data.mountedFilePath, builder.toString(), {flag: 'a'}); // Append to the file
         } catch (err) {
@@ -142,6 +157,10 @@ class Notifier {
         }
     }
 
+    /**
+     * Prints stats about the report generation process, including
+     * history retention and retries.
+     */
     public printStats() {
         if (!websiteId) {
             console.log('Report publishing disabled because WEBSITE_ID is not provided');

@@ -3,20 +3,10 @@ import * as fs from 'fs/promises'
 import * as path from "node:path";
 import util from "node:util";
 const exec = util.promisify(require('child_process').exec)
-import {DEBUG, REPORTS_DIR, websiteId} from "../index";
+import {DEBUG, websiteId} from "../index";
 import {StringBuilder} from "./string-builder";
+import credential from "./credential";
 
-export const getProjectIdFromCredentialsFile = async () => {
-    try {
-        const credentialsContent = JSON.parse(
-            await fs.readFile(process.env.GOOGLE_APPLICATION_CREDENTIALS!, 'utf8')
-        );
-        return credentialsContent.project_id as string;
-    } catch (error) {
-        console.error('Failed to get project_id from Google credentials:', error);
-        throw error;
-    }
-}
 
 
 export async function* getAllFilesStream(dir: string): AsyncGenerator<string> {
@@ -31,14 +21,18 @@ export async function* getAllFilesStream(dir: string): AsyncGenerator<string> {
     }
 }
 
-
+/**
+ * Validates the expiration format for the website hosting link.
+ * Ensures the format is a number followed by 'h', 'd', or 'w' and is within 30 days.
+ * @param expires - The expiration string
+ * @returns {boolean} - True if valid, false otherwise
+ */
 export function validateWebsiteExpires(expires: string): boolean {
 
-    const length = expires.trim().length
+    const length = expires.length
     if(length < 2 || length > 3){
         return false;
     }
-
 
     // Regex to validate a format: number followed by h/d/w
     const validFormatRegex = /^(\d+)([hdw])$/;
@@ -87,7 +81,13 @@ export async function changePermissionsRecursively(dirPath: string, mode: fsSync
     }
 }
 
-export async function publishToFireBaseHosting(): Promise<string| undefined> {
+/**
+ * Publishes the Allure report website using Firebase Hosting.
+ * Configures the hosting setup and deploys the site.
+ * @param configParentDir - Directory containing the hosting configuration
+ * @returns {Promise<string | undefined>} - The URL of the deployed site, if successful
+ */
+export async function publishToFireBaseHosting(configParentDir: string): Promise<string| undefined> {
     if (DEBUG) {
         console.warn('DEBUG=true: Skipping live deployment')
         return
@@ -102,21 +102,20 @@ export async function publishToFireBaseHosting(): Promise<string| undefined> {
         }
     }
     try {
-        await changePermissionsRecursively(REPORTS_DIR, 0o755)
-        const configDir = `${REPORTS_DIR}/firebase.json`
+        await changePermissionsRecursively(configParentDir, 0o755)
+        const configDir = `${configParentDir}/firebase.json`
         await fs.writeFile(configDir, JSON.stringify(hosting), {mode: 0o755, encoding: 'utf-8'})
     } catch (e) {
-        // Overwrite fail, this is not suppose to happen
+        // Overwrite fail, this is not supposed to happen
         console.info(`Cannot create firebase.json. Aborting deployment ${e}`)
         return
     }
 
     console.log(`Deploying Allure report site...`)
-    const projectId = await getProjectIdFromCredentialsFile()
     const builder = new StringBuilder()
     builder.append('firebase hosting:channel:deploy').append(' ')
-        .append(`--config ${REPORTS_DIR}/firebase.json`).append(' ')
-        .append(`--project ${projectId}`).append(' ')
+        .append(`--config ${configParentDir}/firebase.json`).append(' ')
+        .append(`--project ${credential.projectId}`).append(' ')
         .append('--no-authorized-domains').append(' ')
         .append(websiteId!)
 
