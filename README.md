@@ -19,26 +19,26 @@ _An easy-to-use serverless Docker solution for sharing and backing up [Allure te
 
 ---
 
-## **Table of Contents**
+## 📚 **Table of Contents**
 
-1. [Quick Start](#-quick-start)
-2. [Key Features](#-key-features)
-3. [Use Cases](#-use-cases)
-    - [GitHub Actions](#-github-actions-integration)
-    - [Local Test Runs](#-local-test-runs)
-4. [How It Works](#-how-it-works)
-5. [Docker Image Configuration](#-docker-image-configuration)
-   - [Environment Variables](#-environment-variables)
-   - [Mount Volumes](#-mount-volumes)
-6. [Comparison with Other Tools](#-comparison-with-other-open-source-tools)
-7. [Troubleshooting and FAQs](#-troubleshooting-and-faqs)
+1. [Quick Start](#quick-start)
+2. [Key Features](#key-features)
+3. [Use Cases](#use-cases)
+    - [GitHub Actions](#github-actions-integration)
+    - [Local Test Runs](#local-test-runs)
+4. [How It Works](#how-it-works)
+5. [Docker Image Configuration](#docker-image-configuration)
+   - [Environment Variables](#environment-variables)
+   - [Mount Volumes](#mount-volumes)
+6. [Comparison with Other Tools](#comparison-with-other-open-source-tools)
+7. [Troubleshooting and FAQs](#troubleshooting-and-faqs)
 8. [License](#license)
 9. [Contributing](#contributing)
 
 ---
 
 
-## **🚀 Quick Start**
+<h2 id="quick-start">🚀 Quick Start</h2>
 
 To get started with **Allure Docker Deploy**, follow these steps:
 
@@ -185,25 +185,26 @@ ___
 
 ___
 
-## 🔑 **Key Features**
+<h2 id="key-features">🔑 Key Features</h2>
+
 * **Cloud Storage**: Automatically backs up test results to Google Cloud Storage.
 * **Preview URLs:** Generates unique, ephemeral URLs for easy sharing.
 * **Slack Integration:** Notify your team with report links after each test run.
 * **Continuous Deployment:** Automatically detects changes and uploads updated reports.
 
-## 📊 **Use Cases**
+<h2 id="use-cases">📊 Use Cases</h2>
 
-### 🧪 **GitHub Actions Integration**
+<h3 id="github-actions-integration">🧪 GitHub Actions Integration</h2>
 
 Integrate Allure Docker Deploy into your CI/CD pipelines with GitHub Actions.
 Follow the [Quick Start](#for-github-actions) steps to set it up.
 
-### 🖥️ **Local Test Runs**
+<h3 id="local-test-runs">🖥️ Local Test Runs</h2>
 
 Run and preview your test reports locally using the Docker container.
-See the [Quick Start](#-local-test-runs) section for detailed instructions.
+See the [Quick Start](#local-test-runs) section for detailed instructions.
 
-## **🛠️ How It Works**
+<h2 id="how-it-works">🛠️ How It Works</h2>
 1.	**Generate Reports:**
 Collect Allure results from your tests.
 2.	**Deploy Reports:**
@@ -211,10 +212,11 @@ Host the reports on Firebase with unique URLs.
 3.	**Backup Results:**
 Store Allure report history and result files in Google Cloud Storage.
 
-    
-## 🐳 **Docker Image Configuration**
 
-### 🔧 **Environment variables**
+<h2 id="docker-image-configuration">🐳 Docker Image Configuration</h2>
+
+<h3 id="environment-variables">Environment Variables</h3>
+
 
 | Variable                         | Description                                                                                                                         | Example                        | Default |
 |----------------------------------|-------------------------------------------------------------------------------------------------------------------------------------|--------------------------------|---------|
@@ -232,7 +234,7 @@ Store Allure report history and result files in Google Cloud Storage.
 
 ---
 
-### 🔧 **Mount Volumes**
+<h3 id="mount-volumes">Mount Volumes</h3>
 
 | Host                        | Container               | Description                                                                                                                          |
 |-----------------------------|-------------------------|--------------------------------------------------------------------------------------------------------------------------------------|
@@ -247,7 +249,7 @@ Store Allure report history and result files in Google Cloud Storage.
 ---
 
 
-## 🔄 **Comparison with other open-source tools**
+<h2 id="comparison-with-other-open-source-tools">🔄 Comparison with Other Open Source Tools</h2>
 
 | Feature                  | Allure Docker Deploy                                                          | Other tools                                                                            |
 |--------------------------|-------------------------------------------------------------------------------|----------------------------------------------------------------------------------------|
@@ -258,7 +260,7 @@ Store Allure report history and result files in Google Cloud Storage.
 | **No Git commits**       | ✅ You don't need to commit files to Git.                                      | ❌ Requires committing generated reports to Git.                                        |
 
 
-## 🛠️ **Troubleshooting and FAQs**
+<h2 id="troubleshooting-and-faqs">🛠️ Troubleshooting and FAQs</h2>
 ### 🛠️️ Troubleshooting
 #### 1. Allure Report Website Deployment Fails
 - **Problem**: Issues with Google Cloud credentials or permissions.
