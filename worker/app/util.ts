@@ -4,11 +4,9 @@ import * as path from "node:path";
 import util from "node:util";
 
 const exec = util.promisify(require('child_process').exec)
-import {DEBUG, websiteId} from "../index";
+import {websiteId} from "../index";
 import {StringBuilder} from "./string-builder";
 import credential from "./credential";
-import ansiEscapes from 'ansi-escapes';
-import chalk from "chalk";
 
 
 export async function* getAllFilesStream(dir: string): AsyncGenerator<string> {
@@ -89,11 +87,11 @@ export async function changePermissionsRecursively(dirPath: string, mode: fsSync
  * @param configParentDir - Directory containing the hosting configuration
  * @returns {Promise<string | undefined>} - The URL of the deployed site, if successful
  */
-export async function publishToFireBaseHosting(configParentDir: string): Promise<string| undefined> {
-    if (DEBUG) {
-        console.warn('DEBUG=true: Skipping live deployment')
-        return
-    }
+export async function publishToFireBaseHosting(configParentDir: string): Promise<string | undefined> {
+    // if (DEBUG) {
+    //     console.warn('DEBUG=true: Skipping live deployment')
+    //     return
+    // }
     const hosting = {
         "hosting": {
             "public": ".",
@@ -145,9 +143,6 @@ export async function publishToFireBaseHosting(configParentDir: string): Promise
 
     if (match && match[2]) {
         const url = match[2]
-
-        console.log('Allure test report URL')
-        console.log(ansiEscapes.link(chalk.blue(url), url));
         return url as string
     } else {
         console.warn('Could not parse URL from hosting.')

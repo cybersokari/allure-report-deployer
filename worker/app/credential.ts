@@ -6,7 +6,7 @@ import fs from "fs/promises";
  * Handles loading and accessing Google Cloud credentials.
  * Implements a Singleton pattern to ensure only one instance is created.
  */
-class Credential {
+export class Credential {
     private _projectId: string | null = null; // Holds the project ID
     private static instance: Credential; // Singleton instance
     private data: any; // Parsed credentials data
@@ -35,15 +35,10 @@ class Credential {
      * Sets the project ID for later use.
      */
     public async create() {
-        try {
-            this.data = JSON.parse(
-                await fs.readFile(process.env.GOOGLE_APPLICATION_CREDENTIALS!, 'utf8')
-            );
-            this._projectId = this.data.project_id;
-        } catch (error) {
-            console.error('Failed to get project_id from Google credentials:', error);
-            throw error;
-        }
+        this.data = JSON.parse(
+            await fs.readFile(process.env.GOOGLE_APPLICATION_CREDENTIALS!, 'utf8')
+        );
+        this._projectId = this.data.project_id;
     }
 }
 

@@ -33,12 +33,12 @@ class Counter {
     startTimer(): void {
         this.startTime = Date.now();
     }
-    getElapsedSeconds(): number {
+    getElapsedSeconds(): string {
         if (!this.startTime) {
             throw "Timer has not been started.";
         }
         const elapsed = Date.now() - this.startTime;
-        return elapsed / 1000
+        return (elapsed / 1000).toFixed()
     }
 }
 
