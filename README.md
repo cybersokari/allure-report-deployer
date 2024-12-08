@@ -19,7 +19,7 @@ _An easy-to-use serverless Docker solution for sharing and backing up [Allure te
 
 ---
 
-## 📚 **Table of Contents**
+## **Table of Contents**
 
 1. [Quick Start](#-quick-start)
 2. [Key Features](#-key-features)
@@ -38,7 +38,7 @@ _An easy-to-use serverless Docker solution for sharing and backing up [Allure te
 ---
 
 
-## 🚀 **Quick Start**
+## **🚀 Quick Start**
 
 To get started with **Allure Docker Deploy**, follow these steps:
 
@@ -203,7 +203,7 @@ Follow the [Quick Start](#for-github-actions) steps to set it up.
 Run and preview your test reports locally using the Docker container.
 See the [Quick Start](#-local-test-runs) section for detailed instructions.
 
-## 🛠️ **How It Works**
+## **🛠️ How It Works**
 1.	**Generate Reports:**
 Collect Allure results from your tests.
 2.	**Deploy Reports:**
