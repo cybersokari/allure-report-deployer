@@ -140,7 +140,7 @@ export class Notifier {
     public async printGithubSummary(data: { mountedFilePath: string, url: string | undefined}): Promise<void> {
         const lineBreak = '</br>'
         const builder = new StringBuilder()
-        builder.append(`**Your Allure report is ready 📈**}`)
+        builder.append(`**Your Allure report is ready 📈**`)
             .append(lineBreak).append(lineBreak)
         if (data.url) {
             builder.append(`**[View report](${data.url})**`)

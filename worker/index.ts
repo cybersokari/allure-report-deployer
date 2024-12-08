@@ -36,6 +36,8 @@ export function main(): void {
         console.warn('WEBSITE_ID or STORAGE_BUCKET is required');
         return
     }
+    new Notifier().printStats();
+
     (async () => {
         // credential must be initialized before starting app
         try {
@@ -94,7 +96,6 @@ export function main(): void {
             }
             await Promise.all(promises)
         }
-
     })()
 
 }
