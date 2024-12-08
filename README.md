@@ -17,7 +17,6 @@
 
 _An easy-to-use serverless Docker solution for sharing and backing up [Allure test reports](https://allurereport.org/)_
 
----
 
 ## 📚 **Table of Contents**
 
@@ -35,8 +34,6 @@ _An easy-to-use serverless Docker solution for sharing and backing up [Allure te
 8. [License](#license)
 9. [Contributing](#contributing)
 
----
-
 
 <h2 id="quick-start">🚀 Quick Start</h2>
 
@@ -53,7 +50,6 @@ To get started with **Allure Docker Deploy**, follow these steps:
 3. **Docker Installed**:
     - Ensure you have Docker installed. [Download Docker](https://docs.docker.com/get-docker/)
 
----
 
 ### **For GitHub Actions:**
 #### 1.	Add a Workflow File:
