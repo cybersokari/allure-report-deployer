@@ -204,15 +204,15 @@ ${Icon.MAGNIFIER} Files processed   : ${chalk.yellow(counter.filesProcessed)}
         }
         if (cloudStorage && !data) {
             appLog(`
-Storage URL       : ${ansiEscapes.link(chalk.blue(dashboardUrl), dashboardUrl)}
-Files uploaded    : ${chalk.yellow(counter.filesUploaded)}
-Files processed   : ${chalk.yellow(counter.filesProcessed)}
+${Icon.FILE_UPLOAD} Storage URL       : ${ansiEscapes.link(chalk.blue(dashboardUrl), dashboardUrl)}
+${Icon.FOLDER} Files uploaded    : ${chalk.yellow(counter.filesUploaded)}
+${Icon.MAGNIFIER} Files processed   : ${chalk.yellow(counter.filesProcessed)}
 `)
         }
 
         if (!cloudStorage && data) {
             appLog(`
-Test report URL   : ${ansiEscapes.link(chalk.blue(data.url), data!.url!)}
+${Icon.CHART} Test report URL   : ${ansiEscapes.link(chalk.blue(data.url), data!.url!)}
 `)
         }
 
