@@ -5,8 +5,7 @@
 
 **Automate your Allure report hosting with Firebase**
 
-<img src="assets/allure-demo.gif" alt="Docker run demo">
-
+![](assets/demo.gif)
 
 ## 📚 **Table of Contents**
 
