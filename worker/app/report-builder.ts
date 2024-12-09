@@ -1,12 +1,14 @@
-import {REPORTS_DIR, STAGING_PATH, watchMode} from "../index";
+import {REPORTS_DIR, STAGING_PATH, watchMode} from "./constant";
 
 const allure = require('allure-commandline')
 import * as path from "node:path";
 import * as fs from 'fs/promises'
 import counter from "./counter";
 import pLimit from 'p-limit';
-import {publishToFireBaseHosting} from "./util";
+import {appLog, publishToFireBaseHosting} from "./util";
 import {Notifier} from "./notifier";
+import chalk from "chalk";
+import {Icon} from "./constant";
 
 /**
  * ReportBuilder Class
@@ -31,9 +33,11 @@ class ReportBuilder {
         clearTimeout(this.timeOut)
         this.timeOut = setTimeout(async () => {
             const path = await this.generate()
-            const url = await publishToFireBaseHosting(path)
-            if (url) {
-                this.notifier.printSummaryToConsole({url: url})
+            if(path){
+                const url = await publishToFireBaseHosting(path)
+                if (url) {
+                    this.notifier.printSummaryToConsole({url: url})
+                }
             }
         }, this.ttl * 1000)
     }
@@ -43,11 +47,12 @@ class ReportBuilder {
      * Ensures history files are included in the report and handles report generation commands.
      * @returns {Promise<string>} - The directory path of the generated report
      */
-    public async generate(): Promise<string> {
+    public async generate(): Promise<string|null> {
         // History files can exist in reports directory in WATCH_MODE
         // due to multiple call to generate, so we try to move
         // the files to /allure-results/history to include the history in the
         // upcoming report due to `allure generate --clean` command
+        appLog(`${chalk.green(Icon.HOUR_GLASS)}  Generating report...`)
         if (watchMode) {
             const destination = `${STAGING_PATH}/history`
             const source = `${REPORTS_DIR}/history`
@@ -61,7 +66,7 @@ class ReportBuilder {
                     errorOnExist: false
                 })
             } catch (e) {
-                console.log(`No history files to move`)
+                // console.log(`No history files to move`)
             }
         }
         // Generate a new Allure report
@@ -73,13 +78,14 @@ class ReportBuilder {
             '--clean',
         ])
 
-        return await new Promise<string>((resolve, reject) => {
+        return await new Promise<string|null>((resolve, reject) => {
             generation.on('exit', async function (exitCode: number) {
                 if (exitCode === 0) {
+                    // No need to log, Allure logs on success, and I haven't found a way to disable it
                     resolve(REPORTS_DIR)
                 } else {
                     console.warn('Failed to generate Allure report')
-                    reject('Failed to generate Allure report')
+                    reject(null)
                 }
             })
         })
@@ -103,7 +109,7 @@ class ReportBuilder {
                         await fs.copyFile(file, destinationFilePath);
                         await counter.incrementFilesProcessed()
                     } catch (e) {
-                        console.warn(`Failed to move ${path.basename(file)} to staging area: ${e}`)
+                       // console.warn(`Failed to move ${path.basename(file)} to staging area: ${e}`)
                     }
                 })
             )

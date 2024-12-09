@@ -14,7 +14,6 @@ services:
       retries: 3
       timeout: 5s
   allure-cloud:
-    tty: true
     build:
       dockerfile: Dockerfile
       context: .
@@ -26,11 +25,11 @@ services:
       WEBSITE_ID: 'fir-demo-project'
       WEBSITE_EXPIRES: 12h
       KEEP_HISTORY: true # Default is true when STORAGE_BUCKET is provided
-      KEEP_RETRIES: true # Default is false
+      KEEP_RESULTS: true # Default is false
       WATCH_MODE: false
       TTL_SECS: 6
     volumes:
-      - ./worker:/app #Devs only. This overrides the /app dir
+#      - ./worker:/app #Devs only. This overrides the /app dir
       - ${PWD}/gcp-key.json:/credentials/key.json:ro
       - /Users/sokari/IdeaProjects/appium/reports/ios/allure-results:/allure-results
     cpus: 1

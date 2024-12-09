@@ -4,12 +4,16 @@ import * as path from "node:path";
 import util from "node:util";
 
 const exec = util.promisify(require('child_process').exec)
-import {websiteId} from "../index";
+import { websiteId} from "./constant";
 import {StringBuilder} from "./string-builder";
 import credential from "./credential";
 
+export function appLog(data:  string) {
+   console.log(data)
+}
 
 export async function* getAllFilesStream(dir: string): AsyncGenerator<string> {
+
     const entries = await fs.readdir(dir, {withFileTypes: true});
     for (const entry of entries) {
         const fullPath = path.join(dir, entry.name);
@@ -87,10 +91,10 @@ export async function changePermissionsRecursively(dirPath: string, mode: fsSync
  * @param configParentDir - Directory containing the hosting configuration
  * @returns {Promise<string | undefined>} - The URL of the deployed site, if successful
  */
-export async function publishToFireBaseHosting(configParentDir: string): Promise<string | undefined> {
+export async function publishToFireBaseHosting(configParentDir: string): Promise<string |  null> {
     // if (DEBUG) {
     //     console.warn('DEBUG=true: Skipping live deployment')
-    //     return
+    //     return null
     // }
     const hosting = {
         "hosting": {
@@ -107,11 +111,11 @@ export async function publishToFireBaseHosting(configParentDir: string): Promise
         await fs.writeFile(configDir, JSON.stringify(hosting), {mode: 0o755, encoding: 'utf-8'})
     } catch (e) {
         // Overwrite fail, this is not supposed to happen
-        console.info(`Cannot create firebase.json. Aborting deployment ${e}`)
-        return
+        // console.info(`Cannot create firebase.json. Aborting deployment ${e}`)
+        return null;
     }
 
-    console.log(`Deploying Allure report site...`)
+    // console.log(`Deploying Allure report site...`)
     const builder = new StringBuilder()
     builder.append('firebase hosting:channel:deploy').append(' ')
         .append(`--config ${configParentDir}/firebase.json`).append(' ')
@@ -125,17 +129,18 @@ export async function publishToFireBaseHosting(configParentDir: string): Promise
         .append(' ')
     const expires = process.env.WEBSITE_EXPIRES
     if (expires && validateWebsiteExpires(expires)) {
-        console.log(`WEBSITE_EXPIRES set to ${expires}`)
+        // console.log(`WEBSITE_EXPIRES set to ${expires}`)
         builder.append(expires)
     } else {
-        console.log('No valid WEBSITE_EXPIRES provided, defaults to 7d')
+        // console.log('No valid WEBSITE_EXPIRES provided, defaults to 7d')
         builder.append('7d')
     }
 
     const {stdout, stderr} = await exec(builder.toString())
 
     if (stderr && !stdout) {
-        console.error(`Error from hosting: ${stderr}`)
+        // console.error(`Error from hosting: ${stderr}`)
+        return null;
     }
     // Try to extract
     const regex = /hosting:channel: Channel URL.*\((.*?)\):\s+(https?:\/\/\S+)/;
@@ -147,10 +152,23 @@ export async function publishToFireBaseHosting(configParentDir: string): Promise
     } else {
         console.warn('Could not parse URL from hosting.')
         console.log(stdout)
-        return
+        return null
     }
 
 }
+
+// async function isSiteAvailable(siteId: string) {
+//     const builder = new StringBuilder()
+//     builder.append('firebase hosting:sites:get')
+//         .append(' ').append(siteId)
+//         .append(' ').append('--project')
+//         .append(' ').append(credential.projectId)
+//     const {stdout, stderr} = await exec(builder.toString())
+//     if(stderr && !stdout) return false
+//
+//     return stdout.contains(siteId)
+// }
+
 
 
 
