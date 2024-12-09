@@ -5,7 +5,7 @@
 
 **Automate your Allure report hosting with Firebase**
 
-![](assets/demo.gif)
+![Demo](assets/demo.gif)
 
 ## 📚 **Table of Contents**
 
