@@ -14,10 +14,10 @@
 3. [Use Cases](#use-cases)
     - [GitHub Actions](#github-actions-integration)
     - [Local Test Runs](#local-test-runs)
-4. [How It Works](#how-it-works)
-5. [Docker Image Configuration](#docker-image-configuration)
-   - [Environment Variables](#environment-variables)
-   - [Mount Volumes](#mount-volumes)
+4. [Docker Image Configuration](#docker-image-configuration)
+    - [Environment Variables](#environment-variables)
+    - [Mount Volumes](#mount-volumes)
+5. [How It Works](#how-it-works)
 6. [Comparison with Other Tools](#comparison-with-other-open-source-tools)
 7. [Troubleshooting and FAQs](#troubleshooting-and-faqs)
 8. [License](#license)
@@ -74,7 +74,7 @@ jobs:
           -v $GITHUB_STEP_SUMMARY:/github/summary.txt \                 # Display test report URL in GitHub summary
           -v ${{ github.workspace }}/allure-results:/allure-results \  # Mount test results
           -v ${{ secrets.GCP_CREDENTIALS_FILE_PATH }}:/credentials/key.json \ # Bind GCP credentials
-          sokari/allure-docker-deploy:latest
+          sokari/allure-deployer:latest
             
 ```
 ___
@@ -124,16 +124,16 @@ ___
 ### 2. For local test runs
 #### 1. Pull the Docker Image
 ```shell
-docker pull sokari/allure-docker-deploy:latest
+docker pull sokari/allure-deployer:latest
 ```
 ___
 
 #### 2. Run the Container
 ```shell
 docker run -d \
-  -e STORAGE_BUCKET=my-test-results-bucket \
   -e WEBSITE_ID=my-custom-site-id \
   -e WEBSITE_EXPIRES=2d \
+  -e STORAGE_BUCKET=my-test-results-bucket \
   -e WATCH_MODE=true \
   -e TTL_SECS=60 \
   -v /path/to/allure-results:/allure-results \
@@ -146,48 +146,20 @@ ___
 ```yaml
 services:  
   allure:
-    image: sokari/allure-docker-deploy
-    container_name: allure-deploy-service
+    image: sokari/allure-deployer
     volumes:
       - /path/to/allure-results:/allure-results
       - /path/to/service-account.json:/credentials/key.json
     environment:
-      STORAGE_BUCKET: your-storage-bucket
+      WEBSITE_ID: your-site-id # Assign an ID to your Allure report website
+      WEBSITE_EXPIRES: 2d # Duration of availability. 1-30 days
+      STORAGE_BUCKET: your-storage-bucket # Google Cloud storage bucket
       KEEP_HISTORY: true # Default is true when STORAGE_BUCKET is provided
       KEEP_RESULTS: false # Default is false
-      # Uncomment the line below to enable Hosting
-      # WEBSITE_ID: your-firebase-site-id
-      # WEBSITE_EXPIRES: 2d
       WATCH_MODE: true
       TTL_SECS: 60
 ```
 ___
-
-<h2 id="key-features">🔑 Key Features</h2>
-
-* **Cloud Storage**: Automatically backs up test results to Google Cloud Storage.
-* **Preview URLs:** Generates unique, ephemeral URLs for easy sharing.
-* **Slack Integration:** Notify your team with report links after each test run.
-* **Continuous Deployment:** Automatically detects changes and uploads updated reports.
-
-<h2 id="use-cases">📊 Use Cases</h2>
-
-<h3 id="github-actions-integration">🧪 GitHub Actions Integration</h2>
-
-Integrate Allure Report Deployer into your CI/CD pipelines with GitHub Actions.
-Follow the [GitHub action](#for-github-actions) steps to set it up.
-
-<h3 id="local-test-runs">🖥️ Local Test Runs</h2>
-
-Run and preview your test reports locally using the Docker container.
-See the [Local test run](#local-test-runs) section for detailed instructions.
-
-<h2 id="how-it-works">🛠️ How It Works</h2>
-
-* **Generate Reports:** Collect Allure results from your tests.
-* **Deploy Reports:** Host the reports on Firebase with unique URLs.
-* **Backup Results:** Store Allure report history and result files in Google Cloud Storage.
-
 
 <h2 id="docker-image-configuration">🐳 Docker Image Configuration</h2>
 
@@ -223,6 +195,31 @@ See the [Local test run](#local-test-runs) section for detailed instructions.
 - Use absolute paths to avoid errors with relative paths in Docker commands.
 
 ---
+
+<h2 id="key-features">🔑 Key Features</h2>
+
+* **Cloud Storage**: Automatically backs up test results to Google Cloud Storage.
+* **Preview URLs:** Generates unique, ephemeral URLs for easy sharing.
+* **Slack Integration:** Notify your team with report links after each test run.
+* **Continuous Deployment:** Automatically detects changes and uploads updated reports.
+
+<h2 id="use-cases">📊 Use Cases</h2>
+
+<h3 id="github-actions-integration">🧪 GitHub Actions Integration</h2>
+
+Integrate Allure Report Deployer into your CI/CD pipelines with GitHub Actions.
+Follow the [GitHub action](#for-github-actions) steps to set it up.
+
+<h3 id="local-test-runs">🖥️ Local Test Runs</h2>
+
+Run and preview your test reports locally using the Docker container.
+See the [Local test run](#local-test-runs) section for detailed instructions.
+
+<h2 id="how-it-works">🛠️ How It Works</h2>
+
+* **Generate Reports:** Collect Allure results from your tests.
+* **Deploy Reports:** Host the reports on Firebase with unique URLs.
+* **Backup Results:** Store Allure report history and result files in Google Cloud Storage.
 
 
 <h2 id="comparison-with-other-open-source-tools">🔄 Comparison with Other Open Source Tools</h2>
