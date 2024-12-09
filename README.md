@@ -299,7 +299,7 @@ gcloud firebase hosting:list
 
 ## License
 
-This project is licensed under the [BSD-3 License](https://opensource.org/license/bsd-3-clause). See the LICENSE file for details.
+This project is licensed under the [MIT License](https://opensource.org/license/mit). See the LICENSE file for details.
 
 ## Contributing
 
