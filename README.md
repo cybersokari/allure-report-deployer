@@ -1,21 +1,11 @@
-<div style="display: flex; justify-content: space-evenly; align-items: center; margin-bottom: 20px;">
-    <a id="allure" href="https://allurereport.org/docs/">
-        <img src="assets/allure-logo.png" alt="Allure Logo" height="100">
-    </a>
-    <a id="docker" href="https://docs.docker.com/">
-        <img src="assets/docker-logo.png" alt="Docker Logo" height="100">
-    </a>
-    <a id="firebase" href="https://firebase.google.com/docs">
-        <img src="assets/firebase-logo.png" alt="Firebase Logo" height="100">
-    </a>
-</div>
-
-# Allure Docker Deploy
+# Allure Report Deployer
 
 ![Deployment](https://github.com/cybersokari/allure-docker-deploy/actions/workflows/deploy.yaml/badge.svg?branch=main)
 ![](https://img.shields.io/docker/pulls/sokari/allure-docker-deploy)
 
-_An easy-to-use serverless Docker solution for sharing and backing up [Allure test reports](https://allurereport.org/)_
+**Automate your Allure report hosting with Firebase**
+
+<img src="assets/allure-demo.gif" alt="Docker run demo">
 
 
 ## 📚 **Table of Contents**
@@ -37,8 +27,6 @@ _An easy-to-use serverless Docker solution for sharing and backing up [Allure te
 
 <h2 id="quick-start">🚀 Quick Start</h2>
 
-To get started with **Allure Docker Deploy**, follow these steps:
-
 ### Prerequisites
 1. **Google Cloud Credentials**:
     - Create a Google Cloud [service account](https://firebase.google.com/docs/admin/setup#initialize_the_sdk_in_non-google_environments) with access to Firebase Hosting and Cloud Storage.
@@ -47,16 +35,16 @@ To get started with **Allure Docker Deploy**, follow these steps:
 2. **Google Cloud Storage Bucket**:
     - Create a bucket to store test results and reports. You can use the default.
 
-3. **Docker Installed**:
-    - Ensure you have Docker installed. [Download Docker](https://docs.docker.com/get-docker/)
+3. **Docker**:
+    - Ensure your CI environment supports Docker or you have installed it locally. [Download Docker](https://docs.docker.com/get-docker/)
 
 
 ### **For GitHub Actions:**
-#### 1.	Add a Workflow File:
-Copy and paste the following into `.github/workflows/allure-docker-deploy.yml`:
+#### 1.	Run the docker image in your GitHub Actions workflow
+        sokari/allure-docker-deploy:latest
 
 ```yaml
-name: Allure Docker Deploy
+name: Allure Report Deployer
 on:
   push:
     branches:
@@ -176,11 +164,6 @@ services:
 ```
 ___
 
-#### 4. View test report URL in console
-<div style="text-align: left"><img src="assets/clean-console-add.png" height="300" alt="Firebase CLI console output"></div>
-
-___
-
 <h2 id="key-features">🔑 Key Features</h2>
 
 * **Cloud Storage**: Automatically backs up test results to Google Cloud Storage.
@@ -192,7 +175,7 @@ ___
 
 <h3 id="github-actions-integration">🧪 GitHub Actions Integration</h2>
 
-Integrate Allure Docker Deploy into your CI/CD pipelines with GitHub Actions.
+Integrate Allure Report Deployer into your CI/CD pipelines with GitHub Actions.
 Follow the [GitHub action](#for-github-actions) steps to set it up.
 
 <h3 id="local-test-runs">🖥️ Local Test Runs</h2>
@@ -245,7 +228,7 @@ See the [Local test run](#local-test-runs) section for detailed instructions.
 
 <h2 id="comparison-with-other-open-source-tools">🔄 Comparison with Other Open Source Tools</h2>
 
-| Feature                  | Allure Docker Deploy                                                          | Other tools                                                             |
+| Feature                  | Allure Report Deployer                                                        | Other tools                                                             |
 |--------------------------|-------------------------------------------------------------------------------|-------------------------------------------------------------------------|
 | **Serverless**           | ✅ No server required                                                          | ❌ No, you need to pay for a server                                      |
 | **Ephemeral URLs**       | ✅ Yes, every deployment generates a unique ephemeral URL for the test report. | ❌ No, reports are deployed to a single GitHub Pages URL, or not at all. |
