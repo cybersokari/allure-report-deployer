@@ -1,7 +1,7 @@
 # Allure Report Deployer
 
 ![Deployment](https://github.com/cybersokari/allure-docker-deploy/actions/workflows/deploy.yaml/badge.svg?branch=main)
-![](https://img.shields.io/docker/pulls/sokari/allure-docker-deploy)
+![](https://img.shields.io/docker/pulls/sokari/allure-deployer)
 
 **Automate your Allure report hosting with Firebase**
 
@@ -40,7 +40,7 @@
 
 ### **For GitHub Actions:**
 #### 1.	Run the docker image in your GitHub Actions workflow
-        sokari/allure-docker-deploy:latest
+        sokari/allure-deployer:latest
 
 ```yaml
 name: Allure Report Deployer
@@ -138,7 +138,7 @@ docker run -d \
   -e TTL_SECS=60 \
   -v /path/to/allure-results:/allure-results \
   -v /path/to/gcp-key.json:/credentials/key.json \
-  sokari/allure-docker-deploy
+  sokari/allure-deployer
 ```
 ___
 
@@ -299,7 +299,7 @@ gcloud firebase hosting:list
 
 ## License
 
-This project is licensed under the [BSD-3 License](https://opensource.org/license/bsd-3-clause). See the LICENSE file for details.
+This project is licensed under the [MIT License](https://opensource.org/license/mit). See the LICENSE file for details.
 
 ## Contributing
 
