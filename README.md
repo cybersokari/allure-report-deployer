@@ -40,7 +40,7 @@
 
 ### **For GitHub Actions:**
 #### 1.	Run the docker image in your GitHub Actions workflow
-        sokari/allure-docker-deploy:latest
+        sokari/allure-docker-deployer:latest
 
 ```yaml
 name: Allure Report Deployer
