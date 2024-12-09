@@ -16,7 +16,6 @@ fi
 
 if [[ "$GOOGLE_APPLICATION_CREDENTIALS" =~ \.json$ ]]; then
   export GOOGLE_APPLICATION_CREDENTIALS
-  echo "Credential key found at $GOOGLE_APPLICATION_CREDENTIALS"
 else
   echo "$GOOGLE_APPLICATION_CREDENTIALS is not a Google credential json file"
   exit 1
@@ -32,16 +31,14 @@ fi
 GITHUB_STEP_SUMMARY="/github/summary.txt"
 if [ -f "$GITHUB_STEP_SUMMARY" ]; then
   export GITHUB_STEP_SUMMARY
-  echo "Running on GitHub. Summary will be available in a bit"
+  echo "Running on GitHub. Summary will be available"
 fi
 
 if [ -n "$TTL_SECS" ]; then
   if ! [[ "$TTL_SECS" -eq "$TTL_SECS" && "$TTL_SECS" -ge 0 ]]; then
     echo "Error: $TTL_SECS must be a positive number"
     exit 1
-  else
-    echo "TTL_SECS set to $TTL_SECS"
   fi
 fi
-echo 'Starting the app'
+
 node --disable-warning=ExperimentalWarning /app/lib/index.js

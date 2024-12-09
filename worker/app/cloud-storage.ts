@@ -1,6 +1,5 @@
 import * as path from "node:path";
-import * as fs from "fs/promises"
-import {DEBUG, fileProcessingConcurrency, MOUNTED_PATH, REPORTS_DIR, STAGING_PATH} from "../index";
+import {DEBUG, fileProcessingConcurrency, MOUNTED_PATH, REPORTS_DIR, STAGING_PATH} from "./constant";
 import * as admin from "firebase-admin";
 import {Bucket} from '@google-cloud/storage'
 import {getAllFilesStream} from "./util";
@@ -46,7 +45,7 @@ export class CloudStorage {
                     });
                     await counter.incrementFilesUploaded()
                 } catch (error) {
-                    console.error(`Failed to upload ${filePath}:`, error);
+                    // console.error(`Failed to upload ${filePath}:`, error);
                 }
             }))
         }
@@ -58,10 +57,10 @@ export class CloudStorage {
         try {
             const [files] = await CloudStorage.bucket.getFiles({prefix: `${storageHomeDir}/`});
             if (!files.length) {
-                console.log('No files to process from CloudStorage');
+                // console.log('No files to process from CloudStorage');
                 return;
             }
-            await fs.mkdir(STAGING_PATH, {recursive: true}); // recursive, dont throw if exist
+
             const limit = pLimit(concurrency);
             const downloadPromises = [];
             for (const file of files) {
@@ -72,16 +71,15 @@ export class CloudStorage {
                 }))
             }
             await Promise.all(downloadPromises);
-            console.log(`${files.length} files downloaded CloudStorage`);
         } catch (error) {
-            console.error('Download error:', error);
+            // console.error('Download error:', error);
         }
     }
 
     /**
      * Upload history from generated reports
      */
-    public async uploadHistory(): Promise<any> {
+    public async uploadHistory() {
         const files = getAllFilesStream(`${REPORTS_DIR}/history`);
         await this.uploadFiles(files, {concurrency: fileProcessingConcurrency});
     }

@@ -6,7 +6,7 @@ import fs from "fs/promises";
  * Handles loading and accessing Google Cloud credentials.
  * Implements a Singleton pattern to ensure only one instance is created.
  */
-export class Credential {
+class Credential {
     private _projectId: string | null = null; // Holds the project ID
     private static instance: Credential; // Singleton instance
     private data: any; // Parsed credentials data

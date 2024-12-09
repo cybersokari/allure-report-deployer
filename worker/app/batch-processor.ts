@@ -1,4 +1,4 @@
-import {cloudStorage, fileProcessingConcurrency, websiteId} from "../index";
+import {cloudStorage, fileProcessingConcurrency, websiteId} from "./constant";
 import ReportBuilder from "./report-builder";
 /**
  * BatchProcessor Class
