@@ -39,7 +39,7 @@
 
 
 ### **For GitHub Actions:**
-#### 1.	Run the docker image in your GitHub Actions workflow
+#### 1.	Add the [docker image](https://hub.docker.com/r/sokari/allure-deployer) to your GitHub Actions workflow
         sokari/allure-deployer:latest
 
 ```yaml
