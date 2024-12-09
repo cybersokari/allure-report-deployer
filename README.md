@@ -3,7 +3,7 @@
 ![Deployment](https://github.com/cybersokari/allure-docker-deploy/actions/workflows/deploy.yaml/badge.svg?branch=main)
 ![](https://img.shields.io/docker/pulls/sokari/allure-deployer)
 
-**Automate your Allure report hosting with Firebase**
+**Automate your Allure report hosting with Firebase. No server required.**
 
 ![Demo](assets/demo.gif)
 
