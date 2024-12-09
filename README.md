@@ -40,7 +40,7 @@
 
 ### **For GitHub Actions:**
 #### 1.	Run the docker image in your GitHub Actions workflow
-        sokari/allure-docker-deployer:latest
+        sokari/allure-deployer:latest
 
 ```yaml
 name: Allure Report Deployer
@@ -138,7 +138,7 @@ docker run -d \
   -e TTL_SECS=60 \
   -v /path/to/allure-results:/allure-results \
   -v /path/to/gcp-key.json:/credentials/key.json \
-  sokari/allure-docker-deploy
+  sokari/allure-deployer
 ```
 ___
 
