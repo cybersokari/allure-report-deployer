@@ -266,18 +266,18 @@ gcloud firebase hosting:list
 ```
 ---
 
-#### Q3: Can I deploy reports to multiple Firebase sites?**
+#### Q3: Can I deploy reports to multiple Firebase sites?
 - **A**: Yes, use different values for `WEBSITE_ID` for each site. This allows you to manage separate URLs for different test runs or environments.
 
 ---
 
 #### Q4: Do I need a paid Firebase plan?
-- **A**: No, the free Firebase plan is sufficient to host reports. However, you will need to enable billing to use cloud storage, which has free 5GB of storage
+- **A**: No, the free Firebase plan is sufficient to host your reports. However, you will need to enable billing to use cloud storage, which has [free 5GB of storage](https://firebase.google.com/pricing)
 
 ---
 
 #### Q5: What happens if I don’t set WEBSITE_ID?
-- **A**: If WEBSITE_ID is not set, Allure reports will not be generated, only your result files will be backed up to Storage. You must provide an identifier for the hosted site.
+- **A**: If `WEBSITE_ID` is not set, Allure reports will not be generated, only your result files will be backed up to Storage. You must provide an identifier for the hosted site.
 
 ---
 
