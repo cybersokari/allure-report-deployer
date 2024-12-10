@@ -5,6 +5,7 @@ services:
     ports:
       - "9199:9199"
       - "4000:4000"
+      - "5088:5088"
     command: ["firebase", "emulators:start", "--only", "storage,logging", "--project", "fir-demo-project", '--config', "./startfirebase.json"]
     restart: unless-stopped
     healthcheck:
@@ -17,11 +18,21 @@ services:
     build:
       dockerfile: Dockerfile
       context: .
+    develop:
+      watch:
+        - action: sync+restart
+          path: ./worker/lib
+          target: /app/lib
+          ignore:
+            - node_modules/
+        - action: rebuild
+          path: package.json
     container_name: allure-deployer
     env_file: .env.slack
     environment:
       FIREBASE_STORAGE_EMULATOR_HOST: 127.0.0.1:9199 # Dev mode
       STORAGE_BUCKET: "fir-demo-project.appspot.com"
+      PREFIX: 'project-999'
       WEBSITE_ID: 'fir-demo-project'
       WEBSITE_EXPIRES: 12h
       KEEP_HISTORY: true # Default is true when STORAGE_BUCKET is provided
@@ -29,7 +40,7 @@ services:
       WATCH_MODE: false
       TTL_SECS: 6
     volumes:
-#      - ./worker:/app #Devs only. This overrides the /app dir
+#      - ./worker:/app #Dev only. This overrides the /app dir
       - ${PWD}/gcp-key.json:/credentials/key.json:ro
       - /Users/sokari/IdeaProjects/appium/reports/ios/allure-results:/allure-results
     cpus: 1

@@ -6,7 +6,8 @@ import {getAllFilesStream} from "./util";
 import counter from "./counter";
 import pLimit from "p-limit";
 
-const storageHomeDir = 'allure-results'
+const prefix = process.env.PREFIX || undefined
+const storageHomeDir = prefix ? `${prefix}/allure-results` : 'allure-results'
 /**
  * CloudStorage Class
  *

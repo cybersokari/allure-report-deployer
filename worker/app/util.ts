@@ -4,7 +4,7 @@ import * as path from "node:path";
 import util from "node:util";
 
 const exec = util.promisify(require('child_process').exec)
-import { websiteId} from "./constant";
+import {DEBUG, websiteId} from "./constant";
 import {StringBuilder} from "./string-builder";
 import credential from "./credential";
 
@@ -92,10 +92,6 @@ export async function changePermissionsRecursively(dirPath: string, mode: fsSync
  * @returns {Promise<string | undefined>} - The URL of the deployed site, if successful
  */
 export async function publishToFireBaseHosting(configParentDir: string): Promise<string |  null> {
-    // if (DEBUG) {
-    //     console.warn('DEBUG=true: Skipping live deployment')
-    //     return null
-    // }
     const hosting = {
         "hosting": {
             "public": ".",
@@ -136,6 +132,10 @@ export async function publishToFireBaseHosting(configParentDir: string): Promise
         builder.append('7d')
     }
 
+    if (DEBUG) {
+        appLog('DEBUG mode, skipping live deployment')
+        return 'http://127.0.0.1:8080/';
+    }
     const {stdout, stderr} = await exec(builder.toString())
 
     if (stderr && !stdout) {
@@ -156,18 +156,6 @@ export async function publishToFireBaseHosting(configParentDir: string): Promise
     }
 
 }
-
-// async function isSiteAvailable(siteId: string) {
-//     const builder = new StringBuilder()
-//     builder.append('firebase hosting:sites:get')
-//         .append(' ').append(siteId)
-//         .append(' ').append('--project')
-//         .append(' ').append(credential.projectId)
-//     const {stdout, stderr} = await exec(builder.toString())
-//     if(stderr && !stdout) return false
-//
-//     return stdout.contains(siteId)
-// }
 
 
 
