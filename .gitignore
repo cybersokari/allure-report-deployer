@@ -1,7 +1,6 @@
 allure-firebase.iml
 .idea
 */node_modules
-worker/allure-*
 worker/lib
 credentials/gcp-key.json
 .env.slack
