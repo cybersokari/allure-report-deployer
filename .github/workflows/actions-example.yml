@@ -17,7 +17,7 @@ on:
         description: 'Unique identifier for the site'
         required: false
       website-expires:
-        description: 'Report site expiry. Example: 1h, 2d or 3w. Max is 30d'
+        description: 'Test Report site expiry. Example: 1h, 2d or 3w. Max is 30d'
         required: false
         default: '1h'
 
