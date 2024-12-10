@@ -7,6 +7,7 @@ import ansiEscapes from "ansi-escapes";
 import chalk from "chalk";
 import credential from "./credential";
 import {appLog} from "./util";
+
 type SlackCredentials = {
     token: string,
     conversationId: string,
@@ -22,6 +23,9 @@ type SlackCredentials = {
 export class Notifier {
 
     private get dashboardUrl() {
+        if (DEBUG) {
+            return `http://127.0.0.1:4000/storage/${STORAGE_BUCKET}`
+        }
         return new StringBuilder().append("https://console.firebase.google.com/project")
             .append(`/${(credential.projectId)}`)
             .append(`/storage/${STORAGE_BUCKET}/files`)
@@ -178,8 +182,6 @@ export class Notifier {
         if (cloudStorage) {
             if (keepHistory && keepResults) {
                 appLog(`KEEP_HISTORY and KEEP_RESULTS enabled`)
-            } else if (!keepHistory && !keepResults) {
-                appLog(`KEEP_HISTORY and KEEP_RESULTS disabled`)
             } else if (keepHistory) {
                 appLog(`KEEP_HISTORY enabled`)
             } else if (keepResults) {

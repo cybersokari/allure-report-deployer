@@ -67,6 +67,7 @@ jobs:
       run: |
         docker run --rm \
           -e STORAGE_BUCKET=my-test-results-bucket \                    # Specify your Firebase Storage bucket
+          -e PREFIX=project-123 \                                       # A path in your storage bucket (Optional)
           -e WEBSITE_ID=my-custom-site-id \                             # Use a unique ID for the report website
           -e WEBSITE_EXPIRES=3d \                                       # Set the report expiration (e.g., 3 days)
           -e KEEP_HISTORY=true \                                        # Retain historical test data
@@ -154,6 +155,7 @@ services:
       WEBSITE_ID: your-site-id # Assign an ID to your Allure report website
       WEBSITE_EXPIRES: 2d # Duration of availability. 1-30 days
       STORAGE_BUCKET: your-storage-bucket # Google Cloud storage bucket
+      PREFIX: project-123 # A path in your storage bucket (Optional)
       KEEP_HISTORY: true # Default is true when STORAGE_BUCKET is provided
       KEEP_RESULTS: false # Default is false
       WATCH_MODE: true
@@ -169,6 +171,7 @@ ___
 | Variable           | Description                                                                                                                         | Example                        | Default |
 |--------------------|-------------------------------------------------------------------------------------------------------------------------------------|--------------------------------|---------|
 | `STORAGE_BUCKET`   | Google Cloud Storage bucket name                                                                                                    | project-id.firebasestorage.app | None    |
+| `PREFIX`           | A path in your Storage bucket. Optional.                                                                                            | project-123                    | None    |
 | `WEBSITE_ID`       | Unique identifier for hosted reports                                                                                                | test-report-id                 | None    |
 | `WEBSITE_EXPIRES`  | Expiration duration for reports. Examples: 1h, 2d, 3w                                                                               | 29d                            | 7d      |
 | `KEEP_HISTORY`     | Backup `reports/history` directory after report generation.                                                                         | true                           | true    |

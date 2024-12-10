@@ -77,7 +77,7 @@ export function main(): void {
                 keepResults && cloudStorage ? cloudStorage.uploadResults() : null
             ]))[0]
 
-            // Print GitHub summary
+            // Prepare GitHub summary
             const githubStepSummary = process.env.GITHUB_STEP_SUMMARY
             const notifier = new Notifier()
             const notifierPromises : Promise<void>[] = []
@@ -89,7 +89,7 @@ export function main(): void {
             } else {
                 notifier.printSummaryToConsole({url: url})
             }
-            // Send Slack message
+            // Prepare Slack message
             const token = process.env.SLACK_TOKEN;
             const conversationId = process.env.SLACK_CHANNEL_ID;
             if (conversationId && token) {
@@ -98,6 +98,7 @@ export function main(): void {
                     token: token, url: url
                 }))
             }
+            // Send notifications async
             if(notifierPromises.length > 0){
                 await Promise.all(notifierPromises)
             }

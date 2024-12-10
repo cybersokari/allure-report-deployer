@@ -115,7 +115,6 @@ class ReportBuilder {
             )
         }
         await Promise.all(tasks)
-        return this
     }
 
 }

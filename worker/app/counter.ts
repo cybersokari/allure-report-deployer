@@ -31,7 +31,9 @@ class Counter {
     get filesProcessed(){return this.processed}
 
     startTimer(): void {
-        this.startTime = Date.now();
+        if(!this.startTime){
+            this.startTime = Date.now();
+        }
     }
     getElapsedSeconds(): string {
         if (!this.startTime) {
