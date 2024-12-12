@@ -18,7 +18,6 @@ import counter from "./counter";
 import pLimit from "p-limit";
 
 
-const storageHomeDir = process.env.PREFIX || ''
 
 /**
  * CloudStorage Class
@@ -30,6 +29,7 @@ const storageHomeDir = process.env.PREFIX || ''
 export class CloudStorage {
     public static bucket: Bucket
     public static instance: CloudStorage
+    private storageHomeDir = process.env.PREFIX ? `${process.env.PREFIX}/` : undefined
 
     public static getInstance(storageBucket: string) {
         if (!CloudStorage.instance) {
@@ -42,7 +42,7 @@ export class CloudStorage {
     private async uploadFile(filePath: string, destinationFilePath: string) {
         await CloudStorage.bucket.upload(filePath, {
             validation: !DEBUG,
-            destination: `${storageHomeDir}/${destinationFilePath}`,
+            destination: `${this.storageHomeDir}${destinationFilePath}`,
         });
     }
 
@@ -51,7 +51,7 @@ export class CloudStorage {
         if (!showHistory && !showRetries) return
 
         try {
-            let [zippedFiles] = await CloudStorage.bucket.getFiles({prefix: `${storageHomeDir}/`, matchGlob: '**.zip'});
+            let [zippedFiles] = await CloudStorage.bucket.getFiles({prefix: this.storageHomeDir, matchGlob: '**.zip'});
             if (showHistory) {
                 // Unzipping from the oldest to newest archive makes sure
                 // the archive with the latest history files gets unzipped last
