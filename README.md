@@ -262,6 +262,7 @@ subsequent test report generation.
 See how [Allure Retries](https://allurereport.org/docs/history-and-retries/#how-to-keep-retries) work
 
 <h3 id="slack-integration">🛠️ Slack Integration</h2>
+
 To notify stakeholders with secure test report links after each test run,
 create a [simple Slack app](https://youtu.be/SbUv1nCS7a0?si=8rjWDQh6wfeAztxu&t=266) and set `SLACK_TOKEN`
 and `SLACK_CHANNEL_ID` environment variable when you run the Docker image.
