@@ -45,7 +45,7 @@ export class CloudStorage {
     // Download remote files to staging area
     public async stageFilesFromStorage(): Promise<any> {
         try {
-            const [files] = await CloudStorage.bucket.getFiles({prefix: `${storageHomeDir}/`, matchGlob: '*.zip'});
+            const [files] = await CloudStorage.bucket.getFiles({prefix: `${storageHomeDir}/`, matchGlob: '**.zip'});
             const limit = pLimit(fileProcessingConcurrency);
             const downloadPromises = [];
             for (const file of files) {
@@ -53,10 +53,8 @@ export class CloudStorage {
                     // Remove the preceding storageHomeDir path from the downloaded file
                     const destination = path.join(STAGING_PATH, path.basename(file.name));
                     await file.download({destination, validation: !DEBUG});
-                    if(destination.endsWith('.zip')){
-                        await unzipFile(destination, STAGING_PATH);
-                        await fs.rm(destination, {force: true });
-                    }
+                    await unzipFile(destination, STAGING_PATH);
+                    await fs.rm(destination, {force: true });
                 }))
             }
             await Promise.all(downloadPromises);
@@ -71,18 +69,21 @@ export class CloudStorage {
     public async uploadArtifacts() {
         const foldersToBackup: {path: string, destination?: string}[] = []
         const historyFolder = `${REPORTS_DIR}/history`
+        const foldersToCount =[]
         if (keepResults) {
             foldersToBackup.push({path: MOUNTED_PATH})
+            foldersToCount.push(MOUNTED_PATH)
         }
         if (websiteId && keepHistory) {
             foldersToBackup.push({path: historyFolder, destination: 'history'})
+            foldersToCount.push(historyFolder)
         }
         const isoString = new Date().toISOString().replace(/(\.\d{3})?Z$/, ''); // Remove milliSec and TZ
         const outputFileName = isoString.concat('.zip')
         await zipFolder(foldersToBackup, outputFileName)
         // Count while uploading
         await Promise.all([
-            counter.addFilesUploaded(await countFiles([historyFolder, MOUNTED_PATH])),
+            counter.addFilesUploaded(await countFiles(foldersToCount)),
             this.uploadFile(outputFileName, outputFileName)
         ])
     }
