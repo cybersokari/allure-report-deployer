@@ -26,3 +26,4 @@ export const cloudStorage = STORAGE_BUCKET ? CloudStorage.getInstance(STORAGE_BU
 export const keepHistory = process.env.KEEP_HISTORY?.toLowerCase() === 'true' || true // Defaults to true
 export const keepResults = process.env.KEEP_RESULTS?.toLowerCase() === 'true' || false
 export const fileProcessingConcurrency = 10
+export const acceptedFileTypeRegex = /^.*\.(json|png|jpeg|jpg|gif|properties|log|webm)$/i

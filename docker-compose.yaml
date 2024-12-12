@@ -30,8 +30,8 @@ services:
     container_name: allure-deployer
     env_file: .env.slack
     environment:
-#      FIREBASE_STORAGE_EMULATOR_HOST: 127.0.0.1:9199 # Dev mode
-      STORAGE_BUCKET: "gatedaccessdev.appspot.com"
+      FIREBASE_STORAGE_EMULATOR_HOST: 127.0.0.1:9199 # Dev mode
+      STORAGE_BUCKET: "fir-demo-project.appspot.com"
       PREFIX: 'project-999'
       WEBSITE_ID: 'fir-demo-project'
       WEBSITE_EXPIRES: 12h

@@ -3,10 +3,10 @@ import * as fs from 'fs/promises'
 import * as path from "node:path";
 import util from "node:util";
 import archiver from 'archiver';
-import unzipper from 'unzipper';
+import unzipper, {Entry} from 'unzipper';
 
 const exec = util.promisify(require('child_process').exec)
-import {DEBUG, websiteId} from "./constant";
+import {acceptedFileTypeRegex, DEBUG, websiteId} from "./constant";
 import {StringBuilder} from "./string-builder";
 import credential from "./credential";
 
@@ -191,8 +191,25 @@ export async function zipFolder(sourceFolder: { path: string, destination?: stri
 }
 
 export async function unzipFile(zipFilePath: string, outputDir: string) {
-    const directory = await unzipper.Open.file(zipFilePath);
-    await directory.extract({path: outputDir})
+    return await new Promise((resolve, reject) => {
+        fsSync.createReadStream(zipFilePath)
+            .pipe(unzipper.Parse())
+            .on('entry', async (entry: Entry) => {
+                const fullPath = path.join(outputDir, entry.path);
+                if (!!entry.path.match(acceptedFileTypeRegex)) {
+                    entry.pipe(fsSync.createWriteStream(fullPath));
+                } else{
+                    entry.autodrain();
+                }
+            })
+            .on('close', () => {
+                resolve(true);
+            })
+            .on('error', (err) => {
+                console.error('Unzip file error:', err);
+                reject(err);
+            });
+    });
 }
 
 export async function countFiles(directory: string[]) {

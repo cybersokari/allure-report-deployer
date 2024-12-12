@@ -1,4 +1,4 @@
-import { MOUNTED_PATH, REPORTS_DIR, STAGING_PATH} from "./constant";
+import {acceptedFileTypeRegex, MOUNTED_PATH, REPORTS_DIR, STAGING_PATH} from "./constant";
 
 const allure = require('allure-commandline')
 import * as fs from 'fs/promises'
@@ -50,7 +50,7 @@ class ReportBuilder {
         // Count while copying
         await Promise.all([
             fs.cp(`${MOUNTED_PATH}/`, STAGING_PATH, {recursive: true, force: true, filter(source: string): boolean | Promise<boolean> {
-                    return !!source.match(/^.*\.(json|png|jpeg|jpg|gif|properties|log|webm)$/i);
+                    return !!source.match(acceptedFileTypeRegex);
                 }}),
             counter.addFilesProcessed(await countFiles([MOUNTED_PATH]))
         ])
