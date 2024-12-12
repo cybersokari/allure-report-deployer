@@ -212,7 +212,8 @@ Your files are backed up as a `.zip` archive when you set `KEEP_HISTORY` or `KEE
 *  `KEEP_RESULTS` adds all the files in your `/allure-results` mount directory to the archive
 *  `KEEP_HISTORY` adds the `history` [subdirectory of your latest report](https://allurereport.org/docs/how-it-works-history-files/#history-files) to the archive
 
-Archive example when both `KEEP_RESULTS` and `KEEP_HISTORY` are enabled
+
+Example of an archive when both `KEEP_RESULTS` and `KEEP_HISTORY` are enabled
 ```text
 2024-12-12T06:46:28.zip/
             ├── history/

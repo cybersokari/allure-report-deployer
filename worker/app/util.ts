@@ -9,6 +9,7 @@ const exec = util.promisify(require('child_process').exec)
 import {DEBUG, showHistory, showRetries, websiteId} from "./constant";
 import {StringBuilder} from "./string-builder";
 import credential from "./credential";
+import {Counter} from "./counter";
 
 export function appLog(data: string) {
     console.log(data)
@@ -196,22 +197,22 @@ export async function unzipFile(zipFilePath: string, outputDir: string): Promise
             .pipe(unzipper.Parse())
             .on('entry', async (entry: Entry) => {
                 const fullPath = path.join(outputDir, entry.path);
-                if(!showHistory){
+                if (!showHistory) {
                     // Ignore the history subdirectory
-                    if(entry.path.includes('history/')){
+                    if (entry.path.includes('history/')) {
                         entry.autodrain();
                         return;
                     }
                 }
-                if(!showRetries){
-                    if(!entry.path.includes('history/')){
+                if (!showRetries) {
+                    if (!entry.path.includes('history/')) {
                         entry.autodrain();
                         return;
                     }
                 }
                 if (isFileTypeAllure(entry.path)) {
                     entry.pipe(fsSync.createWriteStream(fullPath));
-                } else{
+                } else {
                     entry.autodrain();
                 }
             })
@@ -229,7 +230,7 @@ export async function countFiles(directory: string[]) {
     let count = 0;
     try {
         for (const dir of directory) {
-            const entries = await fs.readdir(dir, { withFileTypes: true });
+            const entries = await fs.readdir(dir, {withFileTypes: true});
             const files = entries.filter((entry) => entry.isFile());
             count += files.length;
         }
@@ -239,10 +240,42 @@ export async function countFiles(directory: string[]) {
     return count
 }
 
-export function isFileTypeAllure(filePath: string){
+export function isFileTypeAllure(filePath: string) {
     return !!filePath.match(/^.*\.(json|png|jpeg|jpg|gif|properties|log|webm)$/i)
 }
 
+
+export function generateMarkdown({
+                                     testReportUrl,
+                                     fileStorageUrl,
+                                     counter,
+                                 }: {
+    testReportUrl?: string | null;
+    fileStorageUrl?: string;
+    counter?: Counter;
+}): string {
+    let markdown = "### 📊 Your Test Report is ready\n\n";
+
+    if (testReportUrl) {
+        markdown += `- **Test Report**: [${testReportUrl}](${testReportUrl})\n`;
+    }
+
+    if (fileStorageUrl) {
+        markdown += `- **File Storage**: [${fileStorageUrl}](${fileStorageUrl})\n`;
+    }
+
+    if (counter) {
+        markdown += `
+| 📂 **Files Uploaded** | 🔍 **Files Processed** | ⏱ **Duration**     |
+|------------------------|------------------------|--------------------|
+| ${counter.filesUploaded}       | ${counter.filesProcessed}      | ${counter.getElapsedSeconds()} seconds |
+    `;
+    }
+
+    markdown += `\n\n⭐ Like this? [Star us on GitHub](https://github.com/cybersokari/allure-report-deployer)!`;
+
+    return markdown.trim();
+}
 
 
 

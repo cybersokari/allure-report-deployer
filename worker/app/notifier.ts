@@ -6,7 +6,7 @@ import * as fs from "node:fs";
 import ansiEscapes from "ansi-escapes";
 import chalk from "chalk";
 import credential from "./credential";
-import {appLog} from "./util";
+import {appLog, generateMarkdown} from "./util";
 
 type SlackCredentials = {
     token: string,
@@ -144,28 +144,10 @@ export class Notifier {
      * Includes the report link, processing stats, and duration.
      * @param data - Contains the report URL and file path for summary
      */
-    public async printGithubSummary(data: { mountedFilePath: string, url: string | undefined | null }): Promise<void> {
-        const lineBreak = '</br>'
-        const builder = new StringBuilder()
-        builder.append(`**Your Allure report is ready 📈**`)
-            .append(lineBreak).append(lineBreak)
-        if (data.url) {
-            builder.append(`**[View report](${data.url})**`)
-                .append(lineBreak).append(lineBreak)
-        }
-        if (cloudStorage) {
-            builder.append(`**[View files](${this.dashboardUrl})**`)
-                .append(lineBreak).append(lineBreak)
-
-            builder.append(`📂 Files uploaded: ${counter.filesUploaded}`)
-                .append(lineBreak).append(lineBreak)
-                .append(`🔍 Files processed: ${counter.filesProcessed}`)
-                .append(lineBreak).append(lineBreak)
-        }
-        builder
-            .append(`⏱️ Duration: ${counter.getElapsedSeconds()} seconds`)
+    public async printGithubSummary({mountedFilePath, url}: { mountedFilePath: string, url: string | null }): Promise<void> {
+        const gitHubSum = generateMarkdown({testReportUrl: url, counter: counter, fileStorageUrl: this.dashboardUrl})
         try {
-            fs.writeFileSync(data.mountedFilePath, builder.toString(), {flag: 'a'}); // Append to the file
+            fs.writeFileSync(mountedFilePath, gitHubSum, {flag: 'a'}); // Append to the file
         } catch (err) {
             console.warn('Failed to write to $GITHUB_STEP_SUMMARY:', err);
         }
@@ -219,6 +201,7 @@ ${Icon.CHART} Test report URL   : ${ansiEscapes.link(chalk.blue(data.url), data!
         }
 
     }
+
 }
 
 
