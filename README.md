@@ -135,8 +135,6 @@ docker run -d \
   -e WEBSITE_ID=my-custom-site-id \
   -e WEBSITE_EXPIRES=2d \
   -e STORAGE_BUCKET=my-test-results-bucket \
-  -e WATCH_MODE=true \
-  -e TTL_SECS=60 \
   -v /path/to/allure-results:/allure-results \
   -v /path/to/gcp-key.json:/credentials/key.json \
   sokari/allure-deployer
@@ -158,8 +156,6 @@ services:
       PREFIX: project-123 # A path in your storage bucket (Optional)
       KEEP_HISTORY: true # Default is true when STORAGE_BUCKET is provided
       KEEP_RESULTS: false # Default is false
-      WATCH_MODE: true
-      TTL_SECS: 60
 ```
 ___
 
@@ -176,8 +172,6 @@ ___
 | `WEBSITE_EXPIRES`  | Expiration duration for reports. Examples: 1h, 2d, 3w                                                                               | 29d                            | 7d      |
 | `KEEP_HISTORY`     | Backup `reports/history` directory after report generation.                                                                         | true                           | true    |
 | `KEEP_RESULTS`     | Backup `/allure-results` directory after report generation..                                                                        | false                          | false   |
-| `WATCH_MODE`       | Keep the container running to auto deploy new test reports and results                                                              | false                          | false   |
-| `TTL_SECS`         | Time to wait (in seconds) after last file is detected before generating and uploading the report. Only works when `WATCH_MODE=true` | 60                             | 45      |
 | `SLACK_TOKEN`      | Your Slack Bot token                                                                                                                | xoxb-XXXXXXXXXX-XXXXXXXX       | None    |
 | `SLACK_CHANNEL_ID` | The ID of the channel or conversation you want to receive your status                                                               | DC56JYGT8                      | None    |
 

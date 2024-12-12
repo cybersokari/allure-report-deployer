@@ -2,28 +2,30 @@ import * as fsSync from 'fs'
 import * as fs from 'fs/promises'
 import * as path from "node:path";
 import util from "node:util";
+import archiver from 'archiver';
+import unzipper from 'unzipper';
 
 const exec = util.promisify(require('child_process').exec)
 import {DEBUG, websiteId} from "./constant";
 import {StringBuilder} from "./string-builder";
 import credential from "./credential";
 
-export function appLog(data:  string) {
-   console.log(data)
+export function appLog(data: string) {
+    console.log(data)
 }
 
-export async function* getAllFilesStream(dir: string): AsyncGenerator<string> {
-
-    const entries = await fs.readdir(dir, {withFileTypes: true});
-    for (const entry of entries) {
-        const fullPath = path.join(dir, entry.name);
-        if (entry.isDirectory()) {
-            yield* getAllFilesStream(fullPath);
-        } else {
-            yield fullPath;
-        }
-    }
-}
+// export async function* getStreamOfFiles(param: { dir: string, recursive?: boolean }): AsyncGenerator<string> {
+//
+//     const entries = await fs.readdir(param.dir, {withFileTypes: true});
+//     for (const entry of entries) {
+//         const fullPath = path.join(param.dir, entry.name);
+//         if (param.recursive && entry.isDirectory()) {
+//             yield* getStreamOfFiles({dir: fullPath, recursive: true});
+//         } else {
+//             yield fullPath;
+//         }
+//     }
+// }
 
 /**
  * Validates the expiration format for the website hosting link.
@@ -91,7 +93,7 @@ export async function changePermissionsRecursively(dirPath: string, mode: fsSync
  * @param configParentDir - Directory containing the hosting configuration
  * @returns {Promise<string | undefined>} - The URL of the deployed site, if successful
  */
-export async function publishToFireBaseHosting(configParentDir: string): Promise<string |  null> {
+export async function publishToFireBaseHosting(configParentDir: string): Promise<string | null> {
     const hosting = {
         "hosting": {
             "public": ".",
@@ -157,6 +159,55 @@ export async function publishToFireBaseHosting(configParentDir: string): Promise
 
 }
 
+
+// Function to zip a folder
+export async function zipFolder(sourceFolder: { path: string, destination?: string }[], outputZipFile: string) {
+    return await new Promise((resolve: (value: boolean) => void, reject) => {
+
+        // Ensure the output directory exists
+        const outputDir = path.dirname(outputZipFile);
+        fsSync.mkdirSync(outputDir, {recursive: true});
+        // Create a file stream for the output zip file
+        const output = fsSync.createWriteStream(outputZipFile);
+        const archive = archiver('zip', {zlib: {level: 9}}); // Set the compression level
+
+        // Listen for errors
+        output.on('close', () => {
+            resolve(true);
+        });
+        archive.on('error', (err) => {
+            appLog(`Zip file archive error: ${err}`);
+            resolve(false);
+        });
+        // Pipe archive data to the file stream
+        archive.pipe(output);
+        // Append files/folders to the archive
+        for (const folder of sourceFolder) {
+            archive.directory(folder.path, folder.destination || false);
+        }
+        // Finalize the archive
+        archive.finalize();
+    });
+}
+
+export async function unzipFile(zipFilePath: string, outputDir: string) {
+    const directory = await unzipper.Open.file(zipFilePath);
+    await directory.extract({path: outputDir})
+}
+
+export async function countFiles(directory: string[]) {
+    let count = 0;
+    try {
+        for (const dir of directory) {
+            const entries = await fs.readdir(dir, { withFileTypes: true });
+            const files = entries.filter((entry) => entry.isFile());
+            count += files.length;
+        }
+    } catch (err) {
+        appLog(`Error reading directory: ${err}`);
+    }
+    return count
+}
 
 
 

@@ -8,27 +8,26 @@ import { Mutex } from 'async-mutex';
  */
 class Counter {
     private startTime: number | null = null;
-    private processed = 0
-    private uploaded = 0
-
+    private _processed = 0
+    private _uploaded = 0
     private mutex = new Mutex();
 
-    async incrementFilesProcessed(): Promise<void> {
+
+    public async addFilesProcessed(count: number) {
         await this.mutex.runExclusive(() => {
-            this.processed++;
+            this._processed += count;
         });
     }
-
-    async incrementFilesUploaded(): Promise<void> {
+    public async addFilesUploaded(count: number) {
         await this.mutex.runExclusive(() => {
-            this.uploaded++;
+            this._uploaded += count;
         });
     }
 
     get filesUploaded(){
-        return this.uploaded
+        return this._uploaded
     }
-    get filesProcessed(){return this.processed}
+    get filesProcessed(){return this._processed}
 
     startTimer(): void {
         if(!this.startTime){
