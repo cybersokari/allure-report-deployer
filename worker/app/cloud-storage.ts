@@ -8,18 +8,18 @@ import {
     REPORTS_DIR,
     showHistory,
     showRetries,
-    STAGING_PATH,
-    websiteId
+    RESULTS_STAGING_PATH,
+    websiteId, ARCHIVE_DIR
 } from "./constant";
 import * as admin from "firebase-admin";
 import {Bucket, File} from '@google-cloud/storage'
 import {countFiles, unzipFile, zipFolder} from "./util";
 import counter from "./counter";
 import pLimit from "p-limit";
-import * as fs from 'fs/promises'
 
 
 const storageHomeDir = process.env.PREFIX || ''
+
 /**
  * CloudStorage Class
  *
@@ -48,11 +48,11 @@ export class CloudStorage {
 
     // Download remote files to staging area
     public async stageFilesFromStorage(): Promise<any> {
-        if(!showHistory && !showRetries) return
+        if (!showHistory && !showRetries) return
 
         try {
             let [zippedFiles] = await CloudStorage.bucket.getFiles({prefix: `${storageHomeDir}/`, matchGlob: '**.zip'});
-            if(showHistory){
+            if (showHistory) {
                 // Unzipping from the oldest to newest archive makes sure
                 // the archive with the latest history files gets unzipped last
                 // and overwrites any old history from in the staging directory.
@@ -64,10 +64,10 @@ export class CloudStorage {
             for (const file of zippedFiles) {
                 downloadPromises.push(limit(async () => {
                     // Remove the preceding storageHomeDir path from the downloaded file
-                    const destination = path.join(STAGING_PATH, path.basename(file.name));
-                    await file.download({destination, validation: !DEBUG});
-                    await unzipFile(destination, STAGING_PATH);
-                    await fs.rm(destination, {force: true });
+                    const archiveDestination = path.join(ARCHIVE_DIR, path.basename(file.name));
+                    // console.log(`Downloading ${file.name} to ${destination}`)
+                    await file.download({destination: archiveDestination, validation: !DEBUG});
+                    await unzipFile(archiveDestination, RESULTS_STAGING_PATH);
                 }))
             }
             await Promise.all(downloadPromises);
@@ -80,9 +80,9 @@ export class CloudStorage {
      * Zip and upload mounted results and generated report history (if enabled)
      */
     public async uploadArtifacts() {
-        const foldersToBackup: {path: string, destination?: string}[] = []
+        const foldersToBackup: { path: string, destination?: string }[] = []
         const historyFolder = `${REPORTS_DIR}/history`
-        const foldersToCount =[]
+        const foldersToCount = []
         if (keepResults) {
             foldersToBackup.push({path: MOUNTED_PATH})
             foldersToCount.push(MOUNTED_PATH)
@@ -92,7 +92,7 @@ export class CloudStorage {
             foldersToCount.push(historyFolder)
         }
         const isoString = new Date().toISOString().replace(/(\.\d{3})?Z$/, ''); // Remove milliSec and TZ
-        const outputFileName = isoString.concat('.zip')
+        const outputFileName = path.join(ARCHIVE_DIR, isoString.concat('.zip'))
         await zipFolder(foldersToBackup, outputFileName)
         // Count while uploading
         await Promise.all([

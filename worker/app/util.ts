@@ -6,7 +6,7 @@ import archiver from 'archiver';
 import unzipper, {Entry} from 'unzipper';
 
 const exec = util.promisify(require('child_process').exec)
-import {DEBUG, showHistory, showRetries, websiteId} from "./constant";
+import {Icon, REPORTS_DIR, showHistory, showRetries, websiteId} from "./constant";
 import {StringBuilder} from "./string-builder";
 import credential from "./credential";
 import {Counter} from "./counter";
@@ -91,10 +91,14 @@ export async function changePermissionsRecursively(dirPath: string, mode: fsSync
 /**
  * Publishes the Allure report website using Firebase Hosting.
  * Configures the hosting setup and deploys the site.
- * @param configParentDir - Directory containing the hosting configuration
  * @returns {Promise<string | undefined>} - The URL of the deployed site, if successful
  */
-export async function publishToFireBaseHosting(configParentDir: string): Promise<string | null> {
+export async function publishToFireBaseHosting(): Promise<string | null> {
+    appLog(`${Icon.HOUR_GLASS}  Deploying to Firebase...`);
+    // if (DEBUG) {
+    //     void ReportBuilder.open()
+    //     return 'http://localhost:8090'
+    // }
     const hosting = {
         "hosting": {
             "public": ".",
@@ -105,8 +109,8 @@ export async function publishToFireBaseHosting(configParentDir: string): Promise
         }
     }
     try {
-        await changePermissionsRecursively(configParentDir, 0o755)
-        const configDir = `${configParentDir}/firebase.json`
+        await changePermissionsRecursively(REPORTS_DIR, 0o755)
+        const configDir = `${REPORTS_DIR}/firebase.json`
         await fs.writeFile(configDir, JSON.stringify(hosting), {mode: 0o755, encoding: 'utf-8'})
     } catch (e) {
         // Overwrite fail, this is not supposed to happen
@@ -117,7 +121,7 @@ export async function publishToFireBaseHosting(configParentDir: string): Promise
     // console.log(`Deploying Allure report site...`)
     const builder = new StringBuilder()
     builder.append('firebase hosting:channel:deploy').append(' ')
-        .append(`--config ${configParentDir}/firebase.json`).append(' ')
+        .append(`--config ${REPORTS_DIR}/firebase.json`).append(' ')
         .append(`--project ${credential.projectId}`).append(' ')
         .append('--no-authorized-domains').append(' ')
         .append(websiteId!)
@@ -135,10 +139,6 @@ export async function publishToFireBaseHosting(configParentDir: string): Promise
         builder.append('7d')
     }
 
-    if (DEBUG) {
-        appLog('DEBUG mode, skipping live deployment')
-        return 'http://127.0.0.1:8080/';
-    }
     const {stdout, stderr} = await exec(builder.toString())
 
     if (stderr && !stdout) {

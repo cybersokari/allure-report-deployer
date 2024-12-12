@@ -1,8 +1,8 @@
-import { MOUNTED_PATH, REPORTS_DIR, STAGING_PATH} from "./constant";
+import {MOUNTED_PATH, REPORTS_DIR, RESULTS_STAGING_PATH} from "./constant";
 
 const allure = require('allure-commandline')
 import * as fs from 'fs/promises'
-import {appLog, countFiles, isFileTypeAllure} from "./util";
+import {appLog, countFiles} from "./util";
 import chalk from "chalk";
 import {Icon} from "./constant";
 import counter from "./counter";
@@ -14,6 +14,26 @@ import counter from "./counter";
  */
 class ReportBuilder {
 
+    public async open(): Promise<null> {
+        const open = allure([
+            'open',
+            REPORTS_DIR,
+            '--port', '8090'
+        ])
+
+        return await new Promise((resolve, reject) => {
+            open.on('exit', async function (exitCode: number) {
+                if (exitCode === 0) {
+                    // No need to log, Allure logs on success, and I haven't found a way to disable it
+                    resolve(null)
+                } else {
+                    console.warn('Failed to open Allure report')
+                    reject(null)
+                }
+            })
+        })
+    }
+
     /**
      * Generates the Allure test report.
      * @returns {Promise<string>} - The directory path of the generated report
@@ -24,7 +44,7 @@ class ReportBuilder {
         // Generate a new Allure report
         const generation = allure([
             'generate',
-            STAGING_PATH,
+            RESULTS_STAGING_PATH,
             '--report-dir',
             REPORTS_DIR,
             '--clean',
@@ -49,10 +69,8 @@ class ReportBuilder {
     public async stageFilesFromMount() {
         // Count while copying
         await Promise.all([
-            fs.cp(`${MOUNTED_PATH}/`, STAGING_PATH, {
-                recursive: true, force: true, filter(source: string): boolean | Promise<boolean> {
-                    return isFileTypeAllure(source);
-                }
+            fs.cp(`${MOUNTED_PATH}/`, RESULTS_STAGING_PATH, {
+                recursive: true, force: true
             }),
             counter.addFilesProcessed(await countFiles([MOUNTED_PATH]))
         ])

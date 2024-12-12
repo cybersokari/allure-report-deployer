@@ -15,7 +15,8 @@ export abstract class Icon {
 export const DEBUG = process.env.FIREBASE_STORAGE_EMULATOR_HOST !== undefined || false;
 export const MOUNTED_PATH = '/allure-results'
 export const HOME_DIR = '/app'
-export const STAGING_PATH = `${HOME_DIR}/allure-results`;
+export const RESULTS_STAGING_PATH = `${HOME_DIR}/allure-results`;
+export const ARCHIVE_DIR = `${HOME_DIR}/archive`;
 export const REPORTS_DIR = `${HOME_DIR}/allure-report`
 export const websiteId = process.env.WEBSITE_ID || null;
 export const STORAGE_BUCKET = process.env.STORAGE_BUCKET || null;
@@ -25,3 +26,4 @@ export const keepResults = process.env.KEEP_RESULTS?.toLowerCase() === 'true' ||
 export const fileProcessingConcurrency = 10
 export const showHistory = process.env.SHOW_HISTORY?.toLowerCase() === 'true' || true
 export const showRetries = process.env.SHOW_RETRIES?.toLowerCase() === 'true' || true
+export const GITHUB_SUMMARY_PATH = process.env.GITHUB_STEP_SUMMARY || null
