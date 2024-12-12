@@ -34,11 +34,4 @@ if [ -f "$GITHUB_STEP_SUMMARY" ]; then
   echo "Running on GitHub. Summary will be available"
 fi
 
-if [ -n "$TTL_SECS" ]; then
-  if ! [[ "$TTL_SECS" -eq "$TTL_SECS" && "$TTL_SECS" -ge 0 ]]; then
-    echo "Error: $TTL_SECS must be a positive number"
-    exit 1
-  fi
-fi
-
 node --disable-warning=ExperimentalWarning /app/lib/index.js

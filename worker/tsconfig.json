@@ -15,6 +15,6 @@
   "include": [
     "index.ts",
     "app/*.ts",
+    "test/*.ts"
   ],
-  "exclude": ["test"]
 }

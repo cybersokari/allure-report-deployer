@@ -26,22 +26,20 @@ services:
           ignore:
             - node_modules/
         - action: rebuild
-          path: package.json
+          path: ./worker/package.json
     container_name: allure-deployer
     env_file: .env.slack
     environment:
-      FIREBASE_STORAGE_EMULATOR_HOST: 127.0.0.1:9199 # Dev mode
-      STORAGE_BUCKET: "fir-demo-project.appspot.com"
+#      FIREBASE_STORAGE_EMULATOR_HOST: 127.0.0.1:9199 # Dev mode
+      STORAGE_BUCKET: "gatedaccessdev.appspot.com"
       PREFIX: 'project-999'
       WEBSITE_ID: 'fir-demo-project'
       WEBSITE_EXPIRES: 12h
       KEEP_HISTORY: true # Default is true when STORAGE_BUCKET is provided
       KEEP_RESULTS: true # Default is false
-      WATCH_MODE: false
-      TTL_SECS: 6
     volumes:
 #      - ./worker:/app #Dev only. This overrides the /app dir
-      - ${PWD}/gcp-key.json:/credentials/key.json:ro
+      - /Users/sokari/IdeaProjects/appium/service-account-sokari.json:/credentials/key.json:ro
       - /Users/sokari/IdeaProjects/appium/reports/ios/allure-results:/allure-results
     cpus: 1
     mem_limit: 2048m
