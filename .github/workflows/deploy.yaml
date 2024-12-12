@@ -31,8 +31,9 @@ jobs:
       - name: Install dependencies
         run: |
           cd ./worker
-          npm install --omit=dev && npm run build
-          
+          npm install && tsc
+          npm install --omit=dev
+
       - name: Build and push
         uses: docker/build-push-action@v6.10.0
         with:
