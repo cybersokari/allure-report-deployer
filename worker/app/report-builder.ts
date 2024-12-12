@@ -1,8 +1,8 @@
-import {acceptedFileTypeRegex, MOUNTED_PATH, REPORTS_DIR, STAGING_PATH} from "./constant";
+import { MOUNTED_PATH, REPORTS_DIR, STAGING_PATH} from "./constant";
 
 const allure = require('allure-commandline')
 import * as fs from 'fs/promises'
-import {appLog, countFiles} from "./util";
+import {appLog, countFiles, isFileTypeAllure} from "./util";
 import chalk from "chalk";
 import {Icon} from "./constant";
 import counter from "./counter";
@@ -18,7 +18,7 @@ class ReportBuilder {
      * Generates the Allure test report.
      * @returns {Promise<string>} - The directory path of the generated report
      */
-    public async generate(): Promise<string|null> {
+    public async generate(): Promise<string | null> {
 
         appLog(`${chalk.green(Icon.HOUR_GLASS)}  Generating report...`)
         // Generate a new Allure report
@@ -30,7 +30,7 @@ class ReportBuilder {
             '--clean',
         ])
 
-        return await new Promise<string|null>((resolve, reject) => {
+        return await new Promise<string | null>((resolve, reject) => {
             generation.on('exit', async function (exitCode: number) {
                 if (exitCode === 0) {
                     // No need to log, Allure logs on success, and I haven't found a way to disable it
@@ -49,9 +49,11 @@ class ReportBuilder {
     public async stageFilesFromMount() {
         // Count while copying
         await Promise.all([
-            fs.cp(`${MOUNTED_PATH}/`, STAGING_PATH, {recursive: true, force: true, filter(source: string): boolean | Promise<boolean> {
-                    return !!source.match(acceptedFileTypeRegex);
-                }}),
+            fs.cp(`${MOUNTED_PATH}/`, STAGING_PATH, {
+                recursive: true, force: true, filter(source: string): boolean | Promise<boolean> {
+                    return isFileTypeAllure(source);
+                }
+            }),
             counter.addFilesProcessed(await countFiles([MOUNTED_PATH]))
         ])
     }

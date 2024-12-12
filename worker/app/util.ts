@@ -6,7 +6,7 @@ import archiver from 'archiver';
 import unzipper, {Entry} from 'unzipper';
 
 const exec = util.promisify(require('child_process').exec)
-import {acceptedFileTypeRegex, DEBUG, websiteId} from "./constant";
+import {DEBUG, showHistory, showRetries, websiteId} from "./constant";
 import {StringBuilder} from "./string-builder";
 import credential from "./credential";
 
@@ -190,13 +190,26 @@ export async function zipFolder(sourceFolder: { path: string, destination?: stri
     });
 }
 
-export async function unzipFile(zipFilePath: string, outputDir: string) {
+export async function unzipFile(zipFilePath: string, outputDir: string): Promise<boolean> {
     return await new Promise((resolve, reject) => {
         fsSync.createReadStream(zipFilePath)
             .pipe(unzipper.Parse())
             .on('entry', async (entry: Entry) => {
                 const fullPath = path.join(outputDir, entry.path);
-                if (!!entry.path.match(acceptedFileTypeRegex)) {
+                if(!showHistory){
+                    // Ignore the history subdirectory
+                    if(entry.path.includes('history/')){
+                        entry.autodrain();
+                        return;
+                    }
+                }
+                if(!showRetries){
+                    if(!entry.path.includes('history/')){
+                        entry.autodrain();
+                        return;
+                    }
+                }
+                if (isFileTypeAllure(entry.path)) {
                     entry.pipe(fsSync.createWriteStream(fullPath));
                 } else{
                     entry.autodrain();
@@ -207,7 +220,7 @@ export async function unzipFile(zipFilePath: string, outputDir: string) {
             })
             .on('error', (err) => {
                 console.error('Unzip file error:', err);
-                reject(err);
+                resolve(false);
             });
     });
 }
@@ -224,6 +237,10 @@ export async function countFiles(directory: string[]) {
         appLog(`Error reading directory: ${err}`);
     }
     return count
+}
+
+export function isFileTypeAllure(filePath: string){
+    return !!filePath.match(/^.*\.(json|png|jpeg|jpg|gif|properties|log|webm)$/i)
 }
 
 

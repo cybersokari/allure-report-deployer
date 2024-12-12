@@ -1,14 +1,18 @@
 import * as path from "node:path";
 import {
-    DEBUG, fileProcessingConcurrency,
+    DEBUG,
+    fileProcessingConcurrency,
     keepHistory,
     keepResults,
     MOUNTED_PATH,
     REPORTS_DIR,
-    STAGING_PATH, websiteId
+    showHistory,
+    showRetries,
+    STAGING_PATH,
+    websiteId
 } from "./constant";
 import * as admin from "firebase-admin";
-import {Bucket} from '@google-cloud/storage'
+import {Bucket, File} from '@google-cloud/storage'
 import {countFiles, unzipFile, zipFolder} from "./util";
 import counter from "./counter";
 import pLimit from "p-limit";
@@ -44,11 +48,20 @@ export class CloudStorage {
 
     // Download remote files to staging area
     public async stageFilesFromStorage(): Promise<any> {
+        if(!showHistory && !showRetries) return
+
         try {
-            const [files] = await CloudStorage.bucket.getFiles({prefix: `${storageHomeDir}/`, matchGlob: '**.zip'});
+            let [zippedFiles] = await CloudStorage.bucket.getFiles({prefix: `${storageHomeDir}/`, matchGlob: '**.zip'});
+            if(showHistory){
+                // Unzipping from the oldest to newest archive makes sure
+                // the archive with the latest history files gets unzipped last
+                // and overwrites any old history from in the staging directory.
+                zippedFiles = this.sortFilesByOldestToNewest(zippedFiles)
+            }
+
             const limit = pLimit(fileProcessingConcurrency);
             const downloadPromises = [];
-            for (const file of files) {
+            for (const file of zippedFiles) {
                 downloadPromises.push(limit(async () => {
                     // Remove the preceding storageHomeDir path from the downloaded file
                     const destination = path.join(STAGING_PATH, path.basename(file.name));
@@ -86,5 +99,17 @@ export class CloudStorage {
             counter.addFilesUploaded(await countFiles(foldersToCount)),
             this.uploadFile(outputFileName, outputFileName)
         ])
+    }
+
+    private sortFilesByOldestToNewest(files: File[]): File[] {
+        if (!files || files.length < 2) {
+            return files;
+        }
+        // Filter out files without valid `timeCreated` metadata
+        files = files.filter(file => file.metadata?.timeCreated);
+        // Sort files by creation time (oldest first)
+        return files.sort((a, b) =>
+            new Date(a.metadata.timeCreated!).getTime() - new Date(b.metadata.timeCreated!).getTime()
+        );
     }
 }
