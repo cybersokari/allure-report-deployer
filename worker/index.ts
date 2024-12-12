@@ -1,5 +1,4 @@
 import {
-    appLog,
     publishToFireBaseHosting,
 } from "./app/util";
 import ReportBuilder from "./app/report-builder";
@@ -8,9 +7,8 @@ import credential from "./app/credential";
 import {Notifier} from "./app/notifier";
 import fs from "fs/promises";
 import {
-    cloudStorage,
-    Icon,
-    STAGING_PATH,
+    cloudStorage, GITHUB_SUMMARY_PATH,
+    RESULTS_STAGING_PATH,
     websiteId
 } from "./app/constant";
 
@@ -35,11 +33,10 @@ export function main(): void {
             console.error('Failed to process Google credentials: Are you sure you have the correct file?', error);
             return
         }
-        if(websiteId){
-            await fs.mkdir(`${STAGING_PATH}/history`, {recursive: true});
+        if (websiteId) {
+            await fs.mkdir(`${RESULTS_STAGING_PATH}/history`, {recursive: true});
         }
 
-        let newReportPath : string | null = null;
         if (websiteId) {
             // Stage files
             await Promise.all([
@@ -47,23 +44,21 @@ export function main(): void {
                 cloudStorage?.stageFilesFromStorage()
             ])
             // Build report
-            newReportPath = await ReportBuilder.generate()
+            await ReportBuilder.generate()
         }
         // Host report and uploadArtifacts
-        let url : string | null;
-        appLog(`${Icon.HOUR_GLASS}  Deploying to Firebase...`);
-        url = (await Promise.all([
-            newReportPath ? publishToFireBaseHosting(newReportPath) : null,
+        const [url] = (await Promise.all([
+            publishToFireBaseHosting(),
             cloudStorage?.uploadArtifacts()
-        ]))[0]
+        ]))
+
 
         // Prepare GitHub summary
-        const githubStepSummary = process.env.GITHUB_STEP_SUMMARY
         const notifier = new Notifier()
-        const notifierPromises : Promise<void>[] = []
-        if (githubStepSummary) {
+        const notifierPromises: Promise<void>[] = []
+        if (GITHUB_SUMMARY_PATH) {
             notifierPromises.push(notifier.printGithubSummary({
-                mountedFilePath: githubStepSummary,
+                mountedFilePath: GITHUB_SUMMARY_PATH,
                 url: url
             }))
         } else {
@@ -79,7 +74,7 @@ export function main(): void {
             }))
         }
         // Send notifications async
-        if(notifierPromises.length > 0){
+        if (notifierPromises.length > 0) {
             await Promise.all(notifierPromises)
         }
     })()

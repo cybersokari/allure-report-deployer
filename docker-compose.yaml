@@ -5,7 +5,7 @@ services:
     ports:
       - "9199:9199"
       - "4000:4000"
-      - "5088:5088"
+      - "8090:8090"
     command: ["firebase", "emulators:start", "--only", "storage,logging", "--project", "fir-demo-project", '--config', "./startfirebase.json"]
     restart: unless-stopped
     healthcheck:
