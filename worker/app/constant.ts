@@ -10,9 +10,6 @@ export abstract class Icon {
     public static CHART = '📊'
     public static FOLDER = '📁'
     public static MAGNIFIER = '🔍'
-
-
-
 }
 
 export const DEBUG = process.env.FIREBASE_STORAGE_EMULATOR_HOST !== undefined || false;
@@ -24,6 +21,7 @@ export const websiteId = process.env.WEBSITE_ID || null;
 export const STORAGE_BUCKET = process.env.STORAGE_BUCKET || null;
 export const cloudStorage = STORAGE_BUCKET ? CloudStorage.getInstance(STORAGE_BUCKET) : null;
 export const keepHistory = process.env.KEEP_HISTORY?.toLowerCase() === 'true' || true // Defaults to true
-export const keepResults = process.env.KEEP_RESULTS?.toLowerCase() === 'true' || false
+export const keepResults = process.env.KEEP_RESULTS?.toLowerCase() === 'true' || true
 export const fileProcessingConcurrency = 10
-export const acceptedFileTypeRegex = /^.*\.(json|png|jpeg|jpg|gif|properties|log|webm)$/i
+export const showHistory = process.env.SHOW_HISTORY?.toLowerCase() === 'true' || true
+export const showRetries = process.env.SHOW_RETRIES?.toLowerCase() === 'true' || true

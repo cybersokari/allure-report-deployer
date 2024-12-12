@@ -10,18 +10,22 @@
 ## 📚 **Table of Contents**
 
 1. [Quick Start](#quick-start)
-2. [Key Features](#key-features)
+2. [How it works](#how-it-works)
+    - [Firebase Hosting](#hosting)
+    - [Cloud Storage](#cloud-storage)
+    - [History and Retries](#history-and-retries)
+    - [Slack Integration](#slack-integration)
 3. [Use Cases](#use-cases)
-    - [GitHub Actions](#github-actions-integration)
+    - [CI Pipeline](#ci-pipelines)
+      - [GitHub Actions](#github-actions-integration)
     - [Local Test Runs](#local-test-runs)
 4. [Docker Image Configuration](#docker-image-configuration)
     - [Environment Variables](#environment-variables)
     - [Mount Volumes](#mount-volumes)
-5. [How It Works](#how-it-works)
-6. [Comparison with Other Tools](#comparison-with-other-open-source-tools)
-7. [Troubleshooting and FAQs](#troubleshooting-and-faqs)
-8. [License](#license)
-9. [Contributing](#contributing)
+5. [Comparison with Other Tools](#comparison-with-other-open-source-tools)
+6. [Troubleshooting and FAQs](#troubleshooting-and-faqs)
+7. [License](#license)
+8. [Contributing](#contributing)
 
 
 <h2 id="quick-start">🚀 Quick Start</h2>
@@ -37,9 +41,10 @@
 3. **Docker**:
     - Ensure your CI environment supports Docker or you have installed it locally. [Download Docker](https://docs.docker.com/get-docker/)
 
+    
 
-### **For GitHub Actions:**
-#### 1.	Add the [docker image](https://hub.docker.com/r/sokari/allure-deployer) to your GitHub Actions workflow
+### For GitHub Actions:
+#### 1.	Add the [docker image](https://hub.docker.com/r/sokari/allure-deployer) to your GitHub Actions workflow and run it.
         sokari/allure-deployer:latest
 
 ```yaml
@@ -78,41 +83,29 @@ jobs:
           sokari/allure-deployer:latest
             
 ```
-___
-
-#### 2. Generate Allure results
-      Add a step that outputs Allure result files to `/allure-results` path in the workflow.
+See the Docker [configuration section](#docker-image-configuration) for more info
 
 ___
 
-#### 3.	Run the Workflow:
-      Push your changes to the main branch and let GitHub Actions do the rest!
-___
+#### 2.	Check your GitHub Actions summary:
+Example:
+```markdown
+`allure-report-deployer`
 
-#### 4.	View Report information:
-      Check the job summary in GitHub Actions for the report URL.
+📊 Your Test Report is ready
 
-<div style="text-align: left"><img src="assets/example-github-summary.png" alt="URL preview in GitHub Actions summary"></div>
+Test Report: https://your-example-url.web.app
+File Storage: https://console.firebase.google.com/project/${project-id}/storage/${storage-bucket}/files
 
-___
-
-#### 5. Get notified in Slack 
-      Add SLACK_TOKEN and SLACK_CHANNEL_ID as environment variable in the docker run command to receipt job
-      completion notifications in Slack.
-
-<div style="text-align: left"><img src="assets/slack-bot.png" alt="URL preview in GitHub Actions summary"></div>
-
-___
-
-#### 6. View your test result files on the Firebase Developer console
-
-<div><img src="assets/storage-dashboard.png" alt="Test result files in Firebase Storage"></div>
+| 📂 Files Uploaded | 🔍 Files Processed | ⏱ Duration |
+|-------------------|--------------------|------------|
+| 5                 | 49                 | 8 seconds  |
+```
 
 ---
 
-#### 7. Test report example site
-      The final URLs are randomized, so only people you share the link with can view your report.
-
+#### 3. Your Test report website in Firebase Hosting:
+Example:
 <div><img src="assets/site.png" alt="Test report example site"></div>
 
 Tips
@@ -164,16 +157,18 @@ ___
 <h3 id="environment-variables">Environment Variables</h3>
 
 
-| Variable           | Description                                                                                                                         | Example                        | Default |
-|--------------------|-------------------------------------------------------------------------------------------------------------------------------------|--------------------------------|---------|
-| `STORAGE_BUCKET`   | Google Cloud Storage bucket name                                                                                                    | project-id.firebasestorage.app | None    |
-| `PREFIX`           | A path in your Storage bucket. Optional.                                                                                            | project-123                    | None    |
-| `WEBSITE_ID`       | Unique identifier for hosted reports                                                                                                | test-report-id                 | None    |
-| `WEBSITE_EXPIRES`  | Expiration duration for reports. Examples: 1h, 2d, 3w                                                                               | 29d                            | 7d      |
-| `KEEP_HISTORY`     | Backup `reports/history` directory after report generation.                                                                         | true                           | true    |
-| `KEEP_RESULTS`     | Backup `/allure-results` directory after report generation..                                                                        | false                          | false   |
-| `SLACK_TOKEN`      | Your Slack Bot token                                                                                                                | xoxb-XXXXXXXXXX-XXXXXXXX       | None    |
-| `SLACK_CHANNEL_ID` | The ID of the channel or conversation you want to receive your status                                                               | DC56JYGT8                      | None    |
+| Variable           | Description                                                                                   | Example                        | Default |
+|--------------------|-----------------------------------------------------------------------------------------------|--------------------------------|---------|
+| `STORAGE_BUCKET`   | Google Cloud Storage bucket name                                                              | project-id.firebasestorage.app | None    |
+| `PREFIX`           | A path in your Storage bucket. Optional.                                                      | project-123                    | None    |
+| `WEBSITE_ID`       | Unique identifier for hosted reports                                                          | test-report-id                 | None    |
+| `WEBSITE_EXPIRES`  | Expiration duration for reports. Examples: 1h, 2d, 3w                                         | 29d                            | 7d      |
+| `KEEP_HISTORY`     | Backup `allure-reports/history` directory after every report generation.                      | true                           | true    |
+| `KEEP_RESULTS`     | Backup `/allure-results` directory after report generation..                                  | false                          | true    |
+| `SHOW_HISTORY`     | Show history in the current report by pulling the history from the last Cloud Storage backup  | true                           | true    |
+| `SHOW_RETRIES`     | Show retries in the current report by pulling result files from all archives in Cloud Storage | true                           | true    |
+| `SLACK_TOKEN`      | Your Slack App token                                                                          | xoxb-XXXXXXXXXX-XXXXXXXX       | None    |
+| `SLACK_CHANNEL_ID` | The Slack channel or conversation to notify with Allure report details                        | DC56JYGT8                      | None    |
 
 **Note**: Either `STORAGE_BUCKET` or `WEBSITE_ID` must be provided. Both can be configured if you want to enable all functionalities.
 
@@ -183,7 +178,7 @@ ___
 
 | Host                        | Container               | Description                                                                                                                          |
 |-----------------------------|-------------------------|--------------------------------------------------------------------------------------------------------------------------------------|
-| `/path/to/allure-results`   | `/allure-results`       | Allure test results.                                                                                                                 |
+| `/path/to/allure-results`   | `/allure-results`       | Allure test results directory.                                                                                                       |
 | `/path/to/credentials.json` | `/credentials/key.json` | Google Cloud service account JSON file.                                                                                              |
 | `$GITHUB_STEP_SUMMARY`      | `/github/summary.txt`   | [GitHub Actions summary](https://github.blog/news-insights/product-news/supercharging-github-actions-with-job-summaries/) (optional) |
 
@@ -193,30 +188,95 @@ ___
 
 ---
 
-<h2 id="key-features">🔑 Key Features</h2>
+<h2 id="how-it-works">🛠️ How It Works</h2>
 
-* **Cloud Storage**: Automatically backs up test results to Google Cloud Storage.
-* **Preview URLs:** Generates unique, ephemeral URLs for easy sharing.
-* **Slack Integration:** Notify your team with report links after each test run.
-* **Continuous Deployment:** Automatically detects changes and uploads updated reports.
+<h3 id="hosting">🌐 Firebase Hosting</h3>
+
+When you run the Docker image with valid Allure result files,
+the report is automatically hosted on Firebase Hosting in your Firebase account.
+A **secure, randomized URL** will be generated and displayed in the console logs.
+If configured, the URL will also appear in **GitHub Summary** and **Slack notifications**.
+
+#### Key Features
+
+- **Temporary Hosting**: The URL is hosted using Firebase's Preview Channels, which expire after 30 days.
+- **Customizable URL**: Use the `WEBSITE_ID` environment variable to control your report's hosting:
+    - Using the **same `WEBSITE_ID`** overwrites the previous report at the same URL.
+    - Using a **new `WEBSITE_ID`** generates a unique URL for each report.
+
+For more information, check the [Environment Variables](#environment-variables) section.
+
+<h3 id="cloud-storage">☁️ Cloud Storage</h3>
+
+Your files are backed up as a `.zip` archive when you set `KEEP_HISTORY` or `KEEP_RESULTS`.
+*  `KEEP_RESULTS` adds all the files in your `/allure-results` mount directory to the archive
+*  `KEEP_HISTORY` adds the `history` [subdirectory of your latest report](https://allurereport.org/docs/how-it-works-history-files/#history-files) to the archive
+
+Archive example when both `KEEP_RESULTS` and `KEEP_HISTORY` are enabled
+```text
+2024-12-12T06:46:28.zip/
+            ├── history/
+            │   ├── categories-trend.json
+            │   ├── duration-trend.json
+            │   ├── history-trend.json
+            │   ├── history.json
+            │   └── retry-trend.json
+            ├── 01f49176-82b1-462d-aa15-bd0369600617-result.json
+            ├── 2f10bad1-2f73-46ab-b2ef-28fc010f4473-container.json
+            ├── 3abc8f5d-8292-45fa-9c0c-d0e1bfc8d173-container.json
+            ├── 4cb007b9-e103-4518-a3b0-5ef98e178367-attachment.webm
+            ├── 4dd05185-1dd4-4981-a860-9db6cd66532a-attachment.webm
+            ├── 4f4d3f28-f6a2-4e0b-8f72-cf37763a4cd0-attachment.webm
+            ├── 7a71a49f-4b80-4cde-a3d2-37813e6a51f3-attachment.webm
+            ├── 7b1f36ef-ce18-4cfe-af8d-17af3a42995d-result.json
+            ├── 7fbde46e-3030-4836-8399-7d537d568b6a-result.json
+            ├── 07febc1-46d1-4fc6-8175-9e167e2ad760-attachment.webm
+            ├── 8d25f178-46dc-4779-87c5-3f82e44e3630-container.json
+            ├── 8fde3b8a-7632-4c87-9c28-4c66b1b99383-attachment.webm
+            ├── 9a6c98c8-3773-4a1e-b1d7-267fc2b7887b-result.json
+            ├── 9c0689aa-3a6c-4580-9f00-427f941ba2ac-container.json
+            ├── 21f27bd5-d1c6-40e1-bc79-9747b3dbe93f-result.json
+            └── 39aea642-05b4-4b01-8944-d8e02f184e30-container.json
+```
+___
+
+Zipped archives examples in the Firebase Developer console
+
+<div><img src="assets/storage-dashboard.png" alt="Test result files in Firebase Storage"></div>
+
+
+<h3 id="history-and-retries">🕗🔄 History and Retries</h3>
+
+#### History
+Set `SHOW_HISTORY` to `true` to enable history in your incoming test report.
+This feature uses the history of your last archive in Cloud Storage, which means that 
+you will need to enable `KEEP_HISTORY` so that your history file will be uploaded to storage 
+for subsequent `SHOW_HISTORY` usage. 
+This is enabled by default.
+See how [Allure History works](https://allurereport.org/docs/history-and-retries/#tests-history)
+#### Retries
+Set `SHOW_RETRIES` to true to show retries in the incoming test report.
+This feature combines all the test result files from Cloud Storage before running the new report
+Enable `KEEP_RESULTS` so that all your test result files will be uploaded to Cloud Storage for
+subsequent test report generation.
+See how [Allure Retries](https://allurereport.org/docs/history-and-retries/#how-to-keep-retries) work
+
+<h3 id="slack-integration">🛠️ Slack Integration</h2>
+To notify stakeholders with secure test report links after each test run,
+create a [simple Slack app](https://youtu.be/SbUv1nCS7a0?si=8rjWDQh6wfeAztxu&t=266) and set `SLACK_TOKEN`
+and `SLACK_CHANNEL_ID` environment variable when you run the Docker image.
+
+<div style="text-align: left"><img src="assets/slack-bot.png" alt="Slack app notification example"></div>
 
 <h2 id="use-cases">📊 Use Cases</h2>
+<h3 id="ci-pipelines">🏗️ CI Pipelines</h2>
+<h4 id="github-actions-integration">🧪 GitHub Actions Integration</h2>
 
-<h3 id="github-actions-integration">🧪 GitHub Actions Integration</h2>
-
-Integrate Allure Report Deployer into your CI/CD pipelines with GitHub Actions.
 Follow the [GitHub action](#for-github-actions) steps to set it up.
 
 <h3 id="local-test-runs">🖥️ Local Test Runs</h2>
 
-Run and preview your test reports locally using the Docker container.
 See the [Local test run](#local-test-runs) section for detailed instructions.
-
-<h2 id="how-it-works">🛠️ How It Works</h2>
-
-* **Generate Reports:** Collect Allure results from your tests.
-* **Deploy Reports:** Host the reports on Firebase with unique URLs.
-* **Backup Results:** Store Allure report history and result files in Google Cloud Storage.
 
 
 <h2 id="comparison-with-other-open-source-tools">🔄 Comparison with Other Open Source Tools</h2>
@@ -226,7 +286,7 @@ See the [Local test run](#local-test-runs) section for detailed instructions.
 | **Serverless**           | ✅ No server required                                                          | ❌ No, you need to pay for a server                                      |
 | **Ephemeral URLs**       | ✅ Yes, every deployment generates a unique ephemeral URL for the test report. | ❌ No, reports are deployed to a single GitHub Pages URL, or not at all. |
 | **Slack notifications**  | ✅ Receive your test report URL in Slack                                       | ❌ Not supported.                                                        |
-| **No Git commits**       | ✅ You don't need to commit files to Git.                                      | ❌ Requires committing generated reports to Git.                         |
+| **No Git commits**       | ✅ You don't need to commit your Allure report files to Git.                   | ❌ Requires committing generated reports to Git.                         |
 
 
 <h2 id="troubleshooting-and-faqs">🛠️ Troubleshooting and FAQs</h2>
