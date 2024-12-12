@@ -97,7 +97,7 @@ export class CloudStorage {
         // Count while uploading
         await Promise.all([
             counter.addFilesUploaded(await countFiles(foldersToCount)),
-            this.uploadFile(outputFileName, outputFileName)
+            this.uploadFile(outputFileName, path.basename(outputFileName))
         ])
     }
 
