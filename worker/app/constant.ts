@@ -1,8 +1,6 @@
-import chalk from "chalk";
-import {CloudStorage} from "./cloud-storage";
 
 export abstract class Icon {
-    public static CHECK_MARK = chalk.green('\u2713')
+    public static CHECK_MARK = '\u2713'
     public static HOUR_GLASS = '\u23F3'
     public static ROCKET = '🚀'
     public static GLOBE = '🌐'
@@ -20,7 +18,6 @@ export const ARCHIVE_DIR = `${HOME_DIR}/archive`;
 export const REPORTS_DIR = `${HOME_DIR}/allure-report`
 export const websiteId = process.env.WEBSITE_ID || null;
 export const STORAGE_BUCKET = process.env.STORAGE_BUCKET || null;
-export const cloudStorage = STORAGE_BUCKET ? CloudStorage.getInstance(STORAGE_BUCKET) : null;
 export const keepHistory = process.env.KEEP_HISTORY?.toLowerCase() === 'true' || true // Defaults to true
 export const keepResults = process.env.KEEP_RESULTS?.toLowerCase() === 'true' || true
 export const fileProcessingConcurrency = 10

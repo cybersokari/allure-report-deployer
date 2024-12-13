@@ -6,10 +6,11 @@ import archiver from 'archiver';
 import unzipper, {Entry} from 'unzipper';
 
 const exec = util.promisify(require('child_process').exec)
-import {Icon, REPORTS_DIR, showHistory, showRetries, websiteId} from "./constant";
+import {DEBUG, Icon, REPORTS_DIR, showHistory, showRetries, websiteId} from "./constant";
 import {StringBuilder} from "./string-builder";
 import credential from "./credential";
 import {Counter} from "./counter";
+import reportBuilder from "./report-builder";
 
 export function appLog(data: string) {
     console.log(data)
@@ -95,10 +96,10 @@ export async function changePermissionsRecursively(dirPath: string, mode: fsSync
  */
 export async function publishToFireBaseHosting(): Promise<string | null> {
     appLog(`${Icon.HOUR_GLASS}  Deploying to Firebase...`);
-    // if (DEBUG) {
-    //     void ReportBuilder.open()
-    //     return 'http://localhost:8090'
-    // }
+    if (DEBUG) {
+        void reportBuilder.open(8090)
+        return 'http://localhost:8090'
+    }
     const hosting = {
         "hosting": {
             "public": ".",
@@ -161,7 +162,6 @@ export async function publishToFireBaseHosting(): Promise<string | null> {
 }
 
 
-// Function to zip a folder
 export async function zipFolder(sourceFolder: { path: string, destination?: string }[], outputZipFile: string) {
     return await new Promise((resolve: (value: boolean) => void, reject) => {
 
@@ -172,7 +172,6 @@ export async function zipFolder(sourceFolder: { path: string, destination?: stri
         const output = fsSync.createWriteStream(outputZipFile);
         const archive = archiver('zip', {zlib: {level: 9}}); // Set the compression level
 
-        // Listen for errors
         output.on('close', () => {
             resolve(true);
         });
@@ -191,7 +190,7 @@ export async function zipFolder(sourceFolder: { path: string, destination?: stri
     });
 }
 
-export async function unzipFile(zipFilePath: string, outputDir: string): Promise<boolean> {
+export async function unzipAllureResult(zipFilePath: string, outputDir: string): Promise<boolean> {
     return await new Promise((resolve, reject) => {
         fsSync.createReadStream(zipFilePath)
             .pipe(unzipper.Parse())

@@ -4,13 +4,22 @@ import {
 import ReportBuilder from "./app/report-builder";
 import counter from "./app/counter";
 import credential from "./app/credential";
-import {Notifier} from "./app/notifier";
 import fs from "fs/promises";
+import admin from "firebase-admin";
 import {
-    cloudStorage, GITHUB_SUMMARY_PATH,
-    RESULTS_STAGING_PATH,
+     GITHUB_SUMMARY_PATH,
+    RESULTS_STAGING_PATH, STORAGE_BUCKET,
     websiteId
 } from "./app/constant";
+import {Storage} from "./app/storage/storage";
+import notifier from "./app/notifier";
+import {FirebaseStorage} from "./app/storage/firebase-storage";
+
+let cloudStorage : Storage | undefined = undefined;
+if(STORAGE_BUCKET){
+    const bucket = admin.initializeApp({storageBucket: STORAGE_BUCKET}).storage().bucket()
+    cloudStorage = new Storage(new FirebaseStorage(bucket))
+}
 
 /**
  * Entry Point
@@ -24,7 +33,7 @@ export function main(): void {
         console.warn('WEBSITE_ID or STORAGE_BUCKET is required');
         return
     }
-    new Notifier().printStats();
+    notifier.printStats();
 
     (async () => {
         try {// Initializing project_id from Google credentials
@@ -54,7 +63,6 @@ export function main(): void {
 
 
         // Prepare GitHub summary
-        const notifier = new Notifier()
         const notifierPromises: Promise<void>[] = []
         if (GITHUB_SUMMARY_PATH) {
             notifierPromises.push(notifier.printGithubSummary({
@@ -65,13 +73,8 @@ export function main(): void {
             notifier.printSummaryToConsole({url: url})
         }
         // Prepare Slack message
-        const token = process.env.SLACK_TOKEN;
-        const conversationId = process.env.SLACK_CHANNEL_ID;
-        if (conversationId && token) {
-            notifierPromises.push(notifier.SendSlackMsg({
-                conversationId: conversationId,
-                token: token, url: url
-            }))
+        if(notifier.slackClient){
+            notifierPromises.push(notifier.SendSlackMsg(url))
         }
         // Send notifications async
         if (notifierPromises.length > 0) {

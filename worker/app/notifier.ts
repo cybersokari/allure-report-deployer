@@ -1,5 +1,5 @@
 import counter from "./counter";
-import {cloudStorage, DEBUG, Icon, keepHistory, keepResults, STORAGE_BUCKET, websiteId} from "./constant";
+import {DEBUG, Icon, keepHistory, keepResults, STORAGE_BUCKET, websiteId} from "./constant";
 import {WebClient} from '@slack/web-api';
 import {StringBuilder} from "./string-builder";
 import * as fs from "node:fs";
@@ -9,9 +9,31 @@ import credential from "./credential";
 import {appLog, generateMarkdown} from "./util";
 
 type SlackCredentials = {
+    channel: string,
     token: string,
-    conversationId: string,
-    url?: string | undefined | null
+}
+
+export interface SlackClient {
+    postMessage(blocks: any, text: string): Promise<void>;
+}
+
+export class RealSlackClient implements SlackClient {
+    private webClient: WebClient;
+    private readonly channel: string;
+
+    constructor(cred: SlackCredentials) {
+        this.webClient = new WebClient(cred.token);
+        this.channel = cred.channel;
+    }
+
+    public async postMessage(blocks: any, text: string): Promise<void> {
+        const channel = this.channel;
+        await this.webClient.chat.postMessage({
+            channel,
+            blocks,
+            text,
+        });
+    }
 }
 
 /**
@@ -20,13 +42,19 @@ type SlackCredentials = {
  * Handles notifications related to report generation and file processing.
  * Supports Slack notifications, GitHub summary updates, and general stats logging.
  */
-export class Notifier {
+class Notifier {
+    public slackClient?: SlackClient;
+
+    constructor(slackClient?: SlackClient) {
+        this.slackClient = slackClient;
+    }
 
     private get dashboardUrl() {
         if (DEBUG) {
             return `http://127.0.0.1:4000/storage/${STORAGE_BUCKET}`
         }
-        return new StringBuilder().append("https://console.firebase.google.com/project")
+        return new StringBuilder()
+            .append("https://console.firebase.google.com/project")
             .append(`/${(credential.projectId)}`)
             .append(`/storage/${STORAGE_BUCKET}/files`)
             .toString()
@@ -35,11 +63,9 @@ export class Notifier {
     /**
      * Sends a message to a Slack channel with details about the report.
      * Includes report links, file processing stats, and additional buttons.
-     * @param slackCred - Slack credentials and channel information
      */
-    public async SendSlackMsg(slackCred: SlackCredentials) {
-        if (DEBUG) return
-        const web = new WebClient(slackCred.token);
+    public async SendSlackMsg(url: string | null) {
+        if (!this.slackClient) throw new Error('Slack client not initialized')
         // See: https://api.slack.com/methods/chat.postMessage
 
         const blocks = []
@@ -50,7 +76,7 @@ export class Notifier {
                 "text": "*Your Allure report is ready* 📊"
             }
         })
-        if (cloudStorage) {
+        if (STORAGE_BUCKET) {
 
             blocks.push({
                     "type": "context",
@@ -80,7 +106,7 @@ export class Notifier {
                 }
             ]
         })
-        if (slackCred.url) {
+        if (url) {
             blocks.push({
                 "type": "actions",
                 "elements": [
@@ -91,12 +117,12 @@ export class Notifier {
                             "text": "View report",
                             "emoji": true
                         },
-                        "url": slackCred.url
+                        "url": url
                     }
                 ]
             })
         }
-        if (cloudStorage) {
+        if (STORAGE_BUCKET) {
             blocks.push({
                 "type": "actions",
                 "elements": [
@@ -128,11 +154,10 @@ export class Notifier {
         })
 
         try {
-            await web.chat.postMessage({
-                channel: slackCred.conversationId,
-                blocks: blocks,
-                text: 'Your Allure report is ready.'
-            });
+            await this.slackClient.postMessage(
+                blocks,
+                'Your Allure report is ready.'
+            );
             appLog('Slack message sent');
         } catch (e) {
 
@@ -161,7 +186,7 @@ export class Notifier {
         if (!websiteId) {
             appLog('Report publishing disabled because WEBSITE_ID is not provided');
         }
-        if (cloudStorage) {
+        if (STORAGE_BUCKET) {
             if (keepHistory && keepResults) {
                 appLog(`KEEP_HISTORY and KEEP_RESULTS enabled`)
             } else if (keepHistory) {
@@ -177,7 +202,7 @@ export class Notifier {
 
     printSummaryToConsole(data?: { url: string | null }): void {
         const dashboardUrl = this.dashboardUrl
-        if (cloudStorage && data) {
+        if (STORAGE_BUCKET && data) {
             appLog(`
 ${Icon.CHART} Test report URL   : ${ansiEscapes.link(chalk.blue(data.url), data!.url!)}
 ${Icon.FILE_UPLOAD} Storage URL       : ${ansiEscapes.link(chalk.blue(dashboardUrl), dashboardUrl)}
@@ -186,7 +211,7 @@ ${Icon.MAGNIFIER} Files processed   : ${chalk.yellow(counter.filesProcessed)}
 `)
 
         }
-        if (cloudStorage && !data) {
+        if (STORAGE_BUCKET && !data) {
             appLog(`
 ${Icon.FILE_UPLOAD} Storage URL       : ${ansiEscapes.link(chalk.blue(dashboardUrl), dashboardUrl)}
 ${Icon.FOLDER} Files uploaded    : ${chalk.yellow(counter.filesUploaded)}
@@ -194,7 +219,7 @@ ${Icon.MAGNIFIER} Files processed   : ${chalk.yellow(counter.filesProcessed)}
 `)
         }
 
-        if (!cloudStorage && data) {
+        if (!STORAGE_BUCKET && data) {
             appLog(`
 ${Icon.CHART} Test report URL   : ${ansiEscapes.link(chalk.blue(data.url), data!.url!)}
 `)
@@ -203,5 +228,15 @@ ${Icon.CHART} Test report URL   : ${ansiEscapes.link(chalk.blue(data.url), data!
     }
 
 }
+
+const token = process.env.SLACK_TOKEN || null;
+const channel = process.env.SLACK_CHANNEL_ID || null;
+let notifier: Notifier;
+if (token && channel) {
+    notifier = new Notifier(new RealSlackClient({token, channel}))
+} else {
+    notifier = new Notifier()
+}
+export default notifier
 
 

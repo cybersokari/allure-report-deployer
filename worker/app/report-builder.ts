@@ -1,81 +1,62 @@
 import {MOUNTED_PATH, REPORTS_DIR, RESULTS_STAGING_PATH} from "./constant";
 
-const allure = require('allure-commandline')
 import * as fs from 'fs/promises'
 import {appLog, countFiles} from "./util";
-import chalk from "chalk";
 import {Icon} from "./constant";
 import counter from "./counter";
 
-/**
- * ReportBuilder Class
- *
- * Responsible for managing the generation of Allure test reports.
- */
-class ReportBuilder {
+export interface AllureCommandRunner {
+    runCommand(args: string[]): Promise<number>;
+}
 
-    public async open(): Promise<null> {
-        const open = allure([
-            'open',
-            REPORTS_DIR,
-            '--port', '8090'
-        ])
+export class ReportBuilder {
+    private allureRunner: AllureCommandRunner;
 
-        return await new Promise((resolve, reject) => {
-            open.on('exit', async function (exitCode: number) {
-                if (exitCode === 0) {
-                    // No need to log, Allure logs on success, and I haven't found a way to disable it
-                    resolve(null)
-                } else {
-                    console.warn('Failed to open Allure report')
-                    reject(null)
-                }
-            })
-        })
+    constructor(allureRunner: AllureCommandRunner) {
+        this.allureRunner = allureRunner;
     }
 
-    /**
-     * Generates the Allure test report.
-     * @returns {Promise<string>} - The directory path of the generated report
-     */
-    public async generate(): Promise<string | null> {
+    async open(port = 8090): Promise<void> {
+        appLog(`Opening Allure report on port ${port}...`);
+        const exitCode = await this.allureRunner.runCommand(['open', REPORTS_DIR, '--port', `${port}`]);
+        if (exitCode !== 0) {
+            throw new Error("Failed to open Allure report");
+        }
+    }
 
-        appLog(`${chalk.green(Icon.HOUR_GLASS)}  Generating report...`)
-        // Generate a new Allure report
-        const generation = allure([
+    async generate(): Promise<string> {
+        appLog(`${Icon.HOUR_GLASS}  Generating Allure report...`)
+        const exitCode = await this.allureRunner.runCommand([
             'generate',
             RESULTS_STAGING_PATH,
             '--report-dir',
             REPORTS_DIR,
             '--clean',
-        ])
-
-        return await new Promise<string | null>((resolve, reject) => {
-            generation.on('exit', async function (exitCode: number) {
-                if (exitCode === 0) {
-                    // No need to log, Allure logs on success, and I haven't found a way to disable it
-                    resolve(REPORTS_DIR)
-                } else {
-                    console.warn('Failed to generate Allure report')
-                    reject(null)
-                }
-            })
-        })
+        ]);
+        if (exitCode !== 0) {
+            throw new Error("Failed to generate Allure report");
+        }
+        return REPORTS_DIR;
     }
 
-    /**
-     * Stages files by moving them from a source directory to the staging directory
-     */
-    public async stageFilesFromMount() {
-        // Count while copying
+    async stageFilesFromMount(): Promise<void> {
         await Promise.all([
-            fs.cp(`${MOUNTED_PATH}/`, RESULTS_STAGING_PATH, {
-                recursive: true, force: true
-            }),
+            fs.cp(`${MOUNTED_PATH}/`, RESULTS_STAGING_PATH, { recursive: true, force: true }),
             counter.addFilesProcessed(await countFiles([MOUNTED_PATH]))
-        ])
+        ]);
     }
-
 }
 
-export default new ReportBuilder()
+class AllureRunner implements AllureCommandRunner {
+    runCommand(args: string[]): Promise<number> {
+        const allureProcess = require("allure-commandline")(args);
+        return new Promise((resolve, reject) => {
+            allureProcess.on("exit", (exitCode: number) => {
+                resolve(exitCode);
+            });
+        });
+    }
+}
+
+export default new ReportBuilder(new AllureRunner());
+

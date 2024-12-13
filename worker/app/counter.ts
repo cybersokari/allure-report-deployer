@@ -10,8 +10,11 @@ export class Counter {
     private startTime: number | null = null;
     private _processed = 0
     private _uploaded = 0
-    private mutex = new Mutex();
+    private mutex: Mutex
 
+    constructor(){
+        this.mutex = new Mutex()
+    }
 
     public async addFilesProcessed(count: number) {
         await this.mutex.runExclusive(() => {
@@ -43,5 +46,4 @@ export class Counter {
     }
 }
 
-const counter = new Counter();
-export default counter;
+export default new Counter();

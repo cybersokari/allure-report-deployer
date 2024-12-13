@@ -29,7 +29,7 @@ services:
         - action: rebuild
           path: ./worker/package.json
     container_name: allure-deployer
-    env_file: .env.slack
+#    env_file: .env.slack
     environment:
       FIREBASE_STORAGE_EMULATOR_HOST: 127.0.0.1:9199 # Dev mode
       STORAGE_BUCKET: "fir-demo-project.appspot.com"
