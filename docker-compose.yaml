@@ -15,6 +15,7 @@ services:
       retries: 3
       timeout: 5s
   allure-cloud:
+    tty: true
     build:
       dockerfile: Dockerfile
       context: .
