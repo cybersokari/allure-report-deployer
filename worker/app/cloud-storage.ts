@@ -29,7 +29,7 @@ import pLimit from "p-limit";
 export class CloudStorage {
     public static bucket: Bucket
     public static instance: CloudStorage
-    private storageHomeDir = process.env.PREFIX ? `${process.env.PREFIX}/` : undefined
+    private storageHomeDir = process.env.PREFIX || ''
 
     public static getInstance(storageBucket: string) {
         if (!CloudStorage.instance) {
@@ -42,7 +42,7 @@ export class CloudStorage {
     private async uploadFile(filePath: string, destinationFilePath: string) {
         await CloudStorage.bucket.upload(filePath, {
             validation: !DEBUG,
-            destination: `${this.storageHomeDir}${destinationFilePath}`,
+            destination: path.join(this.storageHomeDir, destinationFilePath),
         });
     }
 
