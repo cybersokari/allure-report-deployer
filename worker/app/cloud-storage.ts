@@ -29,7 +29,7 @@ import pLimit from "p-limit";
 export class CloudStorage {
     public static bucket: Bucket
     public static instance: CloudStorage
-
+    private storageHomeDir = process.env.PREFIX || ''
     public static getInstance(storageBucket: string) {
         if (!CloudStorage.instance) {
             CloudStorage.bucket = admin.initializeApp({storageBucket: storageBucket}).storage().bucket();
