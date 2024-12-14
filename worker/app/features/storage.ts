@@ -7,11 +7,11 @@ import {
     REPORTS_DIR,
     RESULTS_STAGING_PATH,
     websiteId, ARCHIVE_DIR
-} from "../constant";
-import {countFiles, unzipAllureResult, zipFolder} from "../util";
-import counter from "../counter";
+} from "../utilities/constant.js";
+import {countFiles, unzipAllureResult, zipFolder} from "../utilities/util.js";
+import counter from "../utilities/counter.js";
 import pLimit from "p-limit";
-import {StorageProvider} from "./storage-provider.interface";
+import {StorageProvider} from "../interfaces/storage-provider.interface.js";
 import fs from "fs/promises";
 
 
@@ -26,22 +26,23 @@ export class Storage {
     // Download remote files to staging area
     public async stageFilesFromStorage(): Promise<any> {
         // Create directories for staging
-        await fs.mkdir(`${RESULTS_STAGING_PATH}/history`, {recursive: true});
-
-        try {
-            const localFilePaths = await this.provider.download({prefix: this.storageHomeDir, destination: ARCHIVE_DIR})
-
-            const limit = pLimit(fileProcessingConcurrency);
-            const unzipPromises = [];
-            for (const filePath of localFilePaths) {
-                unzipPromises.push(limit(async () => {
+        await Promise.all([
+            await fs.mkdir(`${RESULTS_STAGING_PATH}/history`, {recursive: true}),
+            await fs.mkdir(ARCHIVE_DIR, {recursive: true})
+        ])
+        const localFilePaths = await this.provider.download({prefix: this.storageHomeDir, destination: ARCHIVE_DIR})
+        const limit = pLimit(fileProcessingConcurrency);
+        const unzipPromises = [];
+        for (const filePath of localFilePaths) {
+            unzipPromises.push(limit(async () => {
+                try {
                     await unzipAllureResult(filePath, RESULTS_STAGING_PATH);
-                }))
-            }
-            await Promise.all(unzipPromises);
-        } catch (error) {
-            console.error('Download to staging error:', error);
+                }catch (e) {
+                    console.warn('Unzip from remote error:', e);
+                }
+            }))
         }
+        await Promise.all(unzipPromises);
     }
 
     /**

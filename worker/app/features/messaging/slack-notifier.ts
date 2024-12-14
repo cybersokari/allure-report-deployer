@@ -1,8 +1,8 @@
 import {Block, KnownBlock, WebClient} from "@slack/web-api";
-import {Notifier} from "./notifier.interface";
-import {NotificationData} from "./notification.model";
-import {STORAGE_BUCKET} from "../constant";
-import {appLog} from "../util";
+import {Notifier} from "../../interfaces/notifier.interface.js";
+import {NotificationData} from "../../models/notification.model.js";
+import {STORAGE_BUCKET} from "../../utilities/constant.js";
+import {appLog} from "../../utilities/util.js";
 
 interface SlackClient {
     postMessage(blocks: (Block | KnownBlock )[], text: string): Promise<void>;

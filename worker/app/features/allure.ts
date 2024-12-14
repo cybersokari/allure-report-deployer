@@ -1,18 +1,17 @@
-import {fileProcessingConcurrency, MOUNTED_PATH, REPORTS_DIR, RESULTS_STAGING_PATH} from "./constant";
+import {fileProcessingConcurrency, MOUNTED_PATH, REPORTS_DIR, RESULTS_STAGING_PATH} from "../utilities/constant.js";
 
 import * as fs from 'fs/promises'
 import {Dirent} from 'fs'
-import {appLog} from "./util";
-import {Icon} from "./constant";
-import counter from "./counter";
+import {appLog} from "../utilities/util.js";
+import {Icon} from "../utilities/constant.js";
+import counter from "../utilities/counter.js";
 import pLimit from "p-limit";
 import * as path from "node:path";
+import {AllureCommandRunner} from "../interfaces/allure-command.interface.js";
+import {AllureService} from "../services/allure-service.js";
 
-export interface AllureCommandRunner {
-    runCommand(args: string[]): Promise<number>;
-}
 
-export class AllureService {
+export class Allure {
     private allureRunner: AllureCommandRunner;
 
     constructor(allureRunner: AllureCommandRunner) {
@@ -80,16 +79,5 @@ export class AllureService {
     }
 }
 
-class AllureRunner implements AllureCommandRunner {
-    runCommand(args: string[]): Promise<number> {
-        const allureProcess = require("allure-commandline")(args);
-        return new Promise((resolve) => {
-            allureProcess.on("exit", (exitCode: number) => {
-                resolve(exitCode);
-            });
-        });
-    }
-}
-
-export default new AllureService(new AllureRunner());
+export default new Allure(new AllureService());
 

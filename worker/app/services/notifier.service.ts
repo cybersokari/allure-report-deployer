@@ -1,5 +1,5 @@
-import {Notifier} from "./notifier.interface";
-import {NotificationData} from "./notification.model";
+import {Notifier} from "../interfaces/notifier.interface.js";
+import {NotificationData} from "../models/notification.model.js";
 
 export class NotifierService {
     private notifiers: Notifier[];

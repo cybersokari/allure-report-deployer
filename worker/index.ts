@@ -1,35 +1,33 @@
-import AllureService from "./app/allure-service";
-import counter from "./app/counter";
-import credential from "./app/credential";
-import admin from "firebase-admin";
+import AllureService from "./app/features/allure.js";
+import counter from "./app/utilities/counter.js";
+import credential from "./app/utilities/credential.js";
 import {
     downloadRequired, STORAGE_BUCKET,
     websiteId
-} from "./app/constant";
-import {Storage} from "./app/storage/storage";
-import {FirebaseStorageService} from "./app/storage/firebase-storage.service";
-import {FirebaseHost} from "./app/hosting/firebase-host";
-import {Notifier} from "./app/messaging/notifier.interface";
-import {githubNotifier} from "./app/messaging/github-notifier";
-import consoleNotifier from "./app/messaging/console-notifier";
-import {slackNotifier} from "./app/messaging/slack-notifier";
-import {NotifierService} from "./app/messaging/notifier.service";
-import {NotificationData} from "./app/messaging/notification.model";
-import {dashboardUrl, printStats} from "./app/util";
+} from "./app/utilities/constant.js";
+import {Storage} from "./app/features/storage.js";
+import {Storage as GcpStorage} from "@google-cloud/storage";
+import {FirebaseStorageService} from "./app/services/firebase-storage.service.js";
+import {FirebaseHost} from "./app/features/hosting/firebase-host.js";
+import {Notifier} from "./app/interfaces/notifier.interface.js";
+import {githubNotifier} from "./app/features/messaging/github-notifier.js";
+import consoleNotifier from "./app/features/messaging/console-notifier.js";
+import {slackNotifier} from "./app/features/messaging/slack-notifier.js";
+import {NotifierService} from "./app/services/notifier.service.js";
+import {NotificationData} from "./app/models/notification.model.js";
+import {dashboardUrl, printStats} from "./app/utilities/util.js";
+import { readFile } from "fs/promises";
+import * as path from "node:path";
 
 
 let cloudStorage: Storage | undefined = undefined;
 if (STORAGE_BUCKET) {
-    const bucket = admin.initializeApp({storageBucket: STORAGE_BUCKET}).storage().bucket()
+    const jsonFilePath = path.resolve(process.env.GOOGLE_APPLICATION_CREDENTIALS!);
+    const gcpJson = JSON.parse(await readFile(jsonFilePath, "utf-8"));
+    const bucket = new GcpStorage({credentials: gcpJson }).bucket(STORAGE_BUCKET)
     cloudStorage = new Storage(new FirebaseStorageService(bucket))
 }
 
-/**
- * Entry Point
- *
- * Initializes the application and sets up file monitoring, report generation,
- * and notifications.
- */
 export function main(): void {
     counter.startTimer()
     if (!cloudStorage && !websiteId) {
@@ -65,23 +63,25 @@ export function main(): void {
             firebaseHost?.deploy(),
             cloudStorage?.uploadArtifacts()
         ]))
-
-
-        const notifiers: Notifier[] = []
-        notifiers.push(consoleNotifier)
-        if(slackNotifier){
-            notifiers.push(slackNotifier)
-        }
-        if(githubNotifier){
-            notifiers.push(githubNotifier)
-        }
-
-        const notificationData = new NotificationData(counter ,reportUrl, dashboardUrl() )
-        await new NotifierService(notifiers).sendNotifications(notificationData)
+        await sendNotifications(reportUrl)
     })()
 
 }
 
-if (require.main === module) {
-    main()
+if (import.meta.url === new URL(import.meta.url).toString()) {
+    main();
+}
+
+async function sendNotifications(reportUrl: string | undefined) {
+    const notifiers: Notifier[] = []
+    notifiers.push(consoleNotifier)
+    if(slackNotifier){
+        notifiers.push(slackNotifier)
+    }
+    if(githubNotifier){
+        notifiers.push(githubNotifier)
+    }
+    const notificationService = new NotifierService(notifiers)
+    const notificationData = new NotificationData(counter ,reportUrl, dashboardUrl())
+    await notificationService.sendNotifications(notificationData)
 }

@@ -1,10 +1,11 @@
-import {HostingProvider} from "./hosting-provider";
-import {REPORTS_DIR} from "../constant";
+import {HostingProvider} from "../../interfaces/hosting-provider.interface.js";
+import {REPORTS_DIR} from "../../utilities/constant.js";
 import * as fs from "fs/promises";
-import {StringBuilder} from "../string-builder";
-import {appLog, changePermissionsRecursively} from "../util";
-import * as util from "node:util";
-const exec = util.promisify(require('child_process').exec)
+import {StringBuilder} from "../../utilities/string-builder.js";
+import {appLog, changePermissionsRecursively} from "../../utilities/util.js";
+import { promisify } from 'util';
+import { exec as execCallback } from 'child_process';
+const exec = promisify(execCallback);
 
 export class FirebaseHost implements HostingProvider {
 

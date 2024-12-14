@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
-    "module": "commonjs",
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
     "noImplicitReturns": true,
     "noUnusedLocals": true,
     "outDir": "lib",
@@ -8,13 +9,15 @@
     "strict": true,
     "target": "es2020",
     "allowSyntheticDefaultImports": true,
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "types": ["node", "jest"]
   },
 
   "compileOnSave": true,
   "include": [
     "index.ts",
     "app/*.ts",
-    "test/*.ts"
+    "test"
   ],
 }

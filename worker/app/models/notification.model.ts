@@ -1,4 +1,4 @@
-import {Counter} from "../counter";
+import {Counter} from "../utilities/counter.js";
 
 export class NotificationData {
     constructor(

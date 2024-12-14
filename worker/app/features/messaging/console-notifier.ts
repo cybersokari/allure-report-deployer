@@ -1,7 +1,7 @@
-import {Notifier} from "./notifier.interface";
-import {NotificationData} from "./notification.model";
-import {Icon} from "../constant";
-import {appLog} from "../util";
+import {Notifier} from "../../interfaces/notifier.interface.js";
+import {NotificationData} from "../../models/notification.model.js";
+import {Icon} from "../../utilities/constant.js";
+import {appLog} from "../../utilities/util.js";
 import ansiEscapes from "ansi-escapes";
 import chalk from "chalk";
 

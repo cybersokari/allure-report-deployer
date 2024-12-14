@@ -4,27 +4,14 @@ import * as path from "node:path";
 import archiver from 'archiver';
 import unzipper, {Entry} from 'unzipper';
 
-import {DEBUG, keepHistory, keepResults, showHistory, showRetries, STORAGE_BUCKET, websiteId} from "./constant";
+import {DEBUG, keepHistory, keepResults, showHistory, showRetries, STORAGE_BUCKET, websiteId} from "./constant.js";
 
-import {StringBuilder} from "./string-builder";
-import credential from "./credential";
+import {StringBuilder} from "./string-builder.js";
+import credential from "./credential.js";
 
 export function appLog(data: string) {
     console.log(data)
 }
-
-// export async function* getStreamOfFiles(param: { dir: string, recursive?: boolean }): AsyncGenerator<string> {
-//
-//     const entries = await fs.readdir(param.dir, {withFileTypes: true});
-//     for (const entry of entries) {
-//         const fullPath = path.join(param.dir, entry.name);
-//         if (param.recursive && entry.isDirectory()) {
-//             yield* getStreamOfFiles({dir: fullPath, recursive: true});
-//         } else {
-//             yield fullPath;
-//         }
-//     }
-// }
 
 
 export async function changePermissionsRecursively(dirPath: string, mode: fsSync.Mode) {

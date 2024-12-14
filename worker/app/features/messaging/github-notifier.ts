@@ -1,6 +1,6 @@
-import {Notifier} from "./notifier.interface";
-import {NotificationData} from "./notification.model";
-import counter from "../counter";
+import {Notifier} from "../../interfaces/notifier.interface.js";
+import {NotificationData} from "../../models/notification.model.js";
+import counter from "../../utilities/counter.js";
 import fs from "node:fs";
 
 class GitHubNotifier implements Notifier {

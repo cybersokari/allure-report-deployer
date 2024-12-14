@@ -1,7 +1,7 @@
 import {Bucket, File} from "@google-cloud/storage";
-import {DEBUG, fileProcessingConcurrency} from "../constant";
+import {DEBUG, fileProcessingConcurrency} from "../utilities/constant.js";
 import pLimit from "p-limit";
-import {Order, StorageProvider} from "./storage-provider.interface";
+import {Order, StorageProvider} from "../interfaces/storage-provider.interface.js";
 import * as path from "node:path";
 
 export class FirebaseStorageService implements StorageProvider {
