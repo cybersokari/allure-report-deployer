@@ -77,8 +77,7 @@ export function main(): void {
         }
 
         const notificationData = new NotificationData(counter ,reportUrl, dashboardUrl() )
-        new NotifierService(notifiers).sendNotifications(notificationData)
-            .catch((error) => console.error(error));
+        await new NotifierService(notifiers).sendNotifications(notificationData)
     })()
 
 }

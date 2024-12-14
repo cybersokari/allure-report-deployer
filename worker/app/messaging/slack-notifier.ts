@@ -4,7 +4,7 @@ import {NotificationData} from "./notification.model";
 import {STORAGE_BUCKET} from "../constant";
 import {appLog} from "../util";
 
-export interface SlackClient {
+interface SlackClient {
     postMessage(blocks: (Block | KnownBlock )[], text: string): Promise<void>;
 }
 
