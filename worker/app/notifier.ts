@@ -6,7 +6,7 @@ import * as fs from "node:fs";
 import ansiEscapes from "ansi-escapes";
 import chalk from "chalk";
 import credential from "./credential";
-import {appLog, generateMarkdown} from "./util";
+import {appLog, createGitHubMarkdown} from "./util";
 
 type SlackCredentials = {
     channel: string,
@@ -64,7 +64,7 @@ class Notifier {
      * Sends a message to a Slack channel with details about the report.
      * Includes report links, file processing stats, and additional buttons.
      */
-    public async SendSlackMsg(url: string | null) {
+    public async SendSlackMsg(url?: string | null) {
         if (!this.slackClient) throw new Error('Slack client not initialized')
         // See: https://api.slack.com/methods/chat.postMessage
 
@@ -169,8 +169,8 @@ class Notifier {
      * Includes the report link, processing stats, and duration.
      * @param data - Contains the report URL and file path for summary
      */
-    public async printGithubSummary({mountedFilePath, url}: { mountedFilePath: string, url: string | null }): Promise<void> {
-        const gitHubSum = generateMarkdown({testReportUrl: url, counter: counter, fileStorageUrl: this.dashboardUrl})
+    public async printGithubSummary({mountedFilePath, url}: { mountedFilePath: string, url?: string | null }): Promise<void> {
+        const gitHubSum = createGitHubMarkdown({testReportUrl: url, counter: counter, fileStorageUrl: this.dashboardUrl})
         try {
             fs.writeFileSync(mountedFilePath, gitHubSum, {flag: 'a'}); // Append to the file
         } catch (err) {
@@ -200,7 +200,7 @@ class Notifier {
     }
 
 
-    printSummaryToConsole(data?: { url: string | null }): void {
+    printSummaryToConsole(data?: { url?: string | null }): void {
         const dashboardUrl = this.dashboardUrl
         if (STORAGE_BUCKET && data) {
             appLog(`

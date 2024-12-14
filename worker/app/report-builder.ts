@@ -41,7 +41,9 @@ export class ReportBuilder {
 
     async stageFilesFromMount(): Promise<void> {
         await Promise.all([
-            fs.cp(`${MOUNTED_PATH}/`, RESULTS_STAGING_PATH, { recursive: true, force: true }),
+            // Copy all content in mounted directory
+            fs.cp(`${MOUNTED_PATH}/`, RESULTS_STAGING_PATH, { recursive: false, force: true }),
+            // Count files in directory as processed files
             counter.addFilesProcessed(await countFiles([MOUNTED_PATH]))
         ]);
     }

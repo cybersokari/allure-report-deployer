@@ -1,16 +1,12 @@
 import * as fsSync from 'fs'
 import * as fs from 'fs/promises'
 import * as path from "node:path";
-import util from "node:util";
 import archiver from 'archiver';
 import unzipper, {Entry} from 'unzipper';
 
-const exec = util.promisify(require('child_process').exec)
-import {DEBUG, Icon, REPORTS_DIR, showHistory, showRetries, websiteId} from "./constant";
-import {StringBuilder} from "./string-builder";
-import credential from "./credential";
+import { showHistory, showRetries} from "./constant";
+
 import {Counter} from "./counter";
-import reportBuilder from "./report-builder";
 
 export function appLog(data: string) {
     console.log(data)
@@ -29,48 +25,6 @@ export function appLog(data: string) {
 //     }
 // }
 
-/**
- * Validates the expiration format for the website hosting link.
- * Ensures the format is a number followed by 'h', 'd', or 'w' and is within 30 days.
- * @param expires - The expiration string
- * @returns {boolean} - True if valid, false otherwise
- */
-export function validateWebsiteExpires(expires: string): boolean {
-
-    const length = expires.length
-    if (length < 2 || length > 3) {
-        return false;
-    }
-
-    // Regex to validate a format: number followed by h/d/w
-    const validFormatRegex = /^(\d+)([hdw])$/;
-    const match = expires.match(validFormatRegex);
-
-    if (!match) {
-        return false;
-    }
-
-    const value = parseInt(match[1]);
-    const unit = match[2];
-
-    // Convert to days for comparison
-    let days: number;
-    switch (unit) {
-        case 'h':
-            days = value / 24;
-            break;
-        case 'd':
-            days = value;
-            break;
-        case 'w':
-            days = value * 7;
-            break;
-        default:
-            return false;
-    }
-    return days <= 30
-}
-
 
 export async function changePermissionsRecursively(dirPath: string, mode: fsSync.Mode) {
     await fs.chmod(dirPath, mode);
@@ -87,78 +41,6 @@ export async function changePermissionsRecursively(dirPath: string, mode: fsSync
             await fs.chmod(fullPath, mode);
         }
     }
-}
-
-/**
- * Publishes the Allure report website using Firebase Hosting.
- * Configures the hosting setup and deploys the site.
- * @returns {Promise<string | undefined>} - The URL of the deployed site, if successful
- */
-export async function publishToFireBaseHosting(): Promise<string | null> {
-    appLog(`${Icon.HOUR_GLASS}  Deploying to Firebase...`);
-    if (DEBUG) {
-        void reportBuilder.open(8090)
-        return 'http://localhost:8090'
-    }
-    const hosting = {
-        "hosting": {
-            "public": ".",
-            "ignore": [
-                "firebase.json",
-                "**/.*",
-            ]
-        }
-    }
-    try {
-        await changePermissionsRecursively(REPORTS_DIR, 0o755)
-        const configDir = `${REPORTS_DIR}/firebase.json`
-        await fs.writeFile(configDir, JSON.stringify(hosting), {mode: 0o755, encoding: 'utf-8'})
-    } catch (e) {
-        // Overwrite fail, this is not supposed to happen
-        // console.info(`Cannot create firebase.json. Aborting deployment ${e}`)
-        return null;
-    }
-
-    // console.log(`Deploying Allure report site...`)
-    const builder = new StringBuilder()
-    builder.append('firebase hosting:channel:deploy').append(' ')
-        .append(`--config ${REPORTS_DIR}/firebase.json`).append(' ')
-        .append(`--project ${credential.projectId}`).append(' ')
-        .append('--no-authorized-domains').append(' ')
-        .append(websiteId!)
-
-    // Website expiration setup
-    builder.append(' ')
-        .append('--expires')
-        .append(' ')
-    const expires = process.env.WEBSITE_EXPIRES
-    if (expires && validateWebsiteExpires(expires)) {
-        // console.log(`WEBSITE_EXPIRES set to ${expires}`)
-        builder.append(expires)
-    } else {
-        // console.log('No valid WEBSITE_EXPIRES provided, defaults to 7d')
-        builder.append('7d')
-    }
-
-    const {stdout, stderr} = await exec(builder.toString())
-
-    if (stderr && !stdout) {
-        // console.error(`Error from hosting: ${stderr}`)
-        return null;
-    }
-    // Try to extract
-    const regex = /hosting:channel: Channel URL.*\((.*?)\):\s+(https?:\/\/\S+)/;
-    const match = stdout.match(regex);
-
-    if (match && match[2]) {
-        const url = match[2]
-        return url as string
-    } else {
-        console.warn('Could not parse URL from hosting.')
-        console.log(stdout)
-        return null
-    }
-
 }
 
 
@@ -244,7 +126,7 @@ export function isFileTypeAllure(filePath: string) {
 }
 
 
-export function generateMarkdown({
+export function createGitHubMarkdown({
                                      testReportUrl,
                                      fileStorageUrl,
                                      counter,

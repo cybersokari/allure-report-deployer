@@ -1,22 +1,20 @@
-import {
-    publishToFireBaseHosting,
-} from "./app/util";
 import ReportBuilder from "./app/report-builder";
 import counter from "./app/counter";
 import credential from "./app/credential";
-import fs from "fs/promises";
 import admin from "firebase-admin";
 import {
-     GITHUB_SUMMARY_PATH,
-    RESULTS_STAGING_PATH, STORAGE_BUCKET,
+    downloadRequired,
+    GITHUB_SUMMARY_PATH, STORAGE_BUCKET,
     websiteId
 } from "./app/constant";
 import {Storage} from "./app/storage/storage";
 import notifier from "./app/notifier";
 import {FirebaseStorage} from "./app/storage/firebase-storage";
+import {FirebaseHost} from "./app/hosting/firebase-host";
 
-let cloudStorage : Storage | undefined = undefined;
-if(STORAGE_BUCKET){
+
+let cloudStorage: Storage | undefined = undefined;
+if (STORAGE_BUCKET) {
     const bucket = admin.initializeApp({storageBucket: STORAGE_BUCKET}).storage().bucket()
     cloudStorage = new Storage(new FirebaseStorage(bucket))
 }
@@ -34,47 +32,48 @@ export function main(): void {
         return
     }
     notifier.printStats();
-
     (async () => {
-        try {// Initializing project_id from Google credentials
-            await credential.create()
+
+        try {
+            await credential.init()
         } catch (error) {
-            console.error('Failed to process Google credentials: Are you sure you have the correct file?', error);
+            console.warn('Invalid Google Credentials JSON: Are you sure you have the correct file?');
             return
         }
+        let firebaseHost: FirebaseHost | undefined
         if (websiteId) {
-            await fs.mkdir(`${RESULTS_STAGING_PATH}/history`, {recursive: true});
-        }
 
-        if (websiteId) {
+            firebaseHost = new FirebaseHost({websiteId: websiteId, projectId: credential.projectId});
+
             // Stage files
             await Promise.all([
                 ReportBuilder.stageFilesFromMount(),
-                cloudStorage?.stageFilesFromStorage()
+                downloadRequired ? cloudStorage?.stageFilesFromStorage() : null,
             ])
             // Build report
             await ReportBuilder.generate()
+            // Init hosting
+            await firebaseHost.init()
         }
-        // Host report and uploadArtifacts
-        const [url] = (await Promise.all([
-            publishToFireBaseHosting(),
+        // Handle initialized features
+        const [websiteUrlFromHostProvider] = (await Promise.all([
+            firebaseHost?.deploy(),
             cloudStorage?.uploadArtifacts()
         ]))
-
 
         // Prepare GitHub summary
         const notifierPromises: Promise<void>[] = []
         if (GITHUB_SUMMARY_PATH) {
             notifierPromises.push(notifier.printGithubSummary({
                 mountedFilePath: GITHUB_SUMMARY_PATH,
-                url: url
+                url: websiteUrlFromHostProvider
             }))
         } else {
-            notifier.printSummaryToConsole({url: url})
+            notifier.printSummaryToConsole({url: websiteUrlFromHostProvider})
         }
         // Prepare Slack message
-        if(notifier.slackClient){
-            notifierPromises.push(notifier.SendSlackMsg(url))
+        if (notifier.slackClient) {
+            notifierPromises.push(notifier.SendSlackMsg(websiteUrlFromHostProvider))
         }
         // Send notifications async
         if (notifierPromises.length > 0) {

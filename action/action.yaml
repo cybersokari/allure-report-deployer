@@ -1,0 +1,53 @@
+name: 'Allure Report Deployer'
+description: 'Deploy Allure reports to Firebase using Docker.'
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+  entrypoint: '/entrypoint.sh'
+  args:
+    - ${{ inputs.storage_bucket }}
+    - ${{ inputs.website_id }}
+    - ${{ inputs.website_expires }}
+    - ${{ inputs.keep_history }}
+    - ${{ inputs.keep_results }}
+    - ${{ inputs.slack_token }}
+    - ${{ inputs.slack_channel_id }}
+    - ${{ inputs.credentials_file_path }}
+    - ${{ inputs.allure_results_path }}
+    - ${{ inputs.show_retries }}
+    - ${{ inputs.show_history }}
+
+inputs:
+  storage_bucket:
+    description: 'Google Cloud Storage bucket name'
+    required: true
+  website_id:
+    description: 'Unique identifier for the hosted report'
+    required: true
+  website_expires:
+    description: 'Expiration duration for reports (e.g., 7d, 2h)'
+    default: '7d'
+  keep_history:
+    description: 'Retain historical data in the report (true/false)'
+    default: 'true'
+  keep_results:
+    description: 'Keep test results in the storage bucket (true/false)'
+    default: 'false'
+  slack_token:
+    description: 'Slack bot token for notifications (optional)'
+    required: false
+  slack_channel_id:
+    description: 'Slack channel ID for notifications (optional)'
+    required: false
+  credentials_file_path:
+    description: 'Path to the Google Cloud credentials JSON file'
+    required: true
+  allure_results_path:
+    description: 'Path to the directory containing Allure results'
+    required: true
+  show_retries:
+    description: 'Show retries in the test report (true/false)'
+    default: 'true'
+  show_history:
+    description: 'Show history in the test report (true/false)'
+    default: 'true'

@@ -11,7 +11,7 @@ export class FirebaseStorage implements StorageProvider {
         this.bucket = storageBucket;
     }
 
-    public async uploadFile(filePath: string, destination: string) {
+    public async upload(filePath: string, destination: string) {
         await this.bucket.upload(filePath, {validation: !DEBUG, destination: destination})
     }
 

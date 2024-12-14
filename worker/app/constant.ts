@@ -24,3 +24,5 @@ export const fileProcessingConcurrency = 10
 export const showHistory = process.env.SHOW_HISTORY?.toLowerCase() === 'true' || true
 export const showRetries = process.env.SHOW_RETRIES?.toLowerCase() === 'true' || true
 export const GITHUB_SUMMARY_PATH = process.env.GITHUB_STEP_SUMMARY || null
+export const uploadRequired = keepResults || keepHistory
+export const downloadRequired = showRetries || showHistory

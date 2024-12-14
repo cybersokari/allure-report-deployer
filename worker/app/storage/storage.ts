@@ -5,8 +5,6 @@ import {
     keepResults,
     MOUNTED_PATH,
     REPORTS_DIR,
-    showHistory,
-    showRetries,
     RESULTS_STAGING_PATH,
     websiteId, ARCHIVE_DIR
 } from "../constant";
@@ -14,6 +12,7 @@ import {countFiles, unzipAllureResult, zipFolder} from "../util";
 import counter from "../counter";
 import pLimit from "p-limit";
 import {StorageProvider} from "./storage-provider";
+import fs from "fs/promises";
 
 
 export class Storage {
@@ -26,7 +25,8 @@ export class Storage {
 
     // Download remote files to staging area
     public async stageFilesFromStorage(): Promise<any> {
-        if (!showHistory && !showRetries) return
+        // Create directories for staging
+        await fs.mkdir(`${RESULTS_STAGING_PATH}/history`, {recursive: true});
 
         try {
             const localFilePaths = await this.provider.download({prefix: this.storageHomeDir, destination: ARCHIVE_DIR})
@@ -49,13 +49,13 @@ export class Storage {
      */
     public async uploadArtifacts() {
         const foldersToBackup: { path: string, destination?: string }[] = []
-        const historyFolder = `${REPORTS_DIR}/history`
         const foldersToCount = []
         if (keepResults) {
             foldersToBackup.push({path: MOUNTED_PATH})
             foldersToCount.push(MOUNTED_PATH)
         }
         if (websiteId && keepHistory) {
+            const historyFolder = `${REPORTS_DIR}/history`
             foldersToBackup.push({path: historyFolder, destination: 'history'})
             foldersToCount.push(historyFolder)
         }
@@ -65,7 +65,7 @@ export class Storage {
         // Count while uploading
         await Promise.all([
             counter.addFilesUploaded(await countFiles(foldersToCount)),
-            this.provider.uploadFile(outputFileName, path.basename(outputFileName))
+            this.provider.upload(outputFileName, path.basename(outputFileName))
         ])
     }
 

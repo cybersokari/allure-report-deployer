@@ -6,7 +6,7 @@ import {appLog, changePermissionsRecursively} from "../util";
 import * as util from "node:util";
 const exec = util.promisify(require('child_process').exec)
 
-export class FirebaseHosting implements HostingProvider {
+export class FirebaseHost implements HostingProvider {
 
     private projectId: string
     private readonly websiteId: string
@@ -19,8 +19,9 @@ export class FirebaseHosting implements HostingProvider {
 
     async deploy(): Promise<null|string> {
         if(!this.command){
-            await this.setUp()
+            throw new Error('Firebase hosting not initialized. Call init() first.')
         }
+        await changePermissionsRecursively(REPORTS_DIR, 0o755)
         const {stdout, stderr} = await exec(this.command)
         if (stderr && !stdout) {
             appLog(`Deployment failed: ${stderr}`)
@@ -40,7 +41,7 @@ export class FirebaseHosting implements HostingProvider {
         }
     }
 
-    async setUp(): Promise<string|null> {
+    async init(): Promise<string|null> {
         const config = {
             "hosting": {
                 "public": ".",
@@ -51,8 +52,8 @@ export class FirebaseHosting implements HostingProvider {
             }
         }
         try {
-            await changePermissionsRecursively(REPORTS_DIR, 0o755)
             const configDir = `${REPORTS_DIR}/firebase.json`
+            await fs.mkdir(REPORTS_DIR, {recursive: true,})
             await fs.writeFile(configDir, JSON.stringify(config), {mode: 0o755, encoding: 'utf-8'})
         } catch (e) {
             // Overwrite fail, this is not supposed to happen

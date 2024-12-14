@@ -3,7 +3,7 @@
 ![Deployment](https://github.com/cybersokari/allure-docker-deploy/actions/workflows/deploy.yaml/badge.svg?branch=main)
 ![](https://img.shields.io/docker/pulls/sokari/allure-deployer)
 
-**Automate your Allure report hosting with Firebase. No server required.**
+**Host your Allure test reports on a website. No server required.**
 
 ![Demo](assets/demo.gif)
 
@@ -90,8 +90,6 @@ ___
 #### 2.	Check your GitHub Actions summary:
 Example:
 ```markdown
-`allure-report-deployer`
-
 📊 Your Test Report is ready
 
 Test Report: https://your-example-url.web.app

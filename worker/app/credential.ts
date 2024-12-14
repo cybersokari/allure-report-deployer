@@ -34,7 +34,7 @@ class Credential {
      * Loads and parses the Google Application credentials from the environment.
      * Sets the project ID for later use.
      */
-    public async create() {
+    public async init() {
         this.data = JSON.parse(
             await fs.readFile(process.env.GOOGLE_APPLICATION_CREDENTIALS!, 'utf8')
         );

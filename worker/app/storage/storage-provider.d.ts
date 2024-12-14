@@ -3,7 +3,7 @@ export enum Order{
     byNewestToOldest,
 }
 export interface StorageProvider {
-    uploadFile(filePath: string, destination: string): Promise<void>;
+    upload(filePath: string, destination: string): Promise<void>;
 
     download({prefix, destination, matchGlob, concurrency, order}: {
         prefix?: string | undefined,
@@ -11,7 +11,7 @@ export interface StorageProvider {
         matchGlob?: string | null,
         order?: Order | undefined,
         concurrency?: number | undefined
-    }): Promise<string[]>;
+    }): Promise<any[]>;
 
     sortFiles(files: any[], order: Order): any[];
 }

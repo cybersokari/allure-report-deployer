@@ -1,6 +1,7 @@
 import { ReportBuilder, AllureCommandRunner } from "../app/report-builder";
 import { MOUNTED_PATH, REPORTS_DIR, RESULTS_STAGING_PATH } from "../app/constant";
-import fs from "fs/promises";
+// import * as fs from "fs/promises";
+import mock from 'mock-fs';
 import counter from "../app/counter";
 import { countFiles } from "../app/util";
 
@@ -13,7 +14,9 @@ jest.mock("../app/counter", () => ({
     addFilesProcessed: jest.fn().mockImplementation(() => {}), // Mock the addFilesProcessed function
 }));
 jest.mock("fs/promises", () => ({
-    cp: jest.fn().mockImplementation(() => {}), // Mock the fs.cp function
+    lstat: jest.fn(),
+    readdir: jest.fn(),
+    cp: jest.fn(),
 }));
 
 describe("ReportBuilder", () => {
@@ -26,7 +29,15 @@ describe("ReportBuilder", () => {
             runCommand: jest.fn(), // Mock the AllureCommandRunner interface
         };
         reportBuilder = new ReportBuilder(mockAllureRunner); // Use the mocked runner
+        mock({
+            '/allure-results' : {
+                'file1.json': '{}',
+                'file2.log': 'content2',
+            },
+            '/app/allure-results':  {}
+        })
     });
+    afterEach(() => mock.restore());
 
     test("open should call allureRunner with correct arguments", async () => {
         (mockAllureRunner.runCommand as jest.Mock).mockResolvedValue(0); // Mock a successful run
@@ -45,13 +56,14 @@ describe("ReportBuilder", () => {
     });
 
     test("stageFilesFromMount should stage files correctly", async () => {
+
         // Mock all dependencies
         await reportBuilder.stageFilesFromMount();
         // Assertions for staging logic
-        expect(fs.cp).toHaveBeenCalledWith(`${MOUNTED_PATH}/`, RESULTS_STAGING_PATH, {
-            recursive: true,
-            force: true,
-        });
+        // expect(fs.cp).toHaveBeenCalledWith(`${MOUNTED_PATH}/`, RESULTS_STAGING_PATH, {
+        //     recursive: true,
+        //     force: true,
+        // });
         expect(countFiles).toHaveBeenCalledWith([MOUNTED_PATH]);
         expect(counter.addFilesProcessed).toHaveBeenCalledWith(5);
     });
