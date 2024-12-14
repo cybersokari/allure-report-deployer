@@ -6,7 +6,7 @@ import { Mutex } from 'async-mutex';
  * and uploaded, as well as timing functionalities to measure elapsed time.
  * Utilizes a mutex for safe concurrent updates to shared counters.
  */
-export class Counter {
+class Counter {
     private startTime: number | null = null;
     private _processed = 0
     private _uploaded = 0
@@ -46,4 +46,5 @@ export class Counter {
     }
 }
 
-export default new Counter();
+const counter = new Counter()
+export default counter;

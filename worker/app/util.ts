@@ -4,9 +4,10 @@ import * as path from "node:path";
 import archiver from 'archiver';
 import unzipper, {Entry} from 'unzipper';
 
-import { showHistory, showRetries} from "./constant";
+import {DEBUG, keepHistory, keepResults, showHistory, showRetries, STORAGE_BUCKET, websiteId} from "./constant";
 
-import {Counter} from "./counter";
+import {StringBuilder} from "./string-builder";
+import credential from "./credential";
 
 export function appLog(data: string) {
     console.log(data)
@@ -125,39 +126,38 @@ export function isFileTypeAllure(filePath: string) {
     return !!filePath.match(/^.*\.(json|png|jpeg|jpg|gif|properties|log|webm)$/i)
 }
 
-
-export function createGitHubMarkdown({
-                                     testReportUrl,
-                                     fileStorageUrl,
-                                     counter,
-                                 }: {
-    testReportUrl?: string | null;
-    fileStorageUrl?: string;
-    counter?: Counter;
-}): string {
-    let markdown = "### 📊 Your Test Report is ready\n\n";
-
-    if (testReportUrl) {
-        markdown += `- **Test Report**: [${testReportUrl}](${testReportUrl})\n`;
+export function dashboardUrl(): string | undefined {
+    if(!STORAGE_BUCKET) return undefined
+    if (DEBUG) {
+        return `http://127.0.0.1:4000/storage/${STORAGE_BUCKET}`
     }
-
-    if (fileStorageUrl) {
-        markdown += `- **File Storage**: [${fileStorageUrl}](${fileStorageUrl})\n`;
-    }
-
-    if (counter) {
-        markdown += `
-| 📂 **Files Uploaded** | 🔍 **Files Processed** | ⏱ **Duration**     |
-|------------------------|------------------------|--------------------|
-| ${counter.filesUploaded}       | ${counter.filesProcessed}      | ${counter.getElapsedSeconds()} seconds |
-    `;
-    }
-
-    markdown += `\n\n⭐ Like this? [Star us on GitHub](https://github.com/cybersokari/allure-report-deployer)!`;
-
-    return markdown.trim();
+    return new StringBuilder()
+        .append("https://console.firebase.google.com/project")
+        .append(`/${(credential.projectId)}`)
+        .append(`/storage/${STORAGE_BUCKET}/files`)
+        .toString()
 }
 
+/**
+ * Prints stats about the report generation process, including
+ * history retention and retries.
+ */
+export function printStats() {
+    if (!websiteId) {
+        appLog('Report publishing disabled because WEBSITE_ID is not provided');
+    }
+    if (STORAGE_BUCKET) {
+        if (keepHistory && keepResults) {
+            appLog(`KEEP_HISTORY and KEEP_RESULTS enabled`)
+        } else if (keepHistory) {
+            appLog(`KEEP_HISTORY enabled`)
+        } else if (keepResults) {
+            appLog(`KEEP_RESULTS enabled`)
+        }
+    } else {
+        appLog('STORAGE_BUCKET is not provided, KEEP_HISTORY and KEEP_RESULTS disabled')
+    }
+}
 
 
 

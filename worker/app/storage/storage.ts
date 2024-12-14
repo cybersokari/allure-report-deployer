@@ -11,7 +11,7 @@ import {
 import {countFiles, unzipAllureResult, zipFolder} from "../util";
 import counter from "../counter";
 import pLimit from "p-limit";
-import {StorageProvider} from "./storage-provider";
+import {StorageProvider} from "./storage-provider.interface";
 import fs from "fs/promises";
 
 

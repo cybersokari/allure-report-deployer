@@ -17,7 +17,7 @@ export class FirebaseHost implements HostingProvider {
         this.websiteId = websiteId
     }
 
-    async deploy(): Promise<null|string> {
+    async deploy(): Promise<undefined|string> {
         if(!this.command){
             throw new Error('Firebase hosting not initialized. Call init() first.')
         }
@@ -25,7 +25,7 @@ export class FirebaseHost implements HostingProvider {
         const {stdout, stderr} = await exec(this.command)
         if (stderr && !stdout) {
             appLog(`Deployment failed: ${stderr}`)
-            return null;
+            return undefined;
         }
         // Try to extract
         const regex = /hosting:channel: Channel URL.*\((.*?)\):\s+(https?:\/\/\S+)/;
@@ -37,7 +37,7 @@ export class FirebaseHost implements HostingProvider {
         } else {
             appLog('Could not retrieve URL from Firebase Hosting.')
             appLog(stdout)
-            return null
+            return undefined
         }
     }
 

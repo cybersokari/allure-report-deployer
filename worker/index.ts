@@ -1,22 +1,27 @@
-import ReportBuilder from "./app/report-builder";
+import AllureService from "./app/allure-service";
 import counter from "./app/counter";
 import credential from "./app/credential";
 import admin from "firebase-admin";
 import {
-    downloadRequired,
-    GITHUB_SUMMARY_PATH, STORAGE_BUCKET,
+    downloadRequired, STORAGE_BUCKET,
     websiteId
 } from "./app/constant";
 import {Storage} from "./app/storage/storage";
-import notifier from "./app/notifier";
-import {FirebaseStorage} from "./app/storage/firebase-storage";
+import {FirebaseStorageService} from "./app/storage/firebase-storage.service";
 import {FirebaseHost} from "./app/hosting/firebase-host";
+import {Notifier} from "./app/messaging/notifier.interface";
+import {githubNotifier} from "./app/messaging/github-notifier";
+import consoleNotifier from "./app/messaging/console-notifier";
+import {slackNotifier} from "./app/messaging/slack-notifier";
+import {NotifierService} from "./app/messaging/notifier.service";
+import {NotificationData} from "./app/messaging/notification.model";
+import {dashboardUrl, printStats} from "./app/util";
 
 
 let cloudStorage: Storage | undefined = undefined;
 if (STORAGE_BUCKET) {
     const bucket = admin.initializeApp({storageBucket: STORAGE_BUCKET}).storage().bucket()
-    cloudStorage = new Storage(new FirebaseStorage(bucket))
+    cloudStorage = new Storage(new FirebaseStorageService(bucket))
 }
 
 /**
@@ -31,7 +36,7 @@ export function main(): void {
         console.warn('WEBSITE_ID or STORAGE_BUCKET is required');
         return
     }
-    notifier.printStats();
+    printStats();
     (async () => {
 
         try {
@@ -47,38 +52,33 @@ export function main(): void {
 
             // Stage files
             await Promise.all([
-                ReportBuilder.stageFilesFromMount(),
+                AllureService.stageFilesFromMount(),
                 downloadRequired ? cloudStorage?.stageFilesFromStorage() : null,
             ])
             // Build report
-            await ReportBuilder.generate()
+            await AllureService.generate()
             // Init hosting
             await firebaseHost.init()
         }
         // Handle initialized features
-        const [websiteUrlFromHostProvider] = (await Promise.all([
+        const [reportUrl] = (await Promise.all([
             firebaseHost?.deploy(),
             cloudStorage?.uploadArtifacts()
         ]))
 
-        // Prepare GitHub summary
-        const notifierPromises: Promise<void>[] = []
-        if (GITHUB_SUMMARY_PATH) {
-            notifierPromises.push(notifier.printGithubSummary({
-                mountedFilePath: GITHUB_SUMMARY_PATH,
-                url: websiteUrlFromHostProvider
-            }))
-        } else {
-            notifier.printSummaryToConsole({url: websiteUrlFromHostProvider})
+
+        const notifiers: Notifier[] = []
+        notifiers.push(consoleNotifier)
+        if(slackNotifier){
+            notifiers.push(slackNotifier)
         }
-        // Prepare Slack message
-        if (notifier.slackClient) {
-            notifierPromises.push(notifier.SendSlackMsg(websiteUrlFromHostProvider))
+        if(githubNotifier){
+            notifiers.push(githubNotifier)
         }
-        // Send notifications async
-        if (notifierPromises.length > 0) {
-            await Promise.all(notifierPromises)
-        }
+
+        const notificationData = new NotificationData(counter ,reportUrl, dashboardUrl() )
+        new NotifierService(notifiers).sendNotifications(notificationData)
+            .catch((error) => console.error(error));
     })()
 
 }

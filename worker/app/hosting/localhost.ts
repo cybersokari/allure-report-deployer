@@ -1,5 +1,5 @@
 import {HostingProvider} from "./hosting-provider";
-import reportBuilder from "../report-builder";
+import reportBuilder from "../allure-service";
 
 export class Localhost implements HostingProvider{
     async deploy(): Promise<void> {

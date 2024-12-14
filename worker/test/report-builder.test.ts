@@ -1,4 +1,4 @@
-import { ReportBuilder, AllureCommandRunner } from "../app/report-builder";
+import { AllureService, AllureCommandRunner } from "../app/allure-service";
 import { MOUNTED_PATH, REPORTS_DIR, RESULTS_STAGING_PATH } from "../app/constant";
 // import * as fs from "fs/promises";
 import mock from 'mock-fs';
@@ -21,14 +21,14 @@ jest.mock("fs/promises", () => ({
 
 describe("ReportBuilder", () => {
     let mockAllureRunner: AllureCommandRunner;
-    let reportBuilder: ReportBuilder;
+    let reportBuilder: AllureService;
 
     beforeEach(() => {
         jest.clearAllMocks(); // Clear mocks between tests
         mockAllureRunner = {
             runCommand: jest.fn(), // Mock the AllureCommandRunner interface
         };
-        reportBuilder = new ReportBuilder(mockAllureRunner); // Use the mocked runner
+        reportBuilder = new AllureService(mockAllureRunner); // Use the mocked runner
         mock({
             '/allure-results' : {
                 'file1.json': '{}',
