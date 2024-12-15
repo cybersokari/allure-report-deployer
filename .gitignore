@@ -6,3 +6,4 @@ credentials/gcp-key.json
 .env.slack
 my.**
 gcp-key.json
+packages/**/dist

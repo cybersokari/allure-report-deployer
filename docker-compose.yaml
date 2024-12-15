@@ -22,17 +22,22 @@ services:
     develop:
       watch:
         - action: sync+restart
-          path: ./worker/lib
-          target: /app/lib
-          ignore:
-            - node_modules/
+          path: ./packages/docker/dist
+          target: /app/packages/docker/dist
+        - action: sync+restart
+          path: ./packages/shared/dist
+          target: /app/packages/shared/dist
         - action: rebuild
-          path: ./worker/package.json
+          path: ./packages/docker/package.json
+          target: /app/packages/docker/package.json
+        - action: rebuild
+          path: packages/shared/package.json
+          target: /app/packages/shared/package.json
     container_name: allure-deployer
 #    env_file: .env.slack
     environment:
       FIREBASE_STORAGE_EMULATOR_HOST: 127.0.0.1:9199 # Dev mode
-      STORAGE_BUCKET: "fir-demo-project.appspot.com"
+      STORAGE_BUCKET: "gatedaccessdev.appspot.com"
 #      PREFIX: 'project-999'
       WEBSITE_ID: 'fir-demo-project'
       WEBSITE_EXPIRES: 12h

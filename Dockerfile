@@ -6,8 +6,9 @@ RUN npm install -g firebase-tools
 FROM deps AS prod
 WORKDIR /app
 
-COPY worker/lib  ./lib
-COPY worker/node_modules ./node_modules
+COPY packages ./packages
+COPY package.json package-lock.json ./
+COPY tsconfig.base.json ./
+COPY node_modules ./node_modules
 
-COPY start.sh /
-CMD ["/bin/sh", "/start.sh"]
+CMD ["/bin/sh", "./packages/docker/start.sh"]

@@ -30,9 +30,11 @@ jobs:
           node-version: 22
       - name: Install dependencies
         run: |
-          cd ./worker
-          npm install && npm run build
-          npm install --omit=dev
+          npm install --workspace=@allure/shared
+          npm install --workspace=@allure/docker
+          npm run build --workspaces
+          npm install --workspace=@allure/shared --omit-dev
+          npm install --workspace=@allure/docker --omit-dev
 
       - name: Build and push
         uses: docker/build-push-action@v6.10.0

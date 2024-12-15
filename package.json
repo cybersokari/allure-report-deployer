@@ -1,0 +1,12 @@
+{
+  "name": "allure-report-deployer",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "packages/shared",
+    "packages/docker"
+  ],
+  "scripts": {
+    "build": "yarn workspaces run build"
+  }
+}

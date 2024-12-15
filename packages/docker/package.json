@@ -1,0 +1,15 @@
+{
+  "name": "@allure/docker",
+  "version": "1.0.0",
+  "description": "Deploy your Allure Test Reports to a website, No server required",
+  "scripts": {
+    "test": "jest",
+    "build": "rm -rf ./dist && tsc"
+  },
+  "type": "module",
+  "dependencies": {
+    "@allure/shared": "1.0.0"
+  },
+  "private": true,
+  "files": ["dist/","src/"]
+}

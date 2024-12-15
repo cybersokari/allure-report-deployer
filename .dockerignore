@@ -1,0 +1,5 @@
+packages/cli
+packages/action
+packages/shared/test
+packages/shared/jest.config.ts
+packages/**/src
