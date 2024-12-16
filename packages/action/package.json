@@ -7,10 +7,9 @@
     "test": "jest",
     "build": "rm -rf ./dist && tsc"
   },
+  "type": "module",
   "private": true,
   "dependencies": {
-    "@actions/core": "^1.11.1",
-    "@actions/github": "^6.0.0",
     "@allure/shared": "1.0.0"
   }
 }

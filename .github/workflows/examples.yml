@@ -56,3 +56,17 @@ jobs:
           -v ${{ github.workspace }}/assets/allure-results:/allure-results \
           -v ${{ github.workspace }}/gcp-key.json:/credentials/key.json \
           sokari/allure-deployer:latest
+
+  test-action:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Allure Deployer Action
+        uses: ./packages/action
+        env:
+          SLACK_TOKEN: ${{secrets.SLACK_TOKEN}}
+          GOOGLE_CREDENTIALS_JSON: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
+        with:
+          allure_results_path: '${{ github.workspace }}/assets/allure-results'
+          storage_bucket: ${{github.event.inputs.storage-bucket}}
+          website_id: ${{ github.event.inputs.website-id }}
+          slack_channel_id: ${{secrets.SLACK_CHANNEL_ID}}

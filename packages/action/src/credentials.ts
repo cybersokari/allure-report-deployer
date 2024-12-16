@@ -1,5 +1,4 @@
 import {CredentialsInterface} from "@allure/shared";
-import core from "@actions/core";
 
 
 export class ActionsCredentials implements CredentialsInterface{
@@ -8,7 +7,7 @@ export class ActionsCredentials implements CredentialsInterface{
     public data: any; // Parsed credentials data
 
     async init(): Promise<void> {
-        this.data = JSON.parse(core.getInput('firebase_credentials'));
+        this.data = JSON.parse(process.env.GOOGLE_CREDENTIALS_JSON!);
         this._projectId = this.data.project_id;
     }
 

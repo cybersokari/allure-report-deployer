@@ -5,32 +5,32 @@ import {
     FirebaseStorageService, getDashboardUrl,
     GitHubNotifier, NotificationData, Notifier, NotifierService,
     printStats, RealSlackClient, SlackNotifier,
-    Storage, GCPStorage
+    Storage, GCPStorage, appLog
 } from "@allure/shared";
 import {ActionsCredentials} from "./credentials.js";
 import {getArgs} from "./constants.js";
-import core from "@actions/core";
 
 export function main() {
     counter.startTimer();
+
     const creds = ActionsCredentials.getInstance();
 
     (async ()=>{
-        await creds.init()
-        const args = getArgs(creds)
-        if(!args.MOUNTED_PATH){
-            core.setFailed('allure_results_path is required')
-            return
-        }
-        if (!args.storageBucket && !args.websiteId) {
-            core.setFailed('website_id or storage_bucket is required');
-            return
-        }
         try {
             await creds.init()
         } catch (error) {
-            core.setFailed('Invalid Google Credentials JSON: Are you sure you have the correct file?')
-            return
+            appLog('Invalid Google Credentials JSON: Are you sure you have the correct file?')
+            console.error(error)
+            process.exit(1)
+        }
+        const args = getArgs(creds)
+        if(!args.MOUNTED_PATH){
+            console.error('allure_results_path is required')
+            process.exit(1)
+        }
+        if (!args.storageBucket && !args.websiteId) {
+            appLog('website_id or storage_bucket is required');
+            process.exit(1)
         }
         printStats(args)
 
@@ -66,8 +66,8 @@ export function main() {
 export async function sendNotifications(reportUrl: string | undefined, args: ArgsInterface) {
     const notifiers: Notifier[] = []
 
-    const slackToken = core.getInput('slack_token')
-    const slackChannelId = core.getInput('slack_channel_id')
+    const slackToken = process.env.SLACK_TOKEN
+    const slackChannelId = process.env.SLACK_CHANNEL_ID
     if (slackToken && slackChannelId) {
         notifiers.push(new SlackNotifier(new RealSlackClient(slackToken, slackChannelId)))
     }
@@ -78,6 +78,5 @@ export async function sendNotifications(reportUrl: string | undefined, args: Arg
         return args.storageBucket ? getDashboardUrl({storageBucket: args.storageBucket, projectId: args.firebaseProjectId}) : undefined
     }
     const notificationData = new NotificationData(counter, reportUrl, dashboardUrl())
-    core.setCommandEcho(true) // Enable echo to GITHUB_STEP_SUMMARY file
     await notificationService.sendNotifications(notificationData)
 }

@@ -1,10 +1,9 @@
 packages/cli
-packages/action
+packages/**/src
 # unused files and directories in shared package
-packages/shared/src
 packages/shared/test
 packages/shared/ts*
 packages/shared/jest*
 
 packages/docker/test
-packages/docker/src
+
