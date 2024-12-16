@@ -15,4 +15,6 @@ COPY node_modules $APP_HOME/node_modules
 
 
 COPY packages/action/entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
 ENTRYPOINT ["/entrypoint.sh"]
