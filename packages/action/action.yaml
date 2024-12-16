@@ -1,9 +1,9 @@
-name: 'Allure Report Deployer'
-description: 'Host Allure Reports as a website, with unique Ephemeral URLs per report and notification to Slack, No server required'
-author: sokari
+name: 'Allure Deployer Action'
+description: 'Deploy Allure Reports as a website, with unique Ephemeral URLs per report and notification to Slack, No server required'
+author: 'Sokari Gillis-Harry'
 runs:
   using: 'node20'
-  main: dist/index.js
+  main: 'dist/index.js'
 
 inputs:
   storage_bucket:
@@ -13,29 +13,34 @@ inputs:
     description: 'Unique identifier for the hosted report'
     required: true
   website_expires:
-    description: 'Expiration duration for reports (e.g., 7d, 2h)'
+    description: "Expiration duration for Report's website (e.g., 2h, 7d, 3w) Max. 30d"
     default: '7d'
   keep_history:
-    description: 'Retain historical data in the report (true/false)'
+    description: 'Save Report history to storage (true/false)'
     default: 'true'
   keep_results:
-    description: 'Keep test results in the storage bucket (true/false)'
-    default: 'false'
+    description: 'Save Report retries (result files) to storage (true/false)'
+    default: 'true'
   slack_token:
-    description: 'Slack bot token for notifications (optional)'
+    description: 'Slack token for notifications (optional)'
     required: false
   slack_channel_id:
     description: 'Slack channel ID for notifications (optional)'
     required: false
   firebase_credentials:
-    description: 'Path to the Google Cloud credentials JSON file'
+    description: 'Firebase (Google Cloud) credentials JSON'
     required: true
   allure_results_path:
     description: 'Path to the directory containing Allure results'
     required: true
   show_retries:
     description: 'Show retries in the test report (true/false)'
+    required: false
     default: 'true'
   show_history:
     description: 'Show history in the test report (true/false)'
     default: 'true'
+
+  outputs:
+    report_url:
+      description: 'URL to your report if enabled'

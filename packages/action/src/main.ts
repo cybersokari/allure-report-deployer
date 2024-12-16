@@ -12,7 +12,6 @@ import {Storage as GcpStorage} from "@google-cloud/storage";
 import {getArgs} from "./constants.js";
 import core from "@actions/core";
 
-
 export function main() {
     counter.startTimer();
     const creds = ActionsCredentials.getInstance();
@@ -20,13 +19,17 @@ export function main() {
     (async ()=>{
         await creds.init()
         const args = getArgs(creds)
-        try {
-            await creds.init()
-            printStats(args)
-        } catch (error) {
-            console.warn('Invalid Google Credentials JSON: Are you sure you have the correct file?');
+        if (!args.storageBucket && !args.websiteId) {
+            core.setFailed('website_id or storage_bucket is required');
             return
         }
+        try {
+            await creds.init()
+        } catch (error) {
+            core.setFailed('Invalid Google Credentials JSON: Are you sure you have the correct file?')
+            return
+        }
+        printStats(args)
 
         let cloudStorage: Storage | undefined = undefined;
         if (args.storageBucket) {
@@ -72,5 +75,6 @@ export async function sendNotifications(reportUrl: string | undefined, args: Arg
         return args.storageBucket ? getDashboardUrl({storageBucket: args.storageBucket, projectId: args.firebaseProjectId}) : undefined
     }
     const notificationData = new NotificationData(counter, reportUrl, dashboardUrl())
+    core.setCommandEcho(true) // Enable echo to GITHUB_STEP_SUMMARY file
     await notificationService.sendNotifications(notificationData)
 }
