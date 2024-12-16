@@ -2,10 +2,14 @@ name: Github Actions use case
 on:
   workflow_dispatch:
     inputs:
+      job:
+        description: 'Select the job to run: test-docker or test-action'
+        required: true
+        default: 'test-action'
       storage-bucket:
         description: 'Your Firebase (GCP) storage bucket'
         required: true
-      keep-retries:
+      keep-results:
         description: 'Backup results to keep retries' 
         required: false
         default: 'false'
@@ -22,7 +26,8 @@ on:
         default: '1h'
 
 jobs:
-  generate-publish:
+  test-docker:
+    if: ${{ github.event.inputs.job == 'test-docker' }}
     runs-on: ubuntu-latest
     env:
       GCP_SECRETS: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
@@ -58,10 +63,11 @@ jobs:
           sokari/allure-deployer:latest
 
   test-action:
+    if: ${{ github.event.inputs.job == 'test-action' }}
     runs-on: ubuntu-latest
     steps:
       - name: Allure Deployer Action
-        uses: ./packages/action
+        uses: cybersokari/allure-deployer-action@v1.0.0
         env:
           SLACK_TOKEN: ${{secrets.SLACK_TOKEN}}
           GOOGLE_CREDENTIALS_JSON: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
@@ -69,4 +75,7 @@ jobs:
           allure_results_path: '${{ github.workspace }}/assets/allure-results'
           storage_bucket: ${{github.event.inputs.storage-bucket}}
           website_id: ${{ github.event.inputs.website-id }}
+          website_expires: ${{github.event.inputs.website-expires}}
           slack_channel_id: ${{secrets.SLACK_CHANNEL_ID}}
+          keep_history: ${{github.event.inputs.keep-history}}
+          keep_results: ${{github.event.inputs.keep-results}}
