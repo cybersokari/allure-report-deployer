@@ -14,4 +14,8 @@ export const showHistory = process.env.SHOW_HISTORY?.toLowerCase() === 'true' ||
 export const showRetries = process.env.SHOW_RETRIES?.toLowerCase() === 'true' || true
 export const uploadRequired = keepResults || keepHistory
 export const downloadRequired = showRetries || showHistory
+export const slackToken = process.env.SLACK_TOKEN || null;
+export const slackChannelId = process.env.SLACK_CHANNEL_ID || null;
+export const GITHUB_SUMMARY_PATH = process.env.GITHUB_STEP_SUMMARY || null
+
 

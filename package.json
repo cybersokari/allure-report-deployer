@@ -4,7 +4,8 @@
   "private": true,
   "workspaces": [
     "packages/shared",
-    "packages/docker"
+    "packages/docker",
+    "packages/action"
   ],
   "scripts": {
     "build": "yarn workspaces run build"

@@ -5,17 +5,13 @@ import {Storage as GcpStorage} from "@google-cloud/storage";
 import {
     Storage,
     FirebaseHost,
-    getDashboardUrl,
     printStats,
     counter,
-    Notifier,
-    NotifierService,
     FirebaseStorageService,
-    NotificationData
 } from "@allure/shared";
 import {readFile} from "fs/promises";
 import * as path from "node:path";
-import {credential, githubNotifier, slackNotifier, consoleNotifier} from "./declarations.js";
+import {credential, sendNotifications} from "./declarations.js";
 import {
     ARCHIVE_DIR, downloadRequired,
     fileProcessingConcurrency,
@@ -69,7 +65,6 @@ export function main(): void {
 
         let firebaseHost: FirebaseHost | undefined
         if (websiteId) {
-
             firebaseHost = new FirebaseHost(websiteId, args);
 
             const allure = new Allure({args: args})
@@ -97,19 +92,3 @@ if (import.meta.url === new URL(import.meta.url).toString()) {
     main();
 }
 
-async function sendNotifications(reportUrl: string | undefined, projectId: string | undefined) {
-    const notifiers: Notifier[] = []
-    notifiers.push(consoleNotifier)
-    if (slackNotifier) {
-        notifiers.push(slackNotifier)
-    }
-    if (githubNotifier) {
-        notifiers.push(githubNotifier)
-    }
-    const notificationService = new NotifierService(notifiers)
-    const dashboardUrl = ()=> {
-        return STORAGE_BUCKET ? getDashboardUrl({storageBucket: STORAGE_BUCKET, projectId: projectId}) : undefined
-    }
-    const notificationData = new NotificationData(counter, reportUrl, dashboardUrl())
-    await notificationService.sendNotifications(notificationData)
-}

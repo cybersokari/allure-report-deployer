@@ -1,22 +1,9 @@
 name: 'Allure Report Deployer'
-description: 'Deploy Allure reports to Firebase using Docker.'
-author: cybersokari
+description: 'Host Allure Reports as a website, with unique Ephemeral URLs per report and notification to Slack, No server required'
+author: sokari
 runs:
-  using: 'docker'
-  image: 'Dockerfile'
-  entrypoint: '/entrypoint.sh'
-  args:
-    - ${{ inputs.storage_bucket }}
-    - ${{ inputs.website_id }}
-    - ${{ inputs.website_expires }}
-    - ${{ inputs.keep_history }}
-    - ${{ inputs.keep_results }}
-    - ${{ inputs.slack_token }}
-    - ${{ inputs.slack_channel_id }}
-    - ${{ inputs.credentials_file_path }}
-    - ${{ inputs.allure_results_path }}
-    - ${{ inputs.show_retries }}
-    - ${{ inputs.show_history }}
+  using: 'node20'
+  main: dist/index.js
 
 inputs:
   storage_bucket:
@@ -40,7 +27,7 @@ inputs:
   slack_channel_id:
     description: 'Slack channel ID for notifications (optional)'
     required: false
-  credentials_file_path:
+  firebase_credentials:
     description: 'Path to the Google Cloud credentials JSON file'
     required: true
   allure_results_path:

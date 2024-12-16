@@ -1,6 +1,7 @@
 export interface ArgsInterface {
     storageBucket?: string;
     websiteId?: string;
+    websiteExpires?: string;
     keepHistory?: boolean;
     keepResults?: boolean;
     showHistory?: boolean;

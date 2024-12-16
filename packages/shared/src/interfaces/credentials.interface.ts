@@ -1,4 +1,4 @@
 export interface CredentialsInterface {
-    projectId: string;
+    projectId: string | undefined;
     init(): Promise<void>;
 }

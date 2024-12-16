@@ -1,24 +1,38 @@
-import { ConsoleNotifier,
-    EnvCredential,
-    GitHubNotifier,
+import {
+    ConsoleNotifier, counter,
+    EnvCredential, getDashboardUrl,
+    GitHubNotifier, NotificationData, Notifier, NotifierService,
     RealSlackClient,
     SlackNotifier
 } from "@allure/shared";
+import {GITHUB_SUMMARY_PATH, slackChannelId, slackToken, STORAGE_BUCKET} from "./constants";
 
-const GITHUB_SUMMARY_PATH = process.env.GITHUB_STEP_SUMMARY || null
 export let githubNotifier: GitHubNotifier | undefined;
 if(GITHUB_SUMMARY_PATH){
     githubNotifier = new GitHubNotifier(GITHUB_SUMMARY_PATH)
 }
 
-
-const token = process.env.SLACK_TOKEN || null;
-const channel = process.env.SLACK_CHANNEL_ID || null;
 export let slackNotifier: SlackNotifier | undefined;
-if(token && channel){
-    slackNotifier = new SlackNotifier(new RealSlackClient(token, channel))
+if(slackToken && slackChannelId){
+    slackNotifier = new SlackNotifier(new RealSlackClient(slackToken, slackChannelId))
 }
 
-// export const allure = new Allure(new AllureService());
 export const credential = EnvCredential.getInstance();
 export const consoleNotifier = new ConsoleNotifier()
+
+export async function sendNotifications(reportUrl: string | undefined, projectId: string | undefined) {
+    const notifiers: Notifier[] = []
+    notifiers.push(consoleNotifier)
+    if (slackNotifier) {
+        notifiers.push(slackNotifier)
+    }
+    if (githubNotifier) {
+        notifiers.push(githubNotifier)
+    }
+    const notificationService = new NotifierService(notifiers)
+    const dashboardUrl = ()=> {
+        return STORAGE_BUCKET ? getDashboardUrl({storageBucket: STORAGE_BUCKET, projectId: projectId}) : undefined
+    }
+    const notificationData = new NotificationData(counter, reportUrl, dashboardUrl())
+    await notificationService.sendNotifications(notificationData)
+}
