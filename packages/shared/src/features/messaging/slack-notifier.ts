@@ -34,7 +34,7 @@ export class SlackNotifier implements Notifier {
         this.slackClient = client;
     }
 
-    async notify(data: NotificationData, storageBucket?: string): Promise<void> {
+    async notify(data: NotificationData): Promise<void> {
 
         // See: https://api.slack.com/methods/chat.postMessage
 
@@ -46,7 +46,7 @@ export class SlackNotifier implements Notifier {
                 "text": "*Your Allure report is ready* 📊"
             }
         })
-        if (storageBucket) {
+        if (data.storageUrl) {
 
             blocks.push({
                     "type": "context",
@@ -92,7 +92,7 @@ export class SlackNotifier implements Notifier {
                 ]
             })
         }
-        if (storageBucket) {
+        if (data.storageUrl) {
             blocks.push({
                 "type": "actions",
                 "elements": [

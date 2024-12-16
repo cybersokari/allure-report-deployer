@@ -23,7 +23,7 @@ export class FirebaseHost implements HostingProvider {
             return undefined;
         }
         // Try to extract
-        const regex = /hosting:channel: Channel URL.*\((.*?)\):\s+(https?:\/\/\S+)/;
+        const regex = /hosting:channel:\s*Channel URL.*\((.*?)\):\s+(https?:\/\/\S+)/s;
         const match = stdout.match(regex);
 
         if (match && match[2]) {
