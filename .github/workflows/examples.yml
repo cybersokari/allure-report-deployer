@@ -67,7 +67,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Allure Deployer Action
-        uses: cybersokari/allure-deployer-action@v1.0.0
+        uses: cybersokari/allure-deployer-action@v1.0.1
         env:
           SLACK_TOKEN: ${{secrets.SLACK_TOKEN}}
           GOOGLE_CREDENTIALS_JSON: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
