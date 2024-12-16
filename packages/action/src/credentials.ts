@@ -1,5 +1,4 @@
 import {CredentialsInterface} from "@allure/shared";
-import fs from "fs/promises";
 import core from "@actions/core";
 
 
@@ -9,9 +8,7 @@ export class ActionsCredentials implements CredentialsInterface{
     public data: any; // Parsed credentials data
 
     async init(): Promise<void> {
-        this.data = JSON.parse(
-            await fs.readFile(core.getInput('firebase_credentials'), 'utf8')
-        );
+        this.data = JSON.parse(core.getInput('firebase_credentials'));
         this._projectId = this.data.project_id;
     }
 

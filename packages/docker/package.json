@@ -11,5 +11,5 @@
     "@allure/shared": "1.0.0"
   },
   "private": true,
-  "files": ["dist/","src/"]
+  "files": ["dist/"]
 }

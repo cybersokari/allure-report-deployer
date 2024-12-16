@@ -1,5 +1,10 @@
 packages/cli
 packages/action
+# unused files and directories in shared package
+packages/shared/src
 packages/shared/test
-packages/shared/jest.config.ts
-packages/**/src
+packages/shared/ts*
+packages/shared/jest*
+
+packages/docker/test
+packages/docker/src

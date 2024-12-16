@@ -1,13 +1,10 @@
 import {
-    Allure, ArgsInterface,
-} from "@allure/shared";
-import {Storage as GcpStorage} from "@google-cloud/storage";
-import {
+    Allure, ArgsInterface, FirebaseStorageService,
     Storage,
     FirebaseHost,
     printStats,
     counter,
-    FirebaseStorageService,
+    GCPStorage,
 } from "@allure/shared";
 import {readFile} from "fs/promises";
 import * as path from "node:path";
@@ -29,10 +26,10 @@ export function main(): void {
         return
     }
     (async () => {
-        let args : ArgsInterface;
+        let args: ArgsInterface;
         try {
             await credential.init()
-             args = {
+            args = {
                 ARCHIVE_DIR: ARCHIVE_DIR,
                 HOME_DIR: HOME_DIR,
                 MOUNTED_PATH: MOUNTED_PATH,
@@ -59,7 +56,7 @@ export function main(): void {
         if (STORAGE_BUCKET) {
             const jsonFilePath = path.resolve(process.env.GOOGLE_APPLICATION_CREDENTIALS!);
             const gcpJson = JSON.parse(await readFile(jsonFilePath, "utf-8"));
-            const bucket = new GcpStorage({credentials: gcpJson}).bucket(STORAGE_BUCKET)
+            const bucket = new GCPStorage({credentials: gcpJson}).bucket(STORAGE_BUCKET)
             cloudStorage = new Storage(new FirebaseStorageService(bucket), args)
         }
 

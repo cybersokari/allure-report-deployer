@@ -5,10 +5,9 @@ import {
     FirebaseStorageService, getDashboardUrl,
     GitHubNotifier, NotificationData, Notifier, NotifierService,
     printStats, RealSlackClient, SlackNotifier,
-    Storage
+    Storage, GCPStorage
 } from "@allure/shared";
 import {ActionsCredentials} from "./credentials.js";
-import {Storage as GcpStorage} from "@google-cloud/storage";
 import {getArgs} from "./constants.js";
 import core from "@actions/core";
 
@@ -19,6 +18,10 @@ export function main() {
     (async ()=>{
         await creds.init()
         const args = getArgs(creds)
+        if(!args.MOUNTED_PATH){
+            core.setFailed('allure_results_path is required')
+            return
+        }
         if (!args.storageBucket && !args.websiteId) {
             core.setFailed('website_id or storage_bucket is required');
             return
@@ -33,7 +36,7 @@ export function main() {
 
         let cloudStorage: Storage | undefined = undefined;
         if (args.storageBucket) {
-            const bucket = new GcpStorage({credentials: creds.data}).bucket(args.storageBucket)
+            const bucket = new GCPStorage({credentials: creds.data}).bucket(args.storageBucket)
             cloudStorage = new Storage(new FirebaseStorageService(bucket), args)
         }
 

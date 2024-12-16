@@ -16,3 +16,4 @@ export * from  "./utilities/util.js"
 export * from  "./utilities/icon.js"
 export * from  "./utilities/env-credential.js"
 export * from  "./utilities/string-builder.js"
+export { Storage as GCPStorage} from "@google-cloud/storage";

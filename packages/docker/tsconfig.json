@@ -2,8 +2,8 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "rootDir": "./src",
-    "outDir": "./dist"
+    "outDir": "./dist",
   },
   "include": ["src/**/*"],
-  "exclude": ["docker-compose.yaml","Dockerfile", "start.sh"]
+  "exclude": ["docker-compose.yaml","Dockerfile", "start.sh", "node_modules"]
 }
