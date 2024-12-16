@@ -32,7 +32,7 @@ export function main(): void {
             args = {
                 ARCHIVE_DIR: ARCHIVE_DIR,
                 HOME_DIR: HOME_DIR,
-                MOUNTED_PATH: MOUNTED_PATH,
+                RESULTS_PATH: MOUNTED_PATH,
                 REPORTS_DIR: REPORTS_DIR,
                 RESULTS_STAGING_PATH: RESULTS_STAGING_PATH,
                 fileProcessingConcurrency: fileProcessingConcurrency,

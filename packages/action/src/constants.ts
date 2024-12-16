@@ -1,5 +1,6 @@
 import { ArgsInterface } from "@allure/shared";
 import { ActionsCredentials } from "./credentials.js";
+import * as path from "node:path";
 
 export function getArgs(credentials: ActionsCredentials): ArgsInterface {
     const keepHistory = process.env.KEEP_HISTORY === "true";
@@ -8,6 +9,7 @@ export function getArgs(credentials: ActionsCredentials): ArgsInterface {
     const showHistory = process.env.SHOW_HISTORY === "true";
     const showRetries = process.env.SHOW_RETRIES === "true";
     const downloadRequired = showRetries || showHistory;
+    const resultsPath = path.normalize(`/github/workspace/${process.env.ALLURE_RESULTS_PATH!}`);
 
     return {
         firebaseProjectId: credentials.projectId,
@@ -18,7 +20,7 @@ export function getArgs(credentials: ActionsCredentials): ArgsInterface {
         keepResults: keepResults,
         ARCHIVE_DIR: '/app/archive',
         HOME_DIR: "/app",
-        MOUNTED_PATH: process.env.ALLURE_RESULTS_PATH!,
+        RESULTS_PATH: resultsPath,
         REPORTS_DIR: "/app/allure-reports",
         RESULTS_STAGING_PATH: "/app/allure-results",
         fileProcessingConcurrency: 10,

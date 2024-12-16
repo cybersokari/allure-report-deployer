@@ -73,7 +73,7 @@ jobs:
           SLACK_TOKEN: ${{secrets.SLACK_TOKEN}}
           GOOGLE_CREDENTIALS_JSON: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
         with:
-          allure_results_path: '${{ github.workspace }}/assets/allure-results'
+          allure_results_path: '/assets/allure-results'
           storage_bucket: ${{github.event.inputs.storage-bucket}}
           website_id: ${{ github.event.inputs.website-id }}
           website_expires: ${{github.event.inputs.website-expires}}

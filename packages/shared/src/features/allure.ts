@@ -44,7 +44,7 @@ export class Allure {
     async stageFilesFromMount(): Promise<void> {
         // Ensure staging directory exists and fetch list
         const [files] = await Promise.all([
-            fs.readdir(this.args.MOUNTED_PATH, { withFileTypes: true }), // Get files info
+            fs.readdir(this.args.RESULTS_PATH, { withFileTypes: true }), // Get files info
             fs.mkdir(this.args.RESULTS_STAGING_PATH, { recursive: true }) // Create staging if it doesn't exist
         ]);
 
@@ -73,7 +73,7 @@ export class Allure {
     }
 
     private async copyFile(file: Dirent): Promise<void> {
-        const fileToCopy = path.join(this.args.MOUNTED_PATH, file.name);
+        const fileToCopy = path.join(this.args.RESULTS_PATH, file.name);
         const destination = path.join(this.args.RESULTS_STAGING_PATH, file.name);
         await fs.cp(fileToCopy, destination, { force: false, errorOnExist: false });
     }

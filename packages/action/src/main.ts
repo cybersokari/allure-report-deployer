@@ -24,7 +24,7 @@ export function main() {
             process.exit(1)
         }
         const args = getArgs(creds)
-        if(!args.MOUNTED_PATH){
+        if(!args.RESULTS_PATH){
             console.error('allure_results_path is required')
             process.exit(1)
         }

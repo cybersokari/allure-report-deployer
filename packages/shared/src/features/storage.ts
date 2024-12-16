@@ -48,8 +48,8 @@ export class Storage {
         const foldersToBackup: { path: string, destination?: string }[] = []
         const foldersToCount = []
         if (this.args.keepResults) {
-            foldersToBackup.push({path: this.args.MOUNTED_PATH})
-            foldersToCount.push(this.args.MOUNTED_PATH)
+            foldersToBackup.push({path: this.args.RESULTS_PATH})
+            foldersToCount.push(this.args.RESULTS_PATH)
         }
         if (this.args.websiteId && this.args.keepHistory) {
             const historyFolder = `${this.args.REPORTS_DIR}/history`
