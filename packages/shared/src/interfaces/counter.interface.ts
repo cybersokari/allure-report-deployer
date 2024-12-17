@@ -1,7 +1,7 @@
 import {Mutex} from "async-mutex";
 
 export interface CounterInterface {
-    startTime: number | null
+    startTime: number | undefined
     processed: number
     uploaded: number
     mutex: Mutex

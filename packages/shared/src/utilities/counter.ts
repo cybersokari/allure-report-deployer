@@ -8,7 +8,7 @@ import {CounterInterface} from "../interfaces/counter.interface";
  * Utilizes a mutex for safe concurrent updates to shared counters.
  */
 class Counter implements CounterInterface{
-    public startTime: number | null = null;
+    public startTime: number | undefined = undefined;
     public processed = 0
     public uploaded = 0
     public mutex: Mutex

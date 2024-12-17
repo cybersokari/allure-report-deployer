@@ -2,22 +2,28 @@ import {HostingProvider} from "../../interfaces/hosting-provider.interface.js";
 import * as fs from "fs/promises";
 import {StringBuilder} from "../../utilities/string-builder.js";
 import {appLog, changePermissionsRecursively} from "../../utilities/util.js";
+import {ArgsInterface} from "../../interfaces/args.interface.js";
+import {ExecFunction} from "../../interfaces/exec-function.interface.js";
 import { promisify } from 'util';
 import { exec as execCallback } from 'child_process';
-import {ArgsInterface} from "../../interfaces/args.interface";
 const exec = promisify(execCallback);
 
 export class FirebaseHost implements HostingProvider {
     public command: string | undefined
+    private readonly commandExec: ExecFunction | undefined
 
-    constructor(readonly websiteId: string, readonly args: ArgsInterface) {}
+    constructor(readonly websiteId: string, readonly args: ArgsInterface, commandExec?: ExecFunction) {
+        if(!commandExec){
+            this.commandExec = exec
+        }
+    }
 
     async deploy(): Promise<undefined|string> {
         if(!this.command){
             throw new Error('Firebase hosting not initialized. Call init() first.')
         }
         await changePermissionsRecursively(this.args.REPORTS_DIR, 0o755)
-        const {stdout, stderr} = await exec(this.command)
+        const {stdout, stderr} = await this.commandExec!(this.command)
         if (stderr && !stdout) {
             appLog(`Deployment failed: ${stderr}`)
             return undefined;

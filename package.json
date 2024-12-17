@@ -9,5 +9,8 @@
   ],
   "scripts": {
     "build": "yarn workspaces run build"
+  },
+  "overrides": {
+    "whatwg-url": "^14.0.0"
   }
 }

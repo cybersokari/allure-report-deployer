@@ -9,3 +9,5 @@ gcp-key.json
 packages/**/dist
 act-event.json
 act-script.sh
+node_modules
+node_modules
