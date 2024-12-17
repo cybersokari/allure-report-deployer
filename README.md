@@ -20,8 +20,8 @@
 3. [Use Cases](#use-cases)
     - [CI Pipelines](#ci-pipelines)
       - [GitHub Action](#github)
-      - [Gitlab](#gitlab-integration)
-      - [Codemagic](#codemagic)
+      - [Gitlab](#gitlab)
+      - [Codemagic](#codemagic-integration)
       - [Bitrise]()
     - [Local Test Runs](#local-test-runs)
 4. [Configurations](#configuration)
@@ -357,7 +357,7 @@ and `SLACK_CHANNEL_ID` environment variable when you run the Docker image.
 
 Follow the [GitHub action](#for-github-actions) steps to set it up.
 
-#### Codemagic integration
+#### **Codemagic integration**
 
 Use the [docker image](https://hub.docker.com/r/sokari/allure-deployer) in your Codemagic workflow.
 
