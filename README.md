@@ -5,7 +5,7 @@
 
 ![](https://img.shields.io/docker/pulls/sokari/allure-deployer-action)
 
-**Host your Allure test reports on a Firebase. No server required.**
+**Host your Allure test reports on  Firebase. No server required.**
 
 ![Demo](assets/demo.gif)
 
