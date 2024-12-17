@@ -39,8 +39,8 @@
 <h2 id="quick-start">🚀 Quick Start</h2>
 
 ### Prerequisites
-1. **Firebase Credentials**:
-    - Create a Firebase [service account](https://firebase.google.com/docs/admin/setup#initialize_the_sdk_in_non-google_environments).
+1. **Firebase/GCP Credentials**:
+    - Create a Firebase/GCP [service account](https://firebase.google.com/docs/admin/setup#initialize_the_sdk_in_non-google_environments).
     - Download the `service-account-file.json` JSON file.
 
 2. **Firebase/Google Cloud Storage Bucket**:
