@@ -3,7 +3,7 @@
 ![Docker](https://github.com/cybersokari/allure-docker-deploy/actions/workflows/deploy-docker.yaml/badge.svg?branch=main)
 ![GitHub Action](https://github.com/cybersokari/allure-docker-deploy/actions/workflows/deploy-docker-action.yaml/badge.svg?branch=main)
 
-![](https://img.shields.io/docker/pulls/sokari/allure-deployer)
+![](https://img.shields.io/docker/pulls/sokari/allure-deployer-action)
 
 **Host your Allure test reports on a website. No server required.**
 

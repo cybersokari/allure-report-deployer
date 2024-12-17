@@ -22,9 +22,9 @@ export class FirebaseHost implements HostingProvider {
             appLog(`Deployment failed: ${stderr}`)
             return undefined;
         }
-        // Try to extract
-        const regex = /hosting:channel:\s*Channel URL.*\((.*?)\):\s+(https?:\/\/\S+)/s;
-        const match = stdout.match(regex);
+        // Regex to retrieve URL from ANSI-based logs
+        const regex = /hosting:channel:\x1b\[[0-9;]*m.*?\(\x1b\[[0-9;]*m?(.*?)\x1b\[[0-9;]*m?\):\s+(https?:\/\/\S+)/;
+        const match = regex.exec(stdout)
 
         if (match && match[2]) {
             const url = match[2]
@@ -35,6 +35,7 @@ export class FirebaseHost implements HostingProvider {
             return undefined
         }
     }
+
 
     async init(): Promise<string|null> {
         const config = {

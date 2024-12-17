@@ -24,8 +24,8 @@ if [ -z "$GOOGLE_CREDENTIALS_JSON" ]; then
   exit 1
 else
   # Create directory for the JSON file
-  TMP_DIR=$(mkdir "/credentials")
-  JSON_FILE="$TMP_DIR/credentials/gcp_credentials.json"
+  DIR=$(mkdir "/credentials")
+  JSON_FILE="$DIR/credentials/gcp_credentials.json"
   # Write the $GOOGLE_CREDENTIALS_JSON content to the JSON file
   echo "$GOOGLE_CREDENTIALS_JSON" > "$JSON_FILE" #TODO: Find out if clean up is needed
   # Export as GOOGLE_APPLICATION_CREDENTIALS for Firebase CLI auto auth

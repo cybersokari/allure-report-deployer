@@ -5,5 +5,7 @@ packages/shared/test
 packages/shared/ts*
 packages/shared/jest*
 
+packages/action/action.yaml
+
 packages/docker/test
 

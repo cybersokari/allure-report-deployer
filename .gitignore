@@ -7,3 +7,5 @@ credentials/gcp-key.json
 my.**
 gcp-key.json
 packages/**/dist
+act-event.json
+act-script.sh
