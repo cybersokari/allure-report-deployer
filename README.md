@@ -20,7 +20,7 @@
 3. [Use Cases](#use-cases)
     - [CI Pipelines](#ci-pipelines)
       - [GitHub Action](#github)
-      - [Gitlab](#gitlab)
+      - [Gitlab](#gitlab-integration)
       - [Codemagic](#codemagic)
       - [Bitrise]()
     - [Local Test Runs](#local-test-runs)
