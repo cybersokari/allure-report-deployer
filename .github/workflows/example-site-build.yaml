@@ -17,7 +17,7 @@ jobs:
           GOOGLE_CREDENTIALS_JSON: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
         with:
           allure_results_path: '/assets/allure-results'
-          storage_bucket: ${{vars.storage-bucket}}
+          storage_bucket: ${{vars.STORAGE_BUCKET}}
           website_id: 'example-site-readme'
           website_expires: '30d'
           slack_channel_id: ${{secrets.SLACK_CHANNEL_ID}}
