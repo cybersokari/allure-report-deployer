@@ -83,8 +83,8 @@ jobs:
 ```
 ___
 
-#### 2.	Check your GitHub Actions summary:
-Live example: https://gatedaccessdev--example-site-readme-1c8flvtu.web.app
+#### 2.	Check your GitHub Actions [summary](https://github.com/cybersokari/allure-report-deployer/actions/runs/12376413839):
+Live report website example: https://gatedaccessdev--example-site-readme-1c8flvtu.web.app
 ```markdown
 📊 Your Test Report is ready
 
