@@ -202,6 +202,7 @@ ___
 <h2 id="configuration">Configurations</h2>
 
 <h3 id="configuration-github">GitHub Actions</h2>
+
 #### Inputs
 
 | Input                 | Description                                                                               | Required | Default           |
@@ -272,19 +273,19 @@ ___
 
 <h3 id="hosting">🌐 Firebase Hosting</h3>
 
-When you run the Docker image with valid Allure result files,
-the report is automatically hosted on Firebase Hosting in your Firebase account.
+Allure Report Deployer hosts your Reports on Firebase Hosting and saves your history and  
+results files in Firebase/GCP storage.
 A **secure, randomized URL** will be generated and displayed in the console logs.
 If configured, the URL will also appear in **GitHub Summary** and **Slack notifications**.
 
 #### Key Features
 
-- **Temporary Hosting**: The URL is hosted using Firebase's Preview Channels, which expire after 30 days.
+- **Auto-Expire Hosting**: No need for cleaning up outdated reports, the website is hosted using Firebase's Preview Channels, which has a maximum life of 30 days.
 - **Customizable URL**: Use the `WEBSITE_ID` environment variable to control your report's hosting:
     - Using the **same `WEBSITE_ID`** overwrites the previous report at the same URL.
     - Using a **new `WEBSITE_ID`** generates a unique URL for each report.
 
-For more information, check the [Environment Variables](#environment-variables) section.
+For more information, check the [Configuration](#configuration) section.
 
 <h3 id="cloud-storage">☁️ Cloud Storage</h3>
 
