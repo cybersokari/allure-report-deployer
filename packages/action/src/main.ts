@@ -42,7 +42,6 @@ export function main() {
 
         let firebaseHost: FirebaseHost | undefined
         if (args.websiteId) {
-            firebaseHost = new FirebaseHost(args.websiteId, args);
 
             const allure = new Allure({args: args})
             // Stage files
@@ -53,6 +52,7 @@ export function main() {
             // Build report
             await allure.generate()
             // Init hosting
+            firebaseHost = new FirebaseHost(args.websiteId, args);
             await firebaseHost.init()
         }
         // Handle initialized features

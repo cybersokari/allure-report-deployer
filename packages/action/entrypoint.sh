@@ -27,7 +27,7 @@ else
   DIR=$(mkdir "/credentials")
   JSON_FILE="$DIR/credentials/gcp_credentials.json"
   # Write the $GOOGLE_CREDENTIALS_JSON content to the JSON file
-  echo "$GOOGLE_CREDENTIALS_JSON" > "$JSON_FILE" #TODO: Find out if clean up is needed
+  echo "$GOOGLE_CREDENTIALS_JSON" > "$JSON_FILE" # No cleanup needed, in non mounted Docker path
   # Export as GOOGLE_APPLICATION_CREDENTIALS for Firebase CLI auto auth
   export GOOGLE_APPLICATION_CREDENTIALS="$JSON_FILE"
 fi

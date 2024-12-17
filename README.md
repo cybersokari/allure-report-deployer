@@ -18,79 +18,73 @@
     - [History and Retries](#history-and-retries)
     - [Slack Integration](#slack-integration)
 3. [Use Cases](#use-cases)
-    - [CI Pipeline](#ci-pipelines)
-      - [GitHub Actions](#github-actions-integration)
+    - [CI Pipelines](#ci-pipelines)
+      - [GitHub Action](#github)
+      - [Gitlab](#gitlab)
+      - [Codemagic]()
+      - [Bitrise]()
     - [Local Test Runs](#local-test-runs)
-4. [Docker Image Configuration](#docker-image-configuration)
-    - [Environment Variables](#environment-variables)
-    - [Mount Volumes](#mount-volumes)
-5. [Comparison with Other Tools](#comparison-with-other-open-source-tools)
-6. [Troubleshooting and FAQs](#troubleshooting-and-faqs)
-7. [License](#license)
-8. [Contributing](#contributing)
+4. [Configurations](#configuration)
+    - [GitHub Action](#configuration-github)
+      - [Inputs](#inputs)
+      - [Environment variables](#environment-variables-github)
+    - [Docker](#configuration-docker)
+      - [Environment Variables](#environment-variables-docker)
+      - [Mount Volumes](#mount-volumes)
+5. [Troubleshooting and FAQs](#troubleshooting-and-faqs)
+6. [License](#license)
+7. [Contributing](#contributing)
 
 
 <h2 id="quick-start">🚀 Quick Start</h2>
 
 ### Prerequisites
-1. **Google Cloud Credentials**:
-    - Create a Google Cloud [service account](https://firebase.google.com/docs/admin/setup#initialize_the_sdk_in_non-google_environments) with access to Firebase Hosting and Cloud Storage.
+1. **Firebase Credentials**:
+    - Create a Firebase [service account](https://firebase.google.com/docs/admin/setup#initialize_the_sdk_in_non-google_environments).
     - Download the `service-account-file.json` JSON file.
 
-2. **Google Cloud Storage Bucket**:
+2. **Firebase/Google Cloud Storage Bucket**:
     - Create a bucket to store test results and reports. You can use the default.
-
-3. **Docker**:
-    - Ensure your CI environment supports Docker or you have installed it locally. [Download Docker](https://docs.docker.com/get-docker/)
 
     
 
-### For GitHub Actions:
-#### 1.	Add the [docker image](https://hub.docker.com/r/sokari/allure-deployer) to your GitHub Actions workflow and run it.
-        sokari/allure-deployer:latest
+### GitHub
+#### 1.	Add the [Allure Deployer GitHub Action](https://github.com/marketplace/actions/allure-deployer-action) to your workflow and run it.
+     
 
 ```yaml
-name: Allure Report Deployer
+name: Your awesome workflow
 on:
   push:
-    branches:
-      - main
 jobs:
-  test-and-report:
+  test-action:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
-    - name: Run Tests
-      run: |
-        # Run your tests and output results to a directory
-        mkdir -p ./allure-results
-    - name: Authenticate Docker Hub
-    - uses: docker/login-action@v3
-      with:
-        username: ${{ secrets.DOCKERHUB_USERNAME }}
-        password: ${{ secrets.DOCKERHUB_TOKEN }}
-        
-    - name: Deploy Allure Reports to Firebase
-      run: |
-        docker run --rm \
-          -e STORAGE_BUCKET=my-test-results-bucket \                    # Specify your Firebase Storage bucket
-          -e PREFIX=project-123 \                                       # A path in your storage bucket (Optional)
-          -e WEBSITE_ID=my-custom-site-id \                             # Use a unique ID for the report website
-          -e WEBSITE_EXPIRES=3d \                                       # Set the report expiration (e.g., 3 days)
-          -e KEEP_HISTORY=true \                                        # Retain historical test data
-          -e KEEP_RESULTS=true \                                        # Enable retry saving for failed tests
-          -v $GITHUB_STEP_SUMMARY:/github/summary.txt \                 # Display test report URL in GitHub summary
-          -v ${{ github.workspace }}/allure-results:/allure-results \  # Mount test results
-          -v ${{ secrets.GCP_CREDENTIALS_FILE_PATH }}:/credentials/key.json \ # Bind GCP credentials
-          sokari/allure-deployer:latest
-            
+      - uses: actions/checkout@v4.1.5
+      - name: Run your tests and create Allure results
+        run: |
+          echo ' Nothing here for now, waiting for results'
+          
+      - name: Allure Deployer Action
+        uses: cybersokari/allure-deployer-action@v1.0.1
+        env:
+          SLACK_TOKEN: ${{secrets.SLACK_TOKEN}}
+          GOOGLE_CREDENTIALS_JSON: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
+        with:
+          allure_results_path: '/assets/allure-results'
+          website_id: 'custom-website-id'
+          website_expires: '14d'
+          storage_bucket: ${{vars.storage-bucket}}
+          slack_channel_id: ${{vars.SLACK_CHANNEL_ID}}
+          keep_history: 'true'
+          show_history: 'true' # Requires keep_history to be enabled
+          keep_results: 'true'
+          show_retries: 'true' # Requires keep_results to be enabled
 ```
-See the Docker [configuration section](#docker-image-configuration) for more info
-
 ___
 
 #### 2.	Check your GitHub Actions summary:
-Example:
+Live example: https://gatedaccessdev--example-site-readme-1c8flvtu.web.app
 ```markdown
 📊 Your Test Report is ready
 
@@ -102,20 +96,72 @@ File Storage: https://console.firebase.google.com/project/${project-id}/storage/
 | 5                 | 49                 | 8 seconds  |
 ```
 
----
-
-#### 3. Your Test report website in Firebase Hosting:
-Example:
-<div><img src="assets/site.png" alt="Test report example site"></div>
-
 Tips
 1.	Use unique values for `WEBSITE_ID` (e.g., `${{ github.ref }}`) to avoid overwriting reports.
 2.	Configure `WEBSITE_EXPIRES` to manage the duration of hosted reports.
-3.	Mount `$GITHUB_STEP_SUMMARY` to display the test report URL in GitHub Actions job summaries.
-
 ___
 
-### 2. For local test runs
+### Gitlab
+#### Add the [docker image](https://hub.docker.com/r/sokari/allure-deployer) to your Gitlab workflow and run it.
+    sokari/allure-deployer:latest
+
+```yaml
+stages:
+  - test
+  - deploy
+
+variables:
+  DOCKER_IMAGE: sokari/allure-deployer:latest
+  STORAGE_BUCKET: my-test-results-bucket
+  PREFIX: project-123
+  WEBSITE_ID: my-custom-site-id
+  WEBSITE_EXPIRES: 3d
+  KEEP_HISTORY: "true"
+  KEEP_RESULTS: "true"
+
+before_script:
+  - mkdir -p ./allure-results
+
+test:
+  stage: test
+  script:
+    - echo "Running tests..."
+    # Simulate test execution and output results
+    - mkdir -p allure-results
+    # Add real test commands here
+  artifacts:
+    paths:
+      - allure-results/
+    expire_in: 1 day
+
+deploy:
+  stage: deploy
+  image: docker:latest
+  services:
+    - docker:dind
+  before_script:
+    - echo "Logging in to Docker Hub"
+    - docker login -u "$DOCKERHUB_USERNAME" -p "$DOCKERHUB_TOKEN"
+  script:
+    - echo "Deploying Allure Reports..."
+    - docker run --rm \
+      -e STORAGE_BUCKET=$STORAGE_BUCKET \
+      -e PREFIX=$PREFIX \
+      -e WEBSITE_ID=$WEBSITE_ID \
+      -e WEBSITE_EXPIRES=$WEBSITE_EXPIRES \
+      -e KEEP_HISTORY=$KEEP_HISTORY \
+      -e KEEP_RESULTS=$KEEP_RESULTS \
+      -v ${CI_PROJECT_DIR}/allure-results:/allure-results \
+      -v ${GCP_CREDENTIALS_FILE_PATH}:/credentials/key.json \
+      sokari/allure-deployer:latest
+  only:
+    - main
+  dependencies:
+    - test
+```
+See the Docker [configuration section](#docker-image-configuration) for more info
+
+### Local test runs
 #### 1. Pull the Docker Image
 ```shell
 docker pull sokari/allure-deployer:latest
@@ -152,9 +198,43 @@ services:
 ```
 ___
 
-<h2 id="docker-image-configuration">🐳 Docker Image Configuration</h2>
 
-<h3 id="environment-variables">Environment Variables</h3>
+<h2 id="configuration">Configurations</h2>
+
+<h3 id="configuration-github">GitHub Actions</h2>
+#### Inputs
+
+| Input                 | Description                                                                               | Required | Default           |
+|-----------------------|-------------------------------------------------------------------------------------------|----------|-------------------|
+| `allure_results_path` | Path to the directory containing Allure results files.                                    | ✅ Yes    | `/allure-results` |
+| `website_id`          | Unique identifier for the Allure report website. Ensures no overwriting of other reports. | ✅ Yes    | None              |
+| `website_expires`     | Duration for which the hosted website remains active. Examples: `1h`, `2d`, `3w`.         | ❌ No     | `7d`              |
+| `storage_bucket`      | Name of the Google Cloud Storage bucket for backup and history storage.                   | ❌ No     | None              |
+| `slack_channel_id`    | ID of the Slack channel to send notifications about report links.                         | ❌ No     | None              |
+| `keep_history`        | Whether to enable history backup in reports.                                              | ❌ No     | `true`            |
+| `show_history`        | Display history from previous test runs. Requires `keep_history` to be enabled.           | ❌ No     | `true`            |
+| `keep_results`        | Backup all the `/allure-results` files into cloud storage for retries and archives.       | ❌ No     | `false`           |
+| `show_retries`        | Include retries from previous test runs. Requires `keep_results` to be enabled.           | ❌ No     | `true`            |
+| `prefix`              | Path prefix in the Cloud Storage bucket for archiving files.                              | ❌ No     | None              |
+
+---
+
+<h4 id="environment-variables-github">Environment Variables</h3>
+
+
+| Variable               | Description                                                   | Example                                      | Required | Default |
+|------------------------|---------------------------------------------------------------|----------------------------------------------|----------|---------|
+| `SLACK_TOKEN`          | Token for Slack App to send notifications with report URLs.   | `xoxb-XXXXXXXXXX-XXXXXXXX`                   | ❌ No     | None    |
+| `GCP_CREDENTIALS_JSON` | Content of the Google Cloud service account credentials file. | `${{ secrets.GCP_APPLICATION_CREDENTIALS }}` | ✅ Yes    | None    |
+**Notes**:
+- `GCP_CREDENTIALS_JSON` must be set with a service account that has access to Firebase Hosting and Cloud Storage.
+- Ensure `SLACK_TOKEN` and `SLACK_CHANNEL_ID` are configured to enable Slack integration.
+
+
+
+<h3 id="configuration-docker">🐳 Docker</h2>
+
+<h4 id="environment-variables-docker">Environment Variables</h3>
 
 
 | Variable           | Description                                                                                   | Example                        | Default |
@@ -174,7 +254,7 @@ ___
 
 ---
 
-<h3 id="mount-volumes">Mount Volumes</h3>
+<h4 id="mount-volumes">Mount Volumes</h3>
 
 | Host                        | Container               | Description                                                                                                                          |
 |-----------------------------|-------------------------|--------------------------------------------------------------------------------------------------------------------------------------|
@@ -279,16 +359,6 @@ Follow the [GitHub action](#for-github-actions) steps to set it up.
 <h3 id="local-test-runs">🖥️ Local Test Runs</h2>
 
 See the [Local test run](#local-test-runs) section for detailed instructions.
-
-
-<h2 id="comparison-with-other-open-source-tools">🔄 Comparison with Other Open Source Tools</h2>
-
-| Feature                  | Allure Report Deployer                                                        | Other tools                                                             |
-|--------------------------|-------------------------------------------------------------------------------|-------------------------------------------------------------------------|
-| **Serverless**           | ✅ No server required                                                          | ❌ No, you need to pay for a server                                      |
-| **Ephemeral URLs**       | ✅ Yes, every deployment generates a unique ephemeral URL for the test report. | ❌ No, reports are deployed to a single GitHub Pages URL, or not at all. |
-| **Slack notifications**  | ✅ Receive your test report URL in Slack                                       | ❌ Not supported.                                                        |
-| **No Git commits**       | ✅ You don't need to commit your Allure report files to Git.                   | ❌ Requires committing generated reports to Git.                         |
 
 
 <h2 id="troubleshooting-and-faqs">🛠️ Troubleshooting and FAQs</h2>
