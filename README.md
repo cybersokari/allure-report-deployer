@@ -21,7 +21,7 @@
     - [CI Pipelines](#ci-pipelines)
       - [GitHub Action](#github)
       - [Gitlab](#gitlab)
-      - [Codemagic]()
+      - [Codemagic](#codemagic)
       - [Bitrise]()
     - [Local Test Runs](#local-test-runs)
 4. [Configurations](#configuration)
@@ -353,9 +353,54 @@ and `SLACK_CHANNEL_ID` environment variable when you run the Docker image.
 
 <h2 id="use-cases">📊 Use Cases</h2>
 <h3 id="ci-pipelines">🏗️ CI Pipelines</h2>
-<h4 id="github-actions-integration">🧪 GitHub Actions Integration</h2>
+<h4 id="github-actions-integration">GitHub Actions Integration</h2>
 
 Follow the [GitHub action](#for-github-actions) steps to set it up.
+
+#### Codemagic integration
+
+Use the [docker image](https://hub.docker.com/r/sokari/allure-deployer) in your Codemagic workflow.
+
+```yaml
+workflows:
+  android-allure:
+    name: Android Allure Report
+    max_build_duration: 30
+    instance_type: linux_x2
+    scripts:
+      - name: Build Android apk                                          # 1. Build apk
+        script:
+
+      - name: Git clone Appium project                                   # 2. Clone Appium project if required
+        script: |
+          git clone https://github.com/my-appium-project
+      - name: Install Appium Deps                                        # 3. Install Appium dependencies
+        script: |
+          cd appium && npm install --force
+      - name: Launch Android Emulator                                    # 4. Start Codemagic Android Emulator
+        script: |
+          FIRST_AVD=$(emulator -list-avds | head -n 1) \
+          && emulator -avd "$FIRST_AVD" & adb wait-for-device
+      - name: Run Appium test                                            # 5. Run test and generate Allure results
+        script: |
+          cd appium && npm run android
+      - name: Run Allure Report Deployer                                 # 6. Generate and deploy reports
+        script: |
+          cd appium && echo $ALLURE_GOOGLE_KEY >> service-key.json \
+          && docker run --rm \
+          -e STORAGE_BUCKET=$STORAGE_BUCKET \
+          -e WEBSITE_ID=website-allure \
+          -e KEEP_RETRIES=true \
+          -e KEEP_HISTORY=true \
+          -e SLACK_TOKEN=***
+          -e SLACK_CHANNEL_ID=****
+          -v service-key.json:/credentials/key.json
+          -v reports/android/allure-results:/allure-results \
+          sokari/allure-deployer:latest
+    artifacts:
+      - android/app/build/outputs/**/*.apk
+
+```
 
 <h3 id="local-test-runs">🖥️ Local Test Runs</h2>
 
