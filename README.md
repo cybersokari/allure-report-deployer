@@ -201,7 +201,9 @@ ___
 
 <h2 id="configuration">Configurations</h2>
 
-<h3 id="configuration-github">GitHub Actions</h2>
+<h3 id="configuration-github">GitHub Action</h2>
+
+https://github.com/marketplace/actions/allure-deployer-action
 
 #### Inputs
 
@@ -234,6 +236,10 @@ ___
 
 
 <h3 id="configuration-docker">🐳 Docker</h2>
+
+```shell
+docker pull sokari/allure-deployer:latest
+```
 
 <h4 id="environment-variables-docker">Environment Variables</h3>
 
