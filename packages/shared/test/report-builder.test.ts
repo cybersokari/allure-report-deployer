@@ -1,5 +1,6 @@
 import {Allure} from "../src";
 import {AllureService} from "../src";
+// @ts-ignore
 import mock from "mock-fs";
 import * as fs from "fs/promises";
 import {fakeArgs} from "./mocks/fake-args.js";
@@ -79,9 +80,8 @@ describe("ReportBuilder", () => {
         };
         reportBuilder = new Allure({allureRunner: mockAllureService, args: fakeArgs});
 
-        // Mock all dependencies
         await reportBuilder.stageFilesFromMount();
-        // Assertions for staging logic
+
         const files = await fs.readdir(dest);
         expect(files).toEqual(['file1.json', 'file2.log']);
     });

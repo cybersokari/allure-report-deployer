@@ -1,10 +1,10 @@
-import {Mutex} from "async-mutex";
+import {MutexInterface} from "async-mutex";
 
 export interface CounterInterface {
     startTime: number | undefined
     processed: number
     uploaded: number
-    mutex: Mutex
+    mutex: MutexInterface
 
     addFilesProcessed(count: number): Promise<void>
     addFilesUploaded(count: number): Promise<void>

@@ -1,4 +1,4 @@
-import { Mutex } from 'async-mutex';
+import {Mutex, MutexInterface} from 'async-mutex';
 import {CounterInterface} from "../interfaces/counter.interface";
 /**
  * Counter Class
@@ -11,7 +11,7 @@ class Counter implements CounterInterface{
     public startTime: number | undefined = undefined;
     public processed = 0
     public uploaded = 0
-    public mutex: Mutex
+    public mutex: MutexInterface;
 
     constructor(){
         this.mutex = new Mutex()

@@ -33,6 +33,7 @@ jobs:
           npm install --workspace=@allure/shared
           npm install --workspace=@allure/docker
           npm run build --workspaces
+          npm run test --workspaces
           npm install --workspace=@allure/shared --omit-dev
           npm install --workspace=@allure/docker --omit-dev
 

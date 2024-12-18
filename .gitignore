@@ -10,4 +10,5 @@ packages/**/dist
 act-event.json
 act-script.sh
 node_modules
-node_modules
+#jest
+packages/**/coverage

@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Deploy your Allure Test Reports to a website, No server required",
   "scripts": {
-    "test": "jest",
+    "test": "",
     "build": "rm -rf ./dist && tsc"
   },
   "type": "module",

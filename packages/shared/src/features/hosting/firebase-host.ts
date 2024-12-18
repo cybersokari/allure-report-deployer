@@ -22,7 +22,7 @@ export class FirebaseHost implements HostingProvider {
         if(!this.command){
             throw new Error('Firebase hosting not initialized. Call init() first.')
         }
-        await changePermissionsRecursively(this.args.REPORTS_DIR, 0o755)
+        await changePermissionsRecursively(this.args.REPORTS_DIR, 0o755, 6)
         const {stdout, stderr} = await this.commandExec!(this.command)
         if (stderr && !stdout) {
             appLog(`Deployment failed: ${stderr}`)

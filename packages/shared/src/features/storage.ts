@@ -6,17 +6,21 @@ import {StorageProvider} from "../interfaces/storage-provider.interface.js";
 import fs from "fs/promises";
 import fsSync from "fs";
 import unzipper, {Entry} from "unzipper";
-import {ArgsInterface} from "../interfaces/args.interface";
+import {ArgsInterface} from "../interfaces/args.interface.js";
+import {UnzipperProvider} from "../interfaces/unzipper.interface.js";
 
 
 export class Storage {
     private provider: StorageProvider;
     private args: ArgsInterface;
+    private unzipper: UnzipperProvider; // Injected UnzipperProvider
 
     constructor(provider: StorageProvider, args: ArgsInterface) {
         this.provider = provider;
         this.args = args;
+        this.unzipper = unzipper;
     }
+
     private storageHomeDir = process.env.PREFIX || ''
 
     // Download remote files to staging area
@@ -26,14 +30,17 @@ export class Storage {
             await fs.mkdir(`${this.args.RESULTS_STAGING_PATH}/history`, {recursive: true}),
             await fs.mkdir(this.args.ARCHIVE_DIR, {recursive: true})
         ])
-        const localFilePaths = await this.provider.download({prefix: this.storageHomeDir, destination: this.args.ARCHIVE_DIR})
+        const localFilePaths = await this.provider.download({
+            prefix: this.storageHomeDir,
+            destination: this.args.ARCHIVE_DIR
+        })
         const limit = pLimit(this.args.fileProcessingConcurrency);
         const unzipPromises = [];
         for (const filePath of localFilePaths) {
             unzipPromises.push(limit(async () => {
                 try {
                     await this.unzipAllureResult(filePath, this.args.RESULTS_STAGING_PATH);
-                }catch (e) {
+                } catch (e) {
                     console.warn('Unzip from remote error:', e);
                 }
             }))
@@ -66,10 +73,10 @@ export class Storage {
         ])
     }
 
-    private async unzipAllureResult(zipFilePath: string, outputDir: string): Promise<boolean> {
+    public async unzipAllureResult(zipFilePath: string, outputDir: string): Promise<boolean> {
         return await new Promise((resolve) => {
             fsSync.createReadStream(zipFilePath)
-                .pipe(unzipper.Parse())
+                .pipe(this.unzipper.Parse())
                 .on('entry', async (entry: Entry) => {
                     const fullPath = path.join(outputDir, entry.path);
                     if (!this.args.showHistory) {

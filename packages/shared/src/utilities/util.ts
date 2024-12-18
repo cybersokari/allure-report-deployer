@@ -10,8 +10,11 @@ export function appLog(data: string) {
 }
 
 
-export async function changePermissionsRecursively(dirPath: string, mode: fsSync.Mode) {
+export async function changePermissionsRecursively(dirPath: string, mode: fsSync.Mode, maxDepth: number = 1) {
+    // Change for the current depth
     await fs.chmod(dirPath, mode);
+
+    if(maxDepth < 1) return
 
     const files = await fs.readdir(dirPath);
 
@@ -20,7 +23,7 @@ export async function changePermissionsRecursively(dirPath: string, mode: fsSync
         const stat = await fs.stat(fullPath);
 
         if (stat.isDirectory()) {
-            await changePermissionsRecursively(fullPath, mode);
+            await changePermissionsRecursively(fullPath, mode, maxDepth - 1);
         } else {
             await fs.chmod(fullPath, mode);
         }
