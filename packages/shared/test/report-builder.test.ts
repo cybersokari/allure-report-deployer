@@ -27,10 +27,10 @@ describe("ReportBuilder", () => {
     let mockAllureService: AllureService | null = null;
     let reportBuilder: Allure;
     const allureCommandSuccess = (s: string[]) => {
-        return Promise.resolve(0)
+        return Promise.resolve({ exitCode: 0, stdout: '', stderr: '' })
     }
     const allureCommandFail = (s: string[]) => {
-        return Promise.resolve(1)
+        return Promise.resolve({ exitCode: 1, stdout: '', stderr: '' })
     }
 
     afterEach(() => {

@@ -17,14 +17,22 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Install dependencies
+
+      - name: Install deps
         run: |
           npm install --workspace=@allure/shared
           npm install --workspace=@allure/action
-          npm run build --workspaces
-          npm run test --workspaces
-          npm install --workspace=@allure/shared --omit-dev
-          npm install --workspace=@allure/action --omit-dev
+
+      - name: Run test
+        run: npm run test --workspaces
+
+      - name: Compile JS
+        run: npm run build --workspaces
+
+      - name: Remove dev deps
+        run: |
+          npm install --workspace=@allure/shared --omit=dev
+          npm install --workspace=@allure/action --omit=dev
 
       - name: Build and push
         uses: docker/build-push-action@v6.10.0
