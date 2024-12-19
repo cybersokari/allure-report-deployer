@@ -5,22 +5,22 @@ import {Icon} from "../utilities/icon.js";
 import {counter} from "../utilities/counter.js";
 import pLimit from "p-limit";
 import * as path from "node:path";
-import {AllureCommandRunner} from "../interfaces/allure-command.interface.js";
+import {CommandRunner} from "../interfaces/command.interface.js";
 import {ArgsInterface} from "../interfaces/args.interface.js";
 import {AllureService} from "../services/allure-service.js";
 
 export class Allure {
-    private allureRunner: AllureCommandRunner;
+    private allureRunner: CommandRunner;
     private args: ArgsInterface;
 
-    constructor({allureRunner, args}: {allureRunner?: AllureCommandRunner , args: ArgsInterface}) {
+    constructor({allureRunner, args}: {allureRunner?: CommandRunner , args: ArgsInterface}) {
         this.allureRunner = allureRunner ?? new AllureService();
         this.args = args;
     }
 
     async open(port = 8090): Promise<void> {
         appLog(`Opening Allure report on port ${port}...`);
-        const exitCode = await this.allureRunner.runCommand(['open', this.args.REPORTS_DIR, '--port', `${port}`]);
+        const { exitCode} = await this.allureRunner.runCommand(['open', this.args.REPORTS_DIR, '--port', `${port}`]);
         if (exitCode !== 0) {
             throw new Error("Failed to open Allure report");
         }
@@ -28,7 +28,7 @@ export class Allure {
 
     async generate(): Promise<string> {
         appLog(`${Icon.HOUR_GLASS}  Generating Allure report...`)
-        const exitCode = await this.allureRunner.runCommand([
+        const { exitCode} = await this.allureRunner.runCommand([
             'generate',
             this.args.RESULTS_STAGING_PATH,
             '--report-dir',

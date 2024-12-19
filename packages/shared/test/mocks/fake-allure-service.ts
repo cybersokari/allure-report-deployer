@@ -1,7 +1,8 @@
-import {AllureCommandRunner} from "../../src/interfaces/allure-command.interface";
+import {CommandRunner} from "../../src/interfaces/command.interface";
 
-export class FakeAllureService implements AllureCommandRunner{
-    runCommand(args: string[]): Promise<number> {
-        return Promise.resolve(0);
+export class FakeAllureService implements CommandRunner{
+    runCommand(args: string[]): Promise<{ exitCode: number; stdout: string; stderr: string }> {
+        return Promise.resolve({exitCode: 0, stderr: "", stdout: ""});
     }
+
 }

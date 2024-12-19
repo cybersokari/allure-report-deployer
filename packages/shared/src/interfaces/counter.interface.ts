@@ -10,5 +10,4 @@ export interface CounterInterface {
     addFilesUploaded(count: number): Promise<void>
     startTimer(): void
     getElapsedSeconds(): string
-
 }

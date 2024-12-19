@@ -1,0 +1,16 @@
+{
+  "name": "@allure/cli",
+  "version": "1.0.0",
+  "description": "",
+  "main": "./dist/index.js",
+  "scripts": {
+    "test": "",
+    "build": "rm -rf ./dist && tsc"
+  },
+  "type": "module",
+  "private": true,
+  "dependencies": {
+    "firebase-tools": "^13.29.1",
+    "@allure/shared": "1.0.0"
+  }
+}

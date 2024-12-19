@@ -15,7 +15,7 @@ services:
       retries: 3
       timeout: 5s
   allure-cloud:
-    tty: true
+    tty: false
     build:
       dockerfile: Dockerfile
       context: .
@@ -42,9 +42,9 @@ services:
       WEBSITE_ID: 'fir-demo-project'
       WEBSITE_EXPIRES: 12h
       KEEP_HISTORY: true # Default is true when STORAGE_BUCKET is provided
-      KEEP_RESULTS: true # Default is false
-      SHOW_HISTORY: true
-      SHOW_RETRIES: true
+      KEEP_RESULTS: false # Default is false
+      SHOW_HISTORY: false
+      SHOW_RETRIES: false
     volumes:
 #      - ./worker:/app #Dev only. This overrides the /app dir
       - /Users/sokari/IdeaProjects/appium/service-account-sokari.json:/credentials/key.json:ro

@@ -28,12 +28,12 @@ export class FirebaseHost implements HostingProvider {
             appLog(`Deployment failed: ${stderr}`)
             return undefined;
         }
-        // Regex to retrieve URL from ANSI-based logs
-        const regex = /hosting:channel:\x1b\[[0-9;]*m.*?\(\x1b\[[0-9;]*m?(.*?)\x1b\[[0-9;]*m?\):\s+(https?:\/\/\S+)/;
-        const match = regex.exec(stdout)
+        // Regex to retrieve URL from logs
+        const projectId = this.args.firebaseProjectId
+        const match = RegExp(`https://${projectId}-.*?web\\.app`).exec(stdout)
 
-        if (match && match[2]) {
-            const url = match[2]
+        if (match) {
+            const url = match[0]
             return url as string
         } else {
             appLog('Could not retrieve URL from Firebase Hosting.')

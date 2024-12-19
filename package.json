@@ -5,7 +5,8 @@
   "workspaces": [
     "packages/shared",
     "packages/docker",
-    "packages/action"
+    "packages/action",
+    "packages/cli"
   ],
   "scripts": {
     "build": "yarn workspaces run build"

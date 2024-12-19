@@ -9,14 +9,14 @@ import {fakeArgs} from "./mocks/fake-args";
 
 // Partially mock the module
 
-jest.mock("../src/utilities/util.js");
+// jest.mock("../src/utilities/util.js");
 
-jest.mock("../src/utilities/counter.js", () => ({
-    counter: {
-        addFilesUploaded: jest.fn(),
-    },
-}));
-jest.mock("p-limit", () => jest.fn(() => jest.fn((fn) => jest.fn())));
+// jest.mock("../src/utilities/counter.js", () => ({
+//     counter: {
+//         addFilesUploaded: jest.fn(),
+//     },
+// }));
+// jest.mock("p-limit", () => jest.fn(() => jest.fn((fn) => jest.fn())));
 
 // const mockedUtils = jest.mocked(utils);
 describe("Storage", () => {
@@ -45,14 +45,8 @@ describe("Storage", () => {
 
         // Mock file system
         mock({
-            "/staging": {},
-            "/archive": {},
-            "/results": {},
-            "/reports": {
-                history: {},
-            },
+            "/app": {},
         });
-
 
     });
 

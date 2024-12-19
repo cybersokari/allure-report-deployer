@@ -118,7 +118,7 @@ export class SlackNotifier implements Notifier {
                         "text": "Star us on GitHub :smile:",
                         "emoji": true
                     },
-                    "url": "https://github.com/cybersokari/allure-docker-deploy"
+                    "url": "https://github.com/cybersokari/allure-report-deployer"
                 }
             ]
         })

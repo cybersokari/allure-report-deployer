@@ -4,7 +4,12 @@ import path from "node:path";
 import archiver from "archiver";
 import {appLog} from "./util";
 
-export class FileUtils {
+export interface FileUtils {
+    chmod(path: string, mode: number | string): Promise<void>;
+    readdir(path: string): Promise<string[]>;
+}
+
+export class FileManager {
 
     async changePermissionsRecursively(dirPath: string, mode: fsSync.Mode, maxDepth: number = 1) {
         // Change for the current depth
@@ -28,11 +33,11 @@ export class FileUtils {
 
 
     async zipFolder(sourceFolder: { path: string, destination?: string }[], outputZipFile: string) {
-        return await new Promise((resolve: (value: boolean) => void, reject) => {
+        return await new Promise(async (resolve: (value: boolean) => void, reject) => {
 
             // Ensure the output directory exists
             const outputDir = path.dirname(outputZipFile);
-            fsSync.mkdirSync(outputDir, {recursive: true});
+            await fs.mkdir(outputDir, {recursive: true});
             // Create a file stream for the output zip file
             const output = fsSync.createWriteStream(outputZipFile);
             const archive = archiver('zip', {zlib: {level: 9}}); // Set the compression level
