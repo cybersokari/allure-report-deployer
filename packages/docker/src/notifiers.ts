@@ -4,7 +4,7 @@ import {
     GitHubNotifier, NotificationData, Notifier, NotifierService,
     RealSlackClient,
     SlackNotifier
-} from "@allure/shared";
+} from "allure-deployer-shared";
 import {GITHUB_SUMMARY_PATH, slackChannelId, slackToken, STORAGE_BUCKET} from "./constants.js";
 
 export let githubNotifier: GitHubNotifier | undefined;

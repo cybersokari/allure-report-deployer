@@ -1,4 +1,4 @@
-import {CredentialsInterface} from "@allure/shared";
+import {CredentialsInterface} from "allure-deployer-shared";
 
 
 export class ActionsCredentials implements CredentialsInterface{

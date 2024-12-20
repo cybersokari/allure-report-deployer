@@ -5,7 +5,7 @@ import {
     printStats,
     counter,
     GCPStorage,
-} from "@allure/shared";
+} from "allure-deployer-shared";
 import {readFile} from "fs/promises";
 import * as path from "node:path";
 import {credential, sendNotifications} from "./notifiers.js";

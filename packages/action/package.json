@@ -10,6 +10,9 @@
   "type": "module",
   "private": true,
   "dependencies": {
-    "@allure/shared": "1.0.0"
+    "allure-deployer-shared": "1.0.0"
+  },
+  "devDependencies": {
+    "esbuild": "^0.24.1"
   }
 }

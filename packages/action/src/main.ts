@@ -6,7 +6,7 @@ import {
     GitHubNotifier, NotificationData, Notifier, NotifierService,
     printStats, RealSlackClient, SlackNotifier,
     Storage, GCPStorage, appLog
-} from "@allure/shared";
+} from "allure-deployer-shared";
 import {ActionsCredentials} from "./credentials.js";
 import {getArgs} from "./constants.js";
 

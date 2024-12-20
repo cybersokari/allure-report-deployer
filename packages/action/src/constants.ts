@@ -1,4 +1,4 @@
-import { ArgsInterface } from "@allure/shared";
+import { ArgsInterface } from "allure-deployer-shared";
 import { ActionsCredentials } from "./credentials.js";
 import * as path from "node:path";
 

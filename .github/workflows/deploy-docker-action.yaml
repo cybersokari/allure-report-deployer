@@ -20,7 +20,7 @@ jobs:
 
       - name: Install deps
         run: |
-          npm install --workspace=@allure/shared
+          npm install --workspace=allure-deployer-shared
           npm install --workspace=@allure/action
 
       - name: Run test
@@ -31,7 +31,7 @@ jobs:
 
       - name: Remove dev deps
         run: |
-          npm install --workspace=@allure/shared --omit=dev
+          npm install --workspace=allure-deployer-shared--omit=dev
           npm install --workspace=@allure/action --omit=dev
 
       - name: Build and push

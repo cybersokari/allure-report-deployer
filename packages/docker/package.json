@@ -8,8 +8,13 @@
   },
   "type": "module",
   "dependencies": {
-    "@allure/shared": "1.0.0"
+    "allure-deployer-shared": "1.0.0"
   },
   "private": true,
-  "files": ["dist/"]
+  "files": [
+    "dist/"
+  ],
+  "devDependencies": {
+    "esbuild": "^0.24.1"
+  }
 }
