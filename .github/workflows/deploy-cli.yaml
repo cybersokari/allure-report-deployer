@@ -1,0 +1,28 @@
+name: Build CLI
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy-npm:
+    runs-on: ubuntu_latest
+    steps:
+      - uses: actions/checkout@v4.1.5
+      - name: Setup Node.js
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '16' # Use the Node.js version you want
+          registry-url: 'https://registry.npmjs.org/'
+
+      - name: Authenticate with npm
+        run: echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run tests
+        run: npm test
+
+      - name: Publish package
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

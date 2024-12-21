@@ -1,7 +1,6 @@
 import * as fs from 'fs/promises'
 import {Dirent} from 'fs'
 import {appLog} from "../utilities/util.js";
-import {Icon} from "../utilities/icon.js";
 import {counter} from "../utilities/counter.js";
 import pLimit from "p-limit";
 import * as path from "node:path";
@@ -27,7 +26,6 @@ export class Allure {
     }
 
     async generate(): Promise<string> {
-        appLog(`${Icon.HOUR_GLASS}  Generating Allure report...`)
         const { exitCode} = await this.allureRunner.runCommand([
             'generate',
             this.args.RESULTS_STAGING_PATH,

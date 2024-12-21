@@ -6,17 +6,17 @@ No server Required.
 
 ## Features
 
-- **Deploy Allure Test Reports**: Quickly deploy test results to Firebase Hosting.
-- **History and Retries**: Add historical data and retries for enhanced debugging.
-- **Customizable**: Supports multiple deployment configurations using Firebase credentials.
-- **Automation Ready**: Perfect for CI/CD pipelines.
+- **Ephemeral URLs**: No need to clean up outdated test reports. [Firebase Hosting channels](https://firebase.google.com/docs/hosting/manage-hosting-resources#preview-channel-expiration) takes care of it.
+- **History and Retries**: Show Allure [History and Retries](https://allurereport.org/docs/history-and-retries/) in your report.
+- **Cloud Backup**: Save test results in storage for future analysis.
+- **Slack integration**: Send report URL to Slack.
 
 ## Installation
 
 Install globally using npm:
 
 ```bash
-npm install -g allure-deployer-cli
+npm install -g allure-deployer
 ```
 ## Commands
 
@@ -25,7 +25,12 @@ Deploy an Allure test report to Firebase Hosting.
 
 #### Syntax
 ```bash
-allure-deployer deploy [options] <allure-results-path> <website-id>
+allure-deployer deploy <allure-results-path> <website-id>
+```
+
+#### Example
+```bash
+allure-deployer deploy ./allure-results my-report-id --keep-history
 ```
 
 #### Arguments
@@ -35,14 +40,10 @@ allure-deployer deploy [options] <allure-results-path> <website-id>
 #### Options
 - `-kh, --keep-history`: Upload history to storage to enable history in the next report.
 - `-kr, --keep-results`: Upload results to storage to enable retries in the next report.
-- `--gcp-json <json-path>`: Path to the Firebase/GCP JSON credential file.
-- `--gcp-token <token>`: Directly provide a GCP token for deployment.
-- `--runtime-directory <directory>`: Override the default runtime directory for temporary files.
-
-#### Example
-```bash
-allure-deployer deploy ./allure-results allure-report --keep-history --gcp-json ./firebase.json
-```
+- `-h, --show-history`: Show history in the upcoming report.
+- `-r, --show-retries`: Show retries in the upcoming report.
+- `--bucket <bucket-name>`: Directly provide a Firebase/GCP bucket name for deployment.
+- `--gcp-json <json-path>`: Directly provide a Firebase/GCP JSON credential file for deployment.
 
 ### `gcp-json:set`
 Set Firebase/GCP credentials for reuse.
@@ -64,9 +65,6 @@ Set Firebase/GCP bucket for reuse
 ```bash
 allure-deployer bucket:set <bucket-name>
 ```
-
-#### Options
-- `--save-credentials`: Save credentials for reuse.
 
 #### Example
 ```bash
@@ -91,17 +89,13 @@ allure-deployer bucket:set my-bucket.firebasestorage.app
 ## Requirements
 
 - **Node.js**: Version 14 or higher.
-- **Java**: Version 11 or higher
+- **Java**: Version 8 or higher
 
 ## Help
 The CLI provides a set of commands to help you generate and deploy your Allure Reports. To see the list of available commands, run:
 ```shell
 allure-deployer --help
 ```
-
-## License
-
-Licensed under the MIT License. See the `LICENSE` file for details.
 
 ## Contributing
 

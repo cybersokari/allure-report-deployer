@@ -4,7 +4,7 @@ import {
     FirebaseHost,
     printStats,
     counter,
-    GCPStorage,
+    GCPStorage, appLog, Icon,
 } from "allure-deployer-shared";
 import {readFile} from "fs/promises";
 import * as path from "node:path";
@@ -71,6 +71,7 @@ export function main(): void {
                 downloadRequired ? cloudStorage?.stageFilesFromStorage() : null,
             ])
             // Build report
+            appLog(`${Icon.HOUR_GLASS}  Generating Allure report...`)
             await allure.generate()
             // Init hosting
             await firebaseHost.init()

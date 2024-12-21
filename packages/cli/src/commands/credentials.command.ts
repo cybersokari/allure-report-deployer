@@ -3,17 +3,17 @@ import {getSavedCredentialDirectory, getUserAppDirectory, readJsonFile} from "..
 import fs from 'fs/promises'
 import chalk from "chalk";
 import {db} from "../main.js";
+import {KEY_PROJECT_ID} from "../utils/constants.js";
 
 
 export function addCredentialsCommand(defaultProgram: Command) {
     defaultProgram.command('gcp-json:set <json-path>')
         .description("Set Firebase/GCP credentials for future use")
         .action(async (jsonPath) => {
-            console.log(`Json path: ${jsonPath}`)
             const credPath = (await getUserAppDirectory()).concat('/key.json');
             await fs.cp(jsonPath, credPath, {force: true})
             const credentialString = await readJsonFile(jsonPath);
-            db.set('project_id', credentialString.project_id)
+            db.set(KEY_PROJECT_ID, credentialString.project_id)
             console.log(`Credential set for project ${chalk.blue(credentialString.project_id)}`);
         })
     defaultProgram.command('gcp-json')

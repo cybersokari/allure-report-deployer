@@ -8,7 +8,6 @@ my.**
 gcp-key.json
 packages/**/dist
 act-event.json
-act-script.sh
 node_modules
 #jest
 packages/**/coverage

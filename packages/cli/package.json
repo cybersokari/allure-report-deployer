@@ -1,13 +1,18 @@
 {
   "name": "allure-deployer",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Deploy your Allure Reports to Firebase, and notify in Slack, No server required",
   "keywords": [
-    "allure",
-    "allure reports",
-    "testing",
+    "allure server",
+    "allure test report",
+    "allure report",
+    "allure github",
+    "allure docker",
+    "allure hosting",
+    "allure github action",
     "allure results",
-    "allure cli"
+    "allure cli",
+    "allure serverless"
   ],
   "author": "Sokari Gillis-Harry",
   "license": "MIT",
@@ -27,12 +32,13 @@
   },
   "type": "module",
   "dependencies": {
-    "allure-deployer-shared": "~1.0.0",
+    "allure-deployer-shared": "latest",
     "chalk": "^5.4.0",
     "commander": "^12.1.0",
     "conf": "^13.1.0",
     "firebase-tools": "^13.29.1",
-    "inquirer": "^12.2.0"
+    "inquirer": "^12.3.0",
+    "ora": "^8.1.1"
   },
   "devDependencies": {
     "@types/conf": "^2.1.0"

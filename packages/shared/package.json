@@ -1,6 +1,6 @@
 {
   "name": "allure-deployer-shared",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Allure Deployer CLI companion module ",
   "author": "Sokari Gillis-Harry",
   "license": "MIT",
@@ -45,7 +45,6 @@
     "@typescript-eslint/eslint-plugin": "^8.17.0",
     "@typescript-eslint/parser": "^8.17.0",
     "chai": "^5.1.2",
-    "esbuild": "^0.24.1",
     "eslint": "^9.16.0",
     "eslint-config-google": "^0.14.0",
     "eslint-plugin-import": "^2.31.0",

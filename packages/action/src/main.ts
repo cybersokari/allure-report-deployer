@@ -5,7 +5,7 @@ import {
     FirebaseStorageService, getDashboardUrl,
     GitHubNotifier, NotificationData, Notifier, NotifierService,
     printStats, RealSlackClient, SlackNotifier,
-    Storage, GCPStorage, appLog
+    Storage, GCPStorage, appLog, Icon
 } from "allure-deployer-shared";
 import {ActionsCredentials} from "./credentials.js";
 import {getArgs} from "./constants.js";
@@ -50,6 +50,7 @@ export function main() {
                 args.downloadRequired ? cloudStorage?.stageFilesFromStorage() : null,
             ])
             // Build report
+            appLog(`${Icon.HOUR_GLASS}  Generating Allure report...`)
             await allure.generate()
             // Init hosting
             firebaseHost = new FirebaseHost(args.websiteId, args);

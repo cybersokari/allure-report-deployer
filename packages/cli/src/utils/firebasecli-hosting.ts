@@ -20,8 +20,6 @@ export class FirebaseCLIHosting implements HostingProvider {
                 console.error('Failed to deploy report to Firebase hosting', err);
                 resolve(undefined)
             });
-
-
         })
     }
 

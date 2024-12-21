@@ -8,7 +8,7 @@
   },
   "type": "module",
   "dependencies": {
-    "allure-deployer-shared": "1.0.0"
+    "allure-deployer-shared": "~1.0.0"
   },
   "private": true,
   "files": [

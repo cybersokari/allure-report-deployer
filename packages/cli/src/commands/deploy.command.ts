@@ -1,119 +1,102 @@
-import {Argument, Command, Option} from "commander";
-import {db} from "../main.js";
+import { Argument, Command, Option } from "commander";
+import { db } from "../main.js";
 import process from "node:process";
-import {getRuntimeDirectory, getSavedCredentialDirectory, readJsonFile} from "../utils/file-util.js";
-import {CliArguments} from "../utils/cli-arguments.js";
+import { getRuntimeDirectory, getSavedCredentialDirectory, readJsonFile } from "../utils/file-util.js";
+import { CliArguments } from "../utils/cli-arguments.js";
 import fs from "fs/promises";
 import path from "node:path";
+import { KEY_BUCKET, KEY_PROJECT_ID } from "../utils/constants.js";
 
+const ERROR_MESSAGES = {
+    EMPTY_RESULTS: "Error: The specified results directory is empty.",
+    NO_RESULTS_DIR: "Error: No Allure result files in the specified directory.",
+    MISSING_CREDENTIALS: "Error: Firebase/GCP credentials must be set using 'gcp-json:set' or provided via '--gcp-json'.",
+    MISSING_BUCKET: "Error: A Firebase/GCP bucket must be set using 'bucket:set' or provided via '--bucket'.",
+    MISSING_WEBSITE_ID: "Error: The 'website-id' argument or '--bucket' option is required.",
+};
+
+async function validateResultsPath(resultPath: string): Promise<void> {
+    let files = []
+    try {
+        files = await fs.readdir(path.normalize(resultPath));
+    } catch {
+        throw new Error(ERROR_MESSAGES.NO_RESULTS_DIR);
+    }
+    if (!files.length) {
+        throw new Error(ERROR_MESSAGES.EMPTY_RESULTS);
+    }
+}
+
+async function getFirebaseCredentials(gcpJson: string | undefined): Promise<string> {
+    if (gcpJson) {
+        const json = await readJsonFile(gcpJson); // Throws an error for invalid files
+        process.env.GOOGLE_APPLICATION_CREDENTIALS = gcpJson;
+        return json.project_id;
+    }
+
+    const savedCredentials = await getSavedCredentialDirectory();
+    if (!savedCredentials) {
+        throw new Error(ERROR_MESSAGES.MISSING_CREDENTIALS);
+    }
+
+    process.env.GOOGLE_APPLICATION_CREDENTIALS = savedCredentials;
+    return "";
+}
+
+function validateBucket(options: any, websiteId: string): void {
+    if (!options.bucket && !db.get(KEY_BUCKET)) {
+        if (options.showRetries || options.showHistory || options.keepHistory || options.keepResults) {
+            throw new Error(ERROR_MESSAGES.MISSING_BUCKET);
+        }
+        if (!websiteId) {
+            throw new Error(ERROR_MESSAGES.MISSING_WEBSITE_ID);
+        }
+    }
+}
 
 export function addDeployCommand(defaultProgram: Command, onCommand: (args: CliArguments) => Promise<void>) {
-    defaultProgram.command('deploy')
-        .description('Generate and deploy Allure report')
-        .addArgument(new Argument('<allure-results-path>', 'Allure results path')
-            .default('./allure-results', 'Default ./allure-results directory').argOptional())
-        .addArgument(new Argument('<website-id>', 'The unique identifier for this report').
-        argOptional().default('allure-report', 'Default website-id'))
-        .addOption(
-            new Option('-kh, --keep-history', 'Upload history to storage to enable History in next report')
-        )
-        .addOption(
-            new Option('-kr, --keep-results', 'Upload results to storage to enable Retries in next report')
-        )
-        .addOption(new Option('-r, --show-retries', 'Show retries in report'))
-        .addOption(new Option('-h, --show-history', 'Show history in report'))
-        .addOption(new Option('--gcp-json <json-path>', 'Path to your Firebase/GCP JSON credential'))
-        .addOption(new Option('-b, --bucket <bucket>', 'Firebase/GCP Storage bucket'))
+    defaultProgram
+        .command("deploy")
+        .description("Generate and deploy Allure report")
+        .addArgument(new Argument("<allure-results-path>", "Allure results path").default("./allure-results").argOptional())
+        .addArgument(new Argument("<website-id>", "Unique identifier for the report").default("allure-report").argOptional())
+        .addOption(new Option("-kh, --keep-history", "Upload history to enable report history"))
+        .addOption(new Option("-kr, --keep-results", "Upload results to enable retries"))
+        .addOption(new Option("-r, --show-retries", "Show retries in the report"))
+        .addOption(new Option("-h, --show-history", "Show history in the report"))
+        .addOption(new Option("--gcp-json <json-path>", "Path to Firebase/GCP JSON credential"))
+        .addOption(new Option("-b, --bucket <bucket>", "Firebase/GCP Storage bucket"))
         .action(async (resultPath, websiteId, options) => {
+            try {
+                await validateResultsPath(resultPath);
+                const firebaseProjectId = await getFirebaseCredentials(options.gcpJson);
+                validateBucket(options, websiteId);
 
-           try {
-               const files = await fs.readdir(path.normalize(resultPath));
-               if(!files.length){
-                   console.error(`Error: ${resultPath} is empty`);
-                   process.exit(1)
-               }
-           }catch (e) {
-               console.error(`Error: No allure result files in ${resultPath}`);
-               process.exit(1)
-           }
+                const runtimeDir = await getRuntimeDirectory();
+                const cliArgs: CliArguments = {
+                    runtimeCredentialDir: options.gcpJson || (await getSavedCredentialDirectory()),
+                    ARCHIVE_DIR: `${runtimeDir}/archive`,
+                    HOME_DIR: runtimeDir,
+                    REPORTS_DIR: `${runtimeDir}/allure-report`,
+                    RESULTS_PATH: resultPath,
+                    RESULTS_STAGING_PATH: `${runtimeDir}/allure-results`,
+                    downloadRequired: options.showHistory || options.showRetries,
+                    fileProcessingConcurrency: 10,
+                    firebaseProjectId: firebaseProjectId || db.get(KEY_PROJECT_ID),
+                    uploadRequired: options.keepHistory || options.keepResults,
+                    storageBucket: options.bucket || db.get(KEY_BUCKET),
+                    keepHistory: options.keepHistory,
+                    keepResults: options.keepResults,
+                    showRetries: options.showRetries,
+                    showHistory: options.showHistory,
+                    websiteId: websiteId,
+                };
 
-            // Check if GCP credentials is set
-            let firebaseProjectId : string | undefined ;
-            let runtimeCredentialDirectory =  options.gcpJson;
-            if(runtimeCredentialDirectory) {
-                const json = await readJsonFile(runtimeCredentialDirectory); // throws error on an invalid file
-                firebaseProjectId = json.project_id;
-                process.env.GOOGLE_APPLICATION_CREDENTIALS = runtimeCredentialDirectory
-            } else {
-                const savedCredentials = await getSavedCredentialDirectory()
-                if(!savedCredentials){
-                    console.error(
-                        "Error: You must set a Firebase/GCP token using 'gcp-json:set' or provide it with the '--gcp-json' option."
-                    );
-                    process.exit(1);
-                }
-                process.env.GOOGLE_APPLICATION_CREDENTIALS = savedCredentials
-                runtimeCredentialDirectory = savedCredentials
+                await onCommand(cliArgs);
+            } catch (error) {
+                // @ts-ignore
+                console.error(error.message);
+                process.exit(1);
             }
-
-
-            if ((!db.get('bucket') && !options.bucket)) {
-
-                if(options.showRetries){
-                    console.error(
-                        "Error: To show retries, you must set a Firebase/GCP bucket using 'bucket:set' or provide it with the '--bucket' option."
-                    );
-                    process.exit(1);
-                }
-
-                if(options.showHistory){
-                    console.error(
-                        "Error: To show history, you must set a Firebase/GCP bucket using 'bucket:set' or provide it with the '--bucket' option."
-                    );
-                    process.exit(1);
-                }
-
-
-                if(options.keepHistory){
-                    console.error(
-                        "Error: To show back up history, you must set a Firebase/GCP bucket using 'bucket:set' or provide it with the '--bucket' option."
-                    );
-                    process.exit(1);
-                }
-
-                if(options.keepResults){
-                    console.error(
-                        "Error: To back uo results, you must set a Firebase/GCP bucket using 'bucket:set' or provide it with the '--bucket' option."
-                    );
-                    process.exit(1);
-                }
-
-                if (!websiteId) {
-                    console.error('Error: website-id argument or --bucket option is required');
-                    process.exit(1)
-                }
-            }
-
-            const runtimeDir = await getRuntimeDirectory()
-            const cliArgs : CliArguments = {
-                runtimeCredentialDir: runtimeCredentialDirectory,
-                ARCHIVE_DIR: `${runtimeDir}/archive`,
-                HOME_DIR: runtimeDir,
-                REPORTS_DIR: `${runtimeDir}/allure-report`,
-                RESULTS_PATH: resultPath,
-                RESULTS_STAGING_PATH: `${runtimeDir}/allure-results`,
-                downloadRequired: false,
-                fileProcessingConcurrency: 10,
-                firebaseProjectId: firebaseProjectId ?? db.get('project_id'),
-                uploadRequired: false,
-                storageBucket: options.bucket ?? db.get('bucket'),
-                keepHistory: options.keepHistory,
-                keepResults: options.keepResults,
-                showRetries: options.showRetries,
-                showHistory: options.showHistory,
-                websiteId: websiteId
-            }
-
-            await onCommand(cliArgs)
         });
 }
