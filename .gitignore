@@ -1,13 +1,17 @@
 allure-firebase.iml
 .idea
 */node_modules
-worker/lib
-credentials/gcp-key.json
-.env.slack
-my.**
-gcp-key.json
-packages/**/dist
-act-event.json
 node_modules
+
+.env.slack
+# Act
+*/act.secrets
+*/act.variables
+*/act.event.json
+
+*key.json
+packages/**/dist
 #jest
 packages/**/coverage
+*/test*.sh
+!*/test-action.sh

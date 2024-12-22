@@ -5,33 +5,29 @@ import {
     FirebaseHost,
     FirebaseStorageService,
     GCPStorage, getDashboardUrl,
-    NotificationData,
-    NotifierService,
+    NotificationData, Notifier,
+    NotifierService, RealSlackClient, SlackNotifier,
     Storage,
 } from "allure-deployer-shared";
 import {Command} from "commander";
 import {addDeployCommand} from "./commands/deploy.command.js";
 import {addCredentialsCommand} from "./commands/credentials.command.js";
-import Conf from "conf";
 import {addStorageBucketCommand} from "./commands/storage.command.js";
 import {isJavaInstalled, readJsonFile} from "./utils/file-util.js";
 import {CliArguments} from "./utils/cli-arguments.js";
 import {oraPromise} from "ora";
 import {addVersionCommand} from "./commands/version.command.js";
-
-export const db = new Conf({projectName: 'allure'})
-
+import {addSlackTokenCommand} from "./commands/slack-setup.command.js";
 
 
 export function main() {
-
     const defaultProgram = new Command();
     (async ()=> {
-        defaultProgram.description('Allure Deployer CLI');
         addVersionCommand(defaultProgram);
         addCredentialsCommand(defaultProgram);
         addStorageBucketCommand(defaultProgram);
-        addDeployCommand(defaultProgram, runApp);
+        addDeployCommand(defaultProgram, runDeploy);
+        addSlackTokenCommand(defaultProgram);
         // Default action to show help
         defaultProgram.action(() => {
             defaultProgram.outputHelp();
@@ -41,7 +37,7 @@ export function main() {
     })()
 }
 
-async function runApp(args: CliArguments) {
+async function runDeploy(args: CliArguments) {
 
     let cloudStorage: Storage | undefined = undefined;
     if (args.storageBucket) {
@@ -88,7 +84,11 @@ async function runApp(args: CliArguments) {
         ])
     },{successText: 'Deployment successfully.'})
 
-    const notificationService = new NotifierService([new ConsoleNotifier()])
+    const notifiers: Notifier[] = [new ConsoleNotifier()]
+    if(args.slack_token && args.slack_channel){
+        new SlackNotifier(new RealSlackClient(args.slack_token, args.slack_channel))
+    }
+    const notificationService = new NotifierService(notifiers)
     const dashboardUrl = ()=> {
         return args.storageBucket ? getDashboardUrl({storageBucket: args.storageBucket, projectId: args.firebaseProjectId}) : undefined
     }

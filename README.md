@@ -5,45 +5,43 @@
 
 ![](https://img.shields.io/docker/pulls/sokari/allure-deployer-action)
 
-**Host your Allure test reports on  Firebase. No server required.**
+**Host your Allure test reports on Firebase with history, retries, and Slack integration—no server required.**
 
 ![Demo](assets/demo.gif)
 
 ## 📚 **Table of Contents**
 
 1. [Quick Start](#quick-start)
+    - [GitHub Action](#github)
+    - [Gitlab](#gitlab)
+    - [Codemagic](#codemagic)
+    - [Bitrise]()
+    - [Local Test Runs](#local-test-runs)
 2. [How it works](#how-it-works)
     - [Firebase Hosting](#hosting)
     - [Cloud Storage](#cloud-storage)
     - [History and Retries](#history-and-retries)
     - [Slack Integration](#slack-integration)
-3. [Use Cases](#use-cases)
-    - [CI Pipelines](#ci-pipelines)
-      - [GitHub Action](#github)
-      - [Gitlab](#gitlab)
-      - [Codemagic](#codemagic-integration)
-      - [Bitrise]()
-    - [Local Test Runs](#local-test-runs)
-4. [Configurations](#configuration)
+3. [Configurations](#configuration)
     - [GitHub Action](#configuration-github)
       - [Inputs](#inputs)
       - [Environment variables](#environment-variables-github)
     - [Docker](#configuration-docker)
       - [Environment Variables](#environment-variables-docker)
       - [Mount Volumes](#mount-volumes)
-5. [Troubleshooting and FAQs](#troubleshooting-and-faqs)
-6. [License](#license)
-7. [Contributing](#contributing)
+4. [Troubleshooting and FAQs](#troubleshooting-and-faqs)
+5. [License](#license)
+6. [Contributing](#contributing)
 
 ## Usage
 
 This package can be used three different ways:
 
-- 🤖 A [**GitHub Action**](#github) as part of your CI/CD process
+- 🤖 A [**GitHub Action**](https://github.com/marketplace/actions/allure-deployer-action) as part of your CI/CD process
 
-- 🐳 A [**Docker image**](#local-test-runs) that you can run anywhere
+- 🐳 A [**Docker image**](https://hub.docker.com/r/sokari/allure-deployer) that you can run anywhere
 
-- 🖥 A [**CLI**](https://www.npmjs.com/package/allure-deployer) that you run in your terminal
+- 🖥 A [**CLI**](https://www.npmjs.com/package/allure-deployer) that you run in your terminal and CI
 
 
 <h2 id="quick-start">🚀 Quick Start</h2>
@@ -171,42 +169,81 @@ deploy:
 ```
 See the Docker [configuration section](#docker-image-configuration) for more info
 
-### Local test runs
-#### 1. Pull the Docker Image
-```shell
-docker pull sokari/allure-deployer:latest
-```
-___
+### **Codemagic**
 
-#### 2. Run the Container
-```shell
-docker run -d \
-  -e WEBSITE_ID=my-custom-site-id \
-  -e WEBSITE_EXPIRES=2d \
-  -e STORAGE_BUCKET=my-test-results-bucket \
-  -v /path/to/allure-results:/allure-results \
-  -v /path/to/gcp-key.json:/credentials/key.json \
-  sokari/allure-deployer
-```
-___
+Use the [CLI](https://www.npmjs.com/package/allure-deployer) in your Codemagic workflow.
 
-##### 3. You can also use `docker-compose.yaml`:
 ```yaml
-services:  
-  allure:
-    image: sokari/allure-deployer
-    volumes:
-      - /path/to/allure-results:/allure-results
-      - /path/to/service-account.json:/credentials/key.json
-    environment:
-      WEBSITE_ID: your-site-id # Assign an ID to your Allure report website
-      WEBSITE_EXPIRES: 2d # Duration of availability. 1-30 days
-      STORAGE_BUCKET: your-storage-bucket # Google Cloud storage bucket
-      PREFIX: project-123 # A path in your storage bucket (Optional)
-      KEEP_HISTORY: true # Default is true when STORAGE_BUCKET is provided
-      KEEP_RESULTS: false # Default is false
+workflows:
+  android-allure:
+    name: Android Allure Report
+    max_build_duration: 30
+    instance_type: linux_x2
+    scripts:
+      - name: Build Android apk                                          # 1. Build apk
+        script:
+
+      - name: Git clone Appium project                                   # 2. Clone Appium project if required
+        script: |
+          git clone https://github.com/my-appium-project
+      - name: Install Appium Deps                                        # 3. Install Appium dependencies
+        script: |
+          cd appium && npm install --force
+      - name: Launch Android Emulator                                    # 4. Start Codemagic Android Emulator
+        script: |
+          FIRST_AVD=$(emulator -list-avds | head -n 1) \
+          && emulator -avd "$FIRST_AVD" & adb wait-for-device
+      - name: Run Appium test                                            # 5. Run test and generate Allure results
+        script: |
+          cd appium && npm run android
+      - name: Run Allure Report Deployer                                 # 6. Generate and deploy reports
+        script: |
+          npm i -g allure-deployer
+          cd appium && echo $ALLURE_GOOGLE_KEY >> service-key.json
+          allure-deployer deploy /allure-results my-report-id \
+          --gcp-json /credentials/key.json \
+          --keep-history \
+          --keep-results \
+          --show-history \
+          --show-retries \
+          --slack-token $SLACK_TOKEN \
+          --slack-channel $SLACK_CHANNEL
+    artifacts:
+      - android/app/build/outputs/**/*.apk
+
 ```
-___
+
+### **Local test runs**
+#### 1. Install the CLI
+
+```shell
+npm install -g allure-deployer
+```
+
+#### 2. Set your Firebase credentials
+```shell
+allure-deployer gcp-json:set ./gcp-key.json
+```
+
+#### 3. Set your Firebase storage bucket
+```shell
+allure-deployer bucket:set <my-bucket-name>
+```
+
+#### 4. Set Slack credentials (Optional)
+
+```shell
+allure-deployer slack:set <channel> <token>
+```
+
+#### 5. Generate and host your reports
+```shell
+allure-deployer deploy ./allure-results my-report-id \
+          --keep-history \
+          --keep-results \
+          --show-history \
+          --show-retries
+```
 
 
 <h2 id="configuration">Configurations</h2>
@@ -366,61 +403,6 @@ create a [simple Slack app](https://youtu.be/SbUv1nCS7a0?si=8rjWDQh6wfeAztxu&t=2
 and `SLACK_CHANNEL_ID` environment variable when you run the Docker image.
 
 <div style="text-align: left"><img src="assets/slack-bot.png" alt="Slack app notification example"></div>
-
-<h2 id="use-cases">📊 Use Cases</h2>
-<h3 id="ci-pipelines">🏗️ CI Pipelines</h2>
-<h4 id="github-actions-integration">GitHub Actions Integration</h2>
-
-Follow the [GitHub action](#for-github-actions) steps to set it up.
-
-#### **Codemagic integration**
-
-Use the [docker image](https://hub.docker.com/r/sokari/allure-deployer) in your Codemagic workflow.
-
-```yaml
-workflows:
-  android-allure:
-    name: Android Allure Report
-    max_build_duration: 30
-    instance_type: linux_x2
-    scripts:
-      - name: Build Android apk                                          # 1. Build apk
-        script:
-
-      - name: Git clone Appium project                                   # 2. Clone Appium project if required
-        script: |
-          git clone https://github.com/my-appium-project
-      - name: Install Appium Deps                                        # 3. Install Appium dependencies
-        script: |
-          cd appium && npm install --force
-      - name: Launch Android Emulator                                    # 4. Start Codemagic Android Emulator
-        script: |
-          FIRST_AVD=$(emulator -list-avds | head -n 1) \
-          && emulator -avd "$FIRST_AVD" & adb wait-for-device
-      - name: Run Appium test                                            # 5. Run test and generate Allure results
-        script: |
-          cd appium && npm run android
-      - name: Run Allure Report Deployer                                 # 6. Generate and deploy reports
-        script: |
-          cd appium && echo $ALLURE_GOOGLE_KEY >> service-key.json \
-          && docker run --rm \
-          -e STORAGE_BUCKET=$STORAGE_BUCKET \
-          -e WEBSITE_ID=website-allure \
-          -e KEEP_RETRIES=true \
-          -e KEEP_HISTORY=true \
-          -e SLACK_TOKEN=***
-          -e SLACK_CHANNEL_ID=****
-          -v service-key.json:/credentials/key.json
-          -v reports/android/allure-results:/allure-results \
-          sokari/allure-deployer:latest
-    artifacts:
-      - android/app/build/outputs/**/*.apk
-
-```
-
-<h3 id="local-test-runs">🖥️ Local Test Runs</h2>
-
-See the [Local test run](#local-test-runs) section for detailed instructions.
 
 
 <h2 id="troubleshooting-and-faqs">🛠️ Troubleshooting and FAQs</h2>

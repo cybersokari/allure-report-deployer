@@ -30,7 +30,7 @@ export class FirebaseHost implements HostingProvider {
                 const url: string | undefined = data[this.args.firebaseProjectId]?.url;
                 resolve(url)
             }).catch((err: any) => {
-                console.error('Failed to deploy report to Firebase hosting', err);
+                console.warn('Failed to deploy report to Firebase hosting', err);
                 resolve(undefined)
             });
         })

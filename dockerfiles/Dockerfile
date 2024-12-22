@@ -13,6 +13,7 @@ COPY $SHARED_DIR/package*.json $SHARED_DIR
 
 COPY $DOCKER_DIR/dist $DOCKER_DIR/dist
 COPY $DOCKER_DIR/package*.json $DOCKER_DIR
+COPY $DOCKER_DIR/start.sh $DOCKER_DIR
 
 COPY package*.json ./
 COPY tsconfig.base.json ./

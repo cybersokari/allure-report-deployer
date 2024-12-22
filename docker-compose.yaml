@@ -14,10 +14,10 @@ services:
       start_period: 10s
       retries: 3
       timeout: 5s
-  allure-cloud:
+  test-docker:
     tty: false
     build:
-      dockerfile: Dockerfile
+      dockerfile: dockerfiles/Dockerfile
       context: .
     develop:
       watch:
@@ -33,12 +33,12 @@ services:
         - action: rebuild
           path: packages/shared/package.json
           target: /app/packages/shared/package.json
-    container_name: allure-deployer
+    container_name: allure-docker
 #    env_file: .env.slack
     environment:
-#      FIREBASE_STORAGE_EMULATOR_HOST: 127.0.0.1:9199 # Dev mode
-      STORAGE_BUCKET: "gatedaccessdev.appspot.com"
-#      PREFIX: 'project-999'
+      FIREBASE_STORAGE_EMULATOR_HOST: 127.0.0.1:9199 # Dev mode
+      STORAGE_BUCKET: $GCP_BUCKET
+      PREFIX: 'project-999'
       WEBSITE_ID: 'fir-demo-project'
       WEBSITE_EXPIRES: 12h
       KEEP_HISTORY: true # Default is true when STORAGE_BUCKET is provided
@@ -46,24 +46,28 @@ services:
       SHOW_HISTORY: false
       SHOW_RETRIES: false
     volumes:
-#      - ./worker:/app #Dev only. This overrides the /app dir
-      - /Users/sokari/IdeaProjects/appium/service-account-sokari.json:/credentials/key.json:ro
-      - /Users/sokari/IdeaProjects/appium/reports/ios/allure-results:/allure-results
+      - ./key.json:/credentials/key.json:ro
+      - ./assets/allure-results:/allure-results
     cpus: 1
     mem_limit: 2048m
     network_mode: service:firebase
     depends_on:
       firebase:
         condition: service_healthy
-# The service performs live test on a fresh CLI build
   test-cli:
     build:
-      dockerfile: test.cli.Dockerfile
-    container_name: cli-test
+      context: .
+      dockerfile: dockerfiles/test.cli.Dockerfile
+    container_name: allure-cli
     tty: false
-    command: ['sh', '-c', 'allure-deployer deploy /allure-results --gcp-json /key.json --bucket gatedaccessdev.appspot.com']
+    command: ['sh', '-c', 'allure-deployer deploy /allure-results --gcp-json /key.json --bucket $GCP_BUCKET']
     volumes:
-      - ${PWD}/assets/allure-results:/allure-results
-      - ${PWD}/key.json:/key.json:ro
+      - ./assets/allure-results:/allure-results
+      - ./key.json:/key.json:ro
+  test-action:
+    image: act-packages-action:latest
+    build:
+      context: .
+      dockerfile: dockerfiles/action.Dockerfile
 
 

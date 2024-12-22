@@ -1,11 +1,11 @@
 import { Argument, Command, Option } from "commander";
-import { db } from "../main.js";
+import {db} from "../utils/database.js";
 import process from "node:process";
 import { getRuntimeDirectory, getSavedCredentialDirectory, readJsonFile } from "../utils/file-util.js";
 import { CliArguments } from "../utils/cli-arguments.js";
 import fs from "fs/promises";
 import path from "node:path";
-import { KEY_BUCKET, KEY_PROJECT_ID } from "../utils/constants.js";
+import {KEY_BUCKET, KEY_PROJECT_ID, KEY_SLACK_CHANNEL, KEY_SLACK_TOKEN} from "../utils/constants.js";
 
 const ERROR_MESSAGES = {
     EMPTY_RESULTS: "Error: The specified results directory is empty.",
@@ -13,6 +13,7 @@ const ERROR_MESSAGES = {
     MISSING_CREDENTIALS: "Error: Firebase/GCP credentials must be set using 'gcp-json:set' or provided via '--gcp-json'.",
     MISSING_BUCKET: "Error: A Firebase/GCP bucket must be set using 'bucket:set' or provided via '--bucket'.",
     MISSING_WEBSITE_ID: "Error: The 'website-id' argument or '--bucket' option is required.",
+    INVALID_SLACK_CRED: "Invalid Slack credential",
 };
 
 async function validateResultsPath(resultPath: string): Promise<void> {
@@ -54,6 +55,13 @@ function validateBucket(options: any, websiteId: string): void {
     }
 }
 
+function validateSlackCredentials(channel: any, token: any): void {
+    if(channel === undefined && token === undefined) return
+    if(channel || token){
+        throw new Error(`${ERROR_MESSAGES.INVALID_SLACK_CRED}: channel="${channel}", token="${token}"`);
+    }
+}
+
 export function addDeployCommand(defaultProgram: Command, onCommand: (args: CliArguments) => Promise<void>) {
     defaultProgram
         .command("deploy")
@@ -66,11 +74,14 @@ export function addDeployCommand(defaultProgram: Command, onCommand: (args: CliA
         .addOption(new Option("-h, --show-history", "Show history in the report"))
         .addOption(new Option("--gcp-json <json-path>", "Path to Firebase/GCP JSON credential"))
         .addOption(new Option("-b, --bucket <bucket>", "Firebase/GCP Storage bucket"))
+        .addOption(new Option("-sc,  --slack-channel <channel>","Slack channel ID"))
+        .addOption(new Option("-st,  --slack-token <token>","Slack token"))
         .action(async (resultPath, websiteId, options) => {
             try {
                 await validateResultsPath(resultPath);
                 const firebaseProjectId = await getFirebaseCredentials(options.gcpJson);
                 validateBucket(options, websiteId);
+                validateSlackCredentials(options.slackChannel, options.slackToken);
 
                 const runtimeDir = await getRuntimeDirectory();
                 // Default true if not set
@@ -95,6 +106,8 @@ export function addDeployCommand(defaultProgram: Command, onCommand: (args: CliA
                     showRetries: showRetries,
                     showHistory: showHistory,
                     websiteId: websiteId,
+                    slack_channel: options.slackChannel || db.get(KEY_SLACK_CHANNEL, undefined),
+                    slack_token: options.slackToken || db.get(KEY_SLACK_TOKEN, undefined),
                 };
 
                 await onCommand(cliArgs);

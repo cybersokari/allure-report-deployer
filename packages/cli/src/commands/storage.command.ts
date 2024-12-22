@@ -1,5 +1,5 @@
 import {Command} from "commander";
-import {db} from "../main.js";
+import {db} from "../utils/database.js";
 import chalk from "chalk";
 import {getSavedCredentialDirectory} from "../utils/file-util.js";
 import {readFile} from "fs/promises";

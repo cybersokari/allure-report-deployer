@@ -40,7 +40,7 @@
     "ora": "^8.1.1"
   },
   "devDependencies": {
-    "@types/conf": "^2.1.0"
+    "@types/conf": "^3.0.3"
   },
   "bin": {
     "allure-deployer": "dist/index.js"

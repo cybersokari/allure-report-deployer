@@ -1,0 +1,6 @@
+#!/bin/bash
+npm install --workspaces
+npm run build
+export GCP_BUCKET=
+
+docker-compose -f ../docker-compose.yaml up test-docker --build

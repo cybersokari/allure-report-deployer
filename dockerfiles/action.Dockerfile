@@ -17,8 +17,7 @@ COPY $ACTION_DIR/package*.json $APP_HOME/$ACTION_DIR
 COPY package*.json tsconfig.base.json $APP_HOME
 COPY node_modules $APP_HOME/node_modules
 
-
-COPY packages/action/entrypoint.sh /entrypoint.sh
+COPY $ACTION_DIR/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
 ENTRYPOINT ["/entrypoint.sh"]
