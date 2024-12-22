@@ -4,7 +4,7 @@ on:
 
 jobs:
   deploy-cli:
-    runs-on: ubuntu_latest
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4.1.5
       - name: Setup Node.js
