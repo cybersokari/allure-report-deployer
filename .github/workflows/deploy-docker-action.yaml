@@ -33,7 +33,7 @@ jobs:
 
       - name: Remove dev deps
         run: |
-          npm install --workspace=allure-deployer-shared--omit=dev
+          npm install --workspace=allure-deployer-shared --omit=dev
           npm install --workspace=@allure/action --omit=dev
 
       - name: Build and push
