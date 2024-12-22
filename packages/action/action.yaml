@@ -7,7 +7,7 @@ runs:
 #  image: 'sokari/allure-deployer-action:latest'
   args:
     - storage_bucket=${{ inputs.storage_bucket }}
-    - website_id=${{ inputs.website_id }}
+    - report_id=${{ inputs.report_id }}
     - website_expires=${{ inputs.website_expires }}
     - keep_history=${{ inputs.keep_history }}
     - keep_results=${{ inputs.keep_results }}
@@ -20,9 +20,10 @@ inputs:
   storage_bucket:
     description: 'Google Cloud Storage bucket name'
     required: true
-  website_id:
+  report_id:
     description: 'Unique identifier for the hosted report'
     required: true
+    default: 'default'
   website_expires:
     description: "Expiration duration for Report's website (e.g., 2h, 7d, 3w) Max. 30d"
     default: '7d'

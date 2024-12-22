@@ -39,7 +39,7 @@ services:
       FIREBASE_STORAGE_EMULATOR_HOST: 127.0.0.1:9199 # Dev mode
       STORAGE_BUCKET: $GCP_BUCKET
       PREFIX: 'project-999'
-      WEBSITE_ID: 'fir-demo-project'
+      REPORT_ID: 'fir-demo-project'
       WEBSITE_EXPIRES: 12h
       KEEP_HISTORY: true # Default is true when STORAGE_BUCKET is provided
       KEEP_RESULTS: false # Default is false

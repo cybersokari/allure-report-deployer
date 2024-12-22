@@ -1,6 +1,7 @@
 name: Build CLI
 on:
   workflow_dispatch:
+
 jobs:
   deploy-cli:
     runs-on: ubuntu_latest

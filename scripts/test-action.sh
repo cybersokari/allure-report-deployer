@@ -3,7 +3,6 @@
 npm install --workspaces
 npm run build
 # Build docker image for Act
-#docker build -t act-packages-action:latest -f ../dockerfiles/action.Dockerfile ..
 docker-compose build test-action -f ../docker-compose.yaml
 # Trigger 'test-action-local' job in .github/workflows/example.yaml
 cd ..

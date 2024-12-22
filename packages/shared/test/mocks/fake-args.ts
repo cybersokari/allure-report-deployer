@@ -4,7 +4,7 @@ export const fakeArgs : ArgsInterface = {
 
     firebaseProjectId: 'credentials.projectId',
     storageBucket: 'bucket',
-    websiteId: 'dd-site',
+    reportId: 'dd-site',
     websiteExpires: "9d",
     keepHistory: true,
     keepResults: true,

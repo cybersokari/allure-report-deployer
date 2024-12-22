@@ -93,7 +93,7 @@ export function getDashboardUrl({projectId, storageBucket}:{projectId?: string, 
  * history retention and retries.
  */
 export function printStats(args: ArgsInterface) {
-    if (!args.websiteId) {
+    if (!args.reportId) {
         appLog('Report publishing disabled because WEBSITE_ID is not provided');
     }
     if (args.storageBucket) {

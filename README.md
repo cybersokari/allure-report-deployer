@@ -80,7 +80,7 @@ jobs:
           GOOGLE_CREDENTIALS_JSON: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
         with:
           allure_results_path: '/assets/allure-results'
-          website_id: 'custom-website-id'
+          report_id: 'custom-website-id'
           website_expires: '14d'
           storage_bucket: ${{vars.storage-bucket}}
           slack_channel_id: ${{vars.SLACK_CHANNEL_ID}}
@@ -105,7 +105,7 @@ File Storage: https://console.firebase.google.com/project/${project-id}/storage/
 ```
 
 Tips
-1.	Use unique values for `WEBSITE_ID` (e.g., `${{ github.ref }}`) to avoid overwriting reports.
+1.	Use unique values for `REPORT_ID` (e.g., `${{ github.ref }}`) to avoid overwriting reports.
 2.	Configure `WEBSITE_EXPIRES` to manage the duration of hosted reports.
 ___
 
@@ -122,7 +122,7 @@ variables:
   DOCKER_IMAGE: sokari/allure-deployer:latest
   STORAGE_BUCKET: my-test-results-bucket
   PREFIX: project-123
-  WEBSITE_ID: my-custom-site-id
+  REPORT_ID: my-custom-site-id
   WEBSITE_EXPIRES: 3d
   KEEP_HISTORY: "true"
   KEEP_RESULTS: "true"
@@ -155,7 +155,7 @@ deploy:
     - docker run --rm \
       -e STORAGE_BUCKET=$STORAGE_BUCKET \
       -e PREFIX=$PREFIX \
-      -e WEBSITE_ID=$WEBSITE_ID \
+      -e REPORT_ID=$REPORT_ID \
       -e WEBSITE_EXPIRES=$WEBSITE_EXPIRES \
       -e KEEP_HISTORY=$KEEP_HISTORY \
       -e KEEP_RESULTS=$KEEP_RESULTS \
@@ -257,7 +257,7 @@ https://github.com/marketplace/actions/allure-deployer-action
 | Input                 | Description                                                                               | Required | Default           |
 |-----------------------|-------------------------------------------------------------------------------------------|----------|-------------------|
 | `allure_results_path` | Path to the directory containing Allure results files.                                    | ✅ Yes    | `/allure-results` |
-| `website_id`          | Unique identifier for the Allure report website. Ensures no overwriting of other reports. | ✅ Yes    | None              |
+| `report_id`           | Unique identifier for the Allure report website. Ensures no overwriting of other reports. | ✅ Yes    | `default`         |
 | `website_expires`     | Duration for which the hosted website remains active. Examples: `1h`, `2d`, `3w`.         | ❌ No     | `7d`              |
 | `storage_bucket`      | Name of the Google Cloud Storage bucket for backup and history storage.                   | ❌ No     | None              |
 | `slack_channel_id`    | ID of the Slack channel to send notifications about report links.                         | ❌ No     | None              |
@@ -291,20 +291,19 @@ docker pull sokari/allure-deployer:latest
 <h4 id="environment-variables-docker">Environment Variables</h3>
 
 
-| Variable           | Description                                                                                   | Example                        | Default |
-|--------------------|-----------------------------------------------------------------------------------------------|--------------------------------|---------|
-| `STORAGE_BUCKET`   | Google Cloud Storage bucket name                                                              | project-id.firebasestorage.app | None    |
-| `PREFIX`           | A path in your Storage bucket. Optional.                                                      | project-123                    | None    |
-| `WEBSITE_ID`       | Unique identifier for hosted reports                                                          | test-report-id                 | None    |
-| `WEBSITE_EXPIRES`  | Expiration duration for reports. Examples: 1h, 2d, 3w                                         | 29d                            | 7d      |
-| `KEEP_HISTORY`     | Backup `allure-reports/history` directory after every report generation.                      | true                           | true    |
-| `KEEP_RESULTS`     | Backup `/allure-results` directory after report generation..                                  | false                          | true    |
-| `SHOW_HISTORY`     | Show history in the current report by pulling the history from the last Cloud Storage backup  | true                           | true    |
-| `SHOW_RETRIES`     | Show retries in the current report by pulling result files from all archives in Cloud Storage | true                           | true    |
-| `SLACK_TOKEN`      | Your Slack App token                                                                          | xoxb-XXXXXXXXXX-XXXXXXXX       | None    |
-| `SLACK_CHANNEL_ID` | The Slack channel or conversation to notify with Allure report details                        | DC56JYGT8                      | None    |
+| Variable           | Description                                                                                   | Example                        | Default   |
+|--------------------|-----------------------------------------------------------------------------------------------|--------------------------------|-----------|
+| `STORAGE_BUCKET`   | Google Cloud Storage bucket name                                                              | project-id.firebasestorage.app | None      |
+| `PREFIX`           | A path in your Storage bucket. Optional.                                                      | project-123                    | None      |
+| `REPORT_ID`        | Unique identifier for hosted reports                                                          | test-report-id                 | `default` |
+| `WEBSITE_EXPIRES`  | Expiration duration for report website. Examples: 1h, 2d, 3w                                  | 29d                            | `7d`      |
+| `KEEP_HISTORY`     | Backup `allure-reports/history` directory after every report generation.                      | true                           | true      |
+| `KEEP_RESULTS`     | Backup `/allure-results` directory after report generation..                                  | false                          | true      |
+| `SHOW_HISTORY`     | Show history in the current report by pulling the history from the last Cloud Storage backup  | true                           | true      |
+| `SHOW_RETRIES`     | Show retries in the current report by pulling result files from all archives in Cloud Storage | true                           | true      |
+| `SLACK_TOKEN`      | Your Slack App token                                                                          | xoxb-XXXXXXXXXX-XXXXXXXX       | None      |
+| `SLACK_CHANNEL_ID` | The Slack channel or conversation to notify with Allure report details                        | DC56JYGT8                      | None      |
 
-**Note**: Either `STORAGE_BUCKET` or `WEBSITE_ID` must be provided. Both can be configured if you want to enable all functionalities.
 
 ---
 
@@ -334,9 +333,9 @@ If configured, the URL will also appear in **GitHub Summary** and **Slack notifi
 #### Key Features
 
 - **Auto-Expire Hosting**: No need for cleaning up outdated reports, the website is hosted using Firebase's Preview Channels, which has a maximum life of 30 days.
-- **Customizable URL**: Use the `WEBSITE_ID` environment variable to control your report's hosting:
-    - Using the **same `WEBSITE_ID`** overwrites the previous report at the same URL.
-    - Using a **new `WEBSITE_ID`** generates a unique URL for each report.
+- **Customizable URL**: Use the `REPORT_ID` environment variable to control your report's hosting:
+    - Using the **same `REPORT_ID`** overwrites the previous report at the same URL.
+    - Using a **new `REPORT_ID`** generates a unique URL for each report.
 
 For more information, check the [Configuration](#configuration) section.
 
@@ -349,7 +348,7 @@ Your files are backed up as a `.zip` archive when you set `KEEP_HISTORY` or `KEE
 
 Example of an archive when both `KEEP_RESULTS` and `KEEP_HISTORY` are enabled
 ```text
-2024-12-12T06:46:28.zip/
+MY-REPORT-ID.zip/
             ├── history/
             │   ├── categories-trend.json
             │   ├── duration-trend.json
@@ -440,7 +439,7 @@ gcloud firebase hosting:list
 ---
 
 #### Q3: Can I deploy reports to multiple Firebase sites?
-- **A**: Yes, use different values for `WEBSITE_ID` for each site. This allows you to manage separate URLs for different test runs or environments.
+- **A**: Yes, use different values for `REPORT_ID` for each site. This allows you to manage separate URLs for different test runs or environments.
 
 ---
 
@@ -449,8 +448,8 @@ gcloud firebase hosting:list
 
 ---
 
-#### Q5: What happens if I don’t set WEBSITE_ID?
-- **A**: If `WEBSITE_ID` is not set, Allure reports will not be generated, only your result files will be backed up to Storage. You must provide an identifier for the hosted site.
+#### Q5: What happens if I don’t set REPORT_ID?
+- **A**: If `REPORT_ID` is not set, Allure reports will not be generated, only your result files will be backed up to Storage. You must provide an identifier for the hosted site.
 
 ---
 

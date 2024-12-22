@@ -17,9 +17,18 @@ on:
         description: 'Backup history'
         required: false
         default: 'true'
-      website-id:
+      show-retries:
+        description: 'Show keep retries in report'
+        required: false
+        default: 'true'
+      show-history:
+        description: 'Show keep history in report'
+        required: false
+        default: 'true'
+      report-id:
         description: 'Unique identifier for the site'
         required: false
+        default: 'default'
       website-expires:
         description: 'Test Report site expiry. Example: 1h, 2d or 3w. Max is 30d'
         required: false
@@ -87,15 +96,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4.1.5
       - name: Allure Deployer Action
-        uses: ./scripts
+        uses: ./packages/action
         env:
           SLACK_TOKEN: ${{secrets.SLACK_TOKEN}}
           GOOGLE_CREDENTIALS_JSON: ${{ secrets.GCP_CREDENTIALS}}
         with:
           allure_results_path: 'assets/allure-results'
           storage_bucket: ${{github.event.inputs.storage-bucket}}
-          website_id: ${{ github.event.inputs.website-id }}
+          report_id: ${{ github.event.inputs.website-id }}
           website_expires: ${{github.event.inputs.website-expires}}
           slack_channel_id: ${{secrets.SLACK_CHANNEL_ID}}
           keep_history: ${{github.event.inputs.keep-history}}
           keep_results: ${{github.event.inputs.keep-results}}
+          show_retries: ${{github.event.inputs.show-retries}}
+          show_history: ${{github.event.inputs.show-history}}

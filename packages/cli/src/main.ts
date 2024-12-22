@@ -47,32 +47,29 @@ async function runDeploy(args: CliArguments) {
     }
 
     // const spinner = Ora()
-    let firebaseHost: FirebaseHost | undefined
-    if (args.websiteId) {
-        const allure = new Allure({args: args})
+    const allure = new Allure({args: args})
 
-        await oraPromise((ora)=> {
-            ora.start('Staging files...')
-            // Stage files
-            return Promise.all([
-                allure.stageFilesFromMount(),
-                args.downloadRequired ? cloudStorage?.stageFilesFromStorage() : null,
-            ])
-        },{successText: 'Files staged successfully.'})
+    await oraPromise((ora)=> {
+        ora.start('Staging files...')
+        // Stage files
+        return Promise.all([
+            allure.stageFilesFromMount(),
+            args.downloadRequired ? cloudStorage?.stageFilesFromStorage() : null,
+        ])
+    },{successText: 'Files staged successfully.'})
 
-        if(!isJavaInstalled()){
-            console.error('Error: JAVA_HOME not found. Allure commandline requires JAVA installed')
-            process.exit(1)
-        }
-        // Build report
-        await oraPromise((ora)=> {
-            ora.start('Generating Allure report... ')
-            return allure.generate()
-        }, {successText: 'Report generated successfully.'})
-        // Init hosting
-        firebaseHost = new FirebaseHost(args.websiteId, args);
-        await firebaseHost.init()
+    if(!isJavaInstalled()){
+        console.error('Error: JAVA_HOME not found. Allure commandline requires JAVA installed')
+        process.exit(1)
     }
+    // Build report
+    await oraPromise((ora)=> {
+        ora.start('Generating Allure report... ')
+        return allure.generate()
+    }, {successText: 'Report generated successfully.'})
+    // Init hosting
+    const firebaseHost = new FirebaseHost(args);
+    await firebaseHost.init()
 
     // Handle initialized features
     const [reportUrl] = await oraPromise((ora)=> {

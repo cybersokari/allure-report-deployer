@@ -8,7 +8,7 @@ import firebase from 'firebase-tools'
 export class FirebaseHost implements HostingProvider {
     public command: string | undefined
 
-    constructor(readonly websiteId: string, readonly args: ArgsInterface) {
+    constructor(readonly args: ArgsInterface) {
     }
 
     async deploy(): Promise<undefined|string> {
@@ -21,7 +21,7 @@ export class FirebaseHost implements HostingProvider {
         }
         return new Promise<any>(async (resolve, reject) => {
 
-            firebase.hosting.channel.deploy(this.args.websiteId, {
+            firebase.hosting.channel.deploy(this.args.reportId, {
                 config: `${this.args.REPORTS_DIR}/firebase.json`,
                 project: this.args.firebaseProjectId,
                 expires: expires,

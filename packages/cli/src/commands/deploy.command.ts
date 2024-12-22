@@ -67,7 +67,7 @@ export function addDeployCommand(defaultProgram: Command, onCommand: (args: CliA
         .command("deploy")
         .description("Generate and deploy Allure report")
         .addArgument(new Argument("<allure-results-path>", "Allure results path").default("./allure-results").argOptional())
-        .addArgument(new Argument("<website-id>", "Unique identifier for the report").default("allure-report").argOptional())
+        .addArgument(new Argument("<report-id>", "Unique identifier for the report").default("default").argOptional())
         .addOption(new Option("-kh, --keep-history", "Upload history to enable report history"))
         .addOption(new Option("-kr, --keep-results", "Upload results to enable retries"))
         .addOption(new Option("-r, --show-retries", "Show retries in the report"))
@@ -76,11 +76,11 @@ export function addDeployCommand(defaultProgram: Command, onCommand: (args: CliA
         .addOption(new Option("-b, --bucket <bucket>", "Firebase/GCP Storage bucket"))
         .addOption(new Option("-sc,  --slack-channel <channel>","Slack channel ID"))
         .addOption(new Option("-st,  --slack-token <token>","Slack token"))
-        .action(async (resultPath, websiteId, options) => {
+        .action(async (resultPath, reportId, options) => {
             try {
                 await validateResultsPath(resultPath);
                 const firebaseProjectId = await getFirebaseCredentials(options.gcpJson);
-                validateBucket(options, websiteId);
+                validateBucket(options, reportId);
                 validateSlackCredentials(options.slackChannel, options.slackToken);
 
                 const runtimeDir = await getRuntimeDirectory();
@@ -105,7 +105,7 @@ export function addDeployCommand(defaultProgram: Command, onCommand: (args: CliA
                     keepResults: keepResults,
                     showRetries: showRetries,
                     showHistory: showHistory,
-                    websiteId: websiteId,
+                    reportId: reportId,
                     slack_channel: options.slackChannel || db.get(KEY_SLACK_CHANNEL, undefined),
                     slack_token: options.slackToken || db.get(KEY_SLACK_TOKEN, undefined),
                 };

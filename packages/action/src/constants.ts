@@ -16,7 +16,7 @@ export function getArgs(credentials: ActionsCredentials): ArgsInterface {
         firebaseProjectId: credentials.projectId,
         storageBucket: process.env.STORAGE_BUCKET || undefined,
         prefix: prefix,
-        websiteId: process.env.WEBSITE_ID || undefined,
+        reportId: process.env.REPORT_ID || 'default',
         websiteExpires: process.env.WEBSITE_EXPIRES || "7d",
         keepHistory: keepHistory,
         keepResults: keepResults,

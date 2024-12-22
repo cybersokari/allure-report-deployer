@@ -58,13 +58,12 @@ export class Storage {
             foldersToBackup.push({path: this.args.RESULTS_PATH})
             foldersToCount.push(this.args.RESULTS_PATH)
         }
-        if (this.args.websiteId && this.args.keepHistory) {
+        if (this.args.keepHistory) {
             const historyFolder = `${this.args.REPORTS_DIR}/history`
             foldersToBackup.push({path: historyFolder, destination: 'history'})
             foldersToCount.push(historyFolder)
         }
-        const isoString = new Date().toISOString().replace(/(\.\d{3})?Z$/, ''); // Remove milliSec and TZ
-        const outputFileName = path.join(this.args.ARCHIVE_DIR, isoString.concat('.zip'))
+        const outputFileName = path.join(this.args.ARCHIVE_DIR, this.args.reportId.concat('.zip'))
         await zipFolder(foldersToBackup, outputFileName)
         // Count while uploading
         await Promise.all([

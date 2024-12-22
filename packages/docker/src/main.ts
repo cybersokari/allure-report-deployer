@@ -15,16 +15,13 @@ import {
     HOME_DIR, keepHistory, keepResults,
     MOUNTED_PATH,
     REPORTS_DIR,
-    RESULTS_STAGING_PATH, showRetries, STORAGE_BUCKET, uploadRequired, websiteId
+    RESULTS_STAGING_PATH, showRetries, STORAGE_BUCKET, uploadRequired, reportId
 } from "./constants.js";
 
 
 export function main(): void {
-    counter.startTimer()
-    if (!STORAGE_BUCKET && !websiteId) {
-        console.warn('WEBSITE_ID or STORAGE_BUCKET is required');
-        return
-    }
+    counter.startTimer();
+
     (async () => {
         let args: ArgsInterface;
         try {
@@ -41,7 +38,7 @@ export function main(): void {
                 showHistory: keepHistory,
                 showRetries: showRetries,
                 storageBucket: STORAGE_BUCKET,
-                websiteId: websiteId,
+                reportId: reportId,
                 uploadRequired: uploadRequired,
                 downloadRequired: downloadRequired,
                 firebaseProjectId: credential.projectId
@@ -61,21 +58,19 @@ export function main(): void {
         }
 
         let firebaseHost: FirebaseHost | undefined
-        if (websiteId) {
-            firebaseHost = new FirebaseHost(websiteId, args);
+        firebaseHost = new FirebaseHost(args);
 
-            const allure = new Allure({args: args})
-            // Stage files
-            await Promise.all([
-                allure.stageFilesFromMount(),
-                downloadRequired ? cloudStorage?.stageFilesFromStorage() : null,
-            ])
-            // Build report
-            appLog(`${Icon.HOUR_GLASS}  Generating Allure report...`)
-            await allure.generate()
-            // Init hosting
-            await firebaseHost.init()
-        }
+        const allure = new Allure({args: args})
+        // Stage files
+        await Promise.all([
+            allure.stageFilesFromMount(),
+            downloadRequired ? cloudStorage?.stageFilesFromStorage() : null,
+        ])
+        // Build report
+        appLog(`${Icon.HOUR_GLASS}  Generating Allure report...`)
+        await allure.generate()
+        // Init hosting
+        await firebaseHost.init()
         // Handle initialized features
         const [reportUrl] = (await Promise.all([
             firebaseHost?.deploy(),
