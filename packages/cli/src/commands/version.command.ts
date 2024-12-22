@@ -1,17 +1,6 @@
-import {Command, Option} from "commander";
-import {readJsonFile} from "../utils/file-util.js";
-
-
+import {Command} from "commander";
+// ./version-update.js updates this on prepack
+const version = "1.0.0";
 export function addVersionCommand(defaultProgram: Command) {
-    defaultProgram
-        .addOption(new Option("-V, --version", "output the version number"))
-        .description("Allure Deployer CLI")
-
-    defaultProgram.hook("preAction", async (thisCommand) => {
-        if (thisCommand.opts().version) {
-            const packageJson = await readJsonFile("package.json");
-            console.log(packageJson.version || "1.0.0");
-            process.exit(0);
-        }
-    });
+    defaultProgram.version(version).description('Allure Deployer CLI');
 }

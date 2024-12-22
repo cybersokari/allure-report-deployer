@@ -73,7 +73,6 @@ async function runApp(args: CliArguments) {
             ora.start('Generating Allure report... ')
             return allure.generate()
         }, {successText: 'Report generated successfully.'})
-        // spinner.clear()
         // Init hosting
         firebaseHost = new FirebaseHost(args.websiteId, args);
         await firebaseHost.init()

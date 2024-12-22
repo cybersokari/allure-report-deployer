@@ -1,8 +1,5 @@
-packages/cli
-packages/**/src
 # unused files and directories in shared package
 packages/shared/test
-packages/shared/ts*
 packages/shared/jest*
 
 packages/action/action.yaml

@@ -38,8 +38,8 @@ allure-deployer deploy ./allure-results my-report-id --keep-history
 - `<website-id>`: A unique identifier for the deployed report (Default: `allure-report`).
 
 #### Options
-- `-kh, --keep-history`: Upload history to storage to enable history in the next report.
-- `-kr, --keep-results`: Upload results to storage to enable retries in the next report.
+- `-kh, --keep-history`: Upload history to storage to enable history in the next report. Default is true.
+- `-kr, --keep-results`: Upload results to storage to enable retries in the next report. Default is true.
 - `-h, --show-history`: Show history in the upcoming report.
 - `-r, --show-retries`: Show retries in the upcoming report.
 - `--bucket <bucket-name>`: Directly provide a Firebase/GCP bucket name for deployment.

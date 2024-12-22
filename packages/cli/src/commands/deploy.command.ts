@@ -73,6 +73,11 @@ export function addDeployCommand(defaultProgram: Command, onCommand: (args: CliA
                 validateBucket(options, websiteId);
 
                 const runtimeDir = await getRuntimeDirectory();
+                // Default true if not set
+                const keepHistory = options.keepHistory ?? true
+                const keepResults = options.keepResults ?? true
+                const showRetries = options.showRetries ?? true
+                const showHistory = options.showHistory ?? true
                 const cliArgs: CliArguments = {
                     runtimeCredentialDir: options.gcpJson || (await getSavedCredentialDirectory()),
                     ARCHIVE_DIR: `${runtimeDir}/archive`,
@@ -80,15 +85,15 @@ export function addDeployCommand(defaultProgram: Command, onCommand: (args: CliA
                     REPORTS_DIR: `${runtimeDir}/allure-report`,
                     RESULTS_PATH: resultPath,
                     RESULTS_STAGING_PATH: `${runtimeDir}/allure-results`,
-                    downloadRequired: options.showHistory || options.showRetries,
+                    downloadRequired: showHistory || showRetries,
                     fileProcessingConcurrency: 10,
                     firebaseProjectId: firebaseProjectId || db.get(KEY_PROJECT_ID),
-                    uploadRequired: options.keepHistory || options.keepResults,
+                    uploadRequired: keepHistory || keepResults,
                     storageBucket: options.bucket || db.get(KEY_BUCKET),
-                    keepHistory: options.keepHistory,
-                    keepResults: options.keepResults,
-                    showRetries: options.showRetries,
-                    showHistory: options.showHistory,
+                    keepHistory: keepHistory,
+                    keepResults: keepResults,
+                    showRetries: showRetries,
+                    showHistory: showHistory,
                     websiteId: websiteId,
                 };
 

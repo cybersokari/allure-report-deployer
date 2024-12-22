@@ -1,14 +1,19 @@
 FROM node:22-alpine AS deps
 LABEL authors="cybersokari"
 RUN apk add openjdk17-jre
-RUN npm install -g firebase-tools
 
 FROM deps AS prod
 
 ENV APP_HOME=/app
+ENV SHARED_DIR=packages/shared
+ENV ACTION_DIR=packages/action
 
-COPY packages/shared $APP_HOME/packages/shared
-COPY packages/action $APP_HOME/packages/action
+COPY $SHARED_DIR/dist $APP_HOME/$SHARED_DIR/dist
+COPY $SHARED_DIR/package*.json $APP_HOME/$SHARED_DIR
+
+COPY $ACTION_DIR/dist $APP_HOME/$ACTION_DIR/dist
+COPY $ACTION_DIR/package*.json $APP_HOME/$ACTION_DIR
+
 COPY package*.json tsconfig.base.json $APP_HOME
 COPY node_modules $APP_HOME/node_modules
 

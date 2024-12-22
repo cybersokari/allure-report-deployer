@@ -59,5 +59,17 @@ export async function getSavedCredentialDirectory(): Promise<string|null> {
 }
 
 export function isJavaInstalled() {
-    return  fsSync.existsSync(`${process.env.JAVA_HOME}/bin/java`);
+    const javaHome = process.env.JAVA_HOME;
+
+    let javaPath: string|undefined;
+
+    if (javaHome) {
+        javaPath = `${javaHome}/bin/java`;
+    } else {
+        // Check common system paths
+        const commonPaths = ["/usr/bin/java", "/usr/local/bin/java"];
+        javaPath = commonPaths.find((path) => fsSync.existsSync(path));
+    }
+
+    return javaPath && fsSync.existsSync(javaPath)
 }

@@ -55,3 +55,15 @@ services:
     depends_on:
       firebase:
         condition: service_healthy
+# The service performs live test on a fresh CLI build
+  test-cli:
+    build:
+      dockerfile: test.cli.Dockerfile
+    container_name: cli-test
+    tty: false
+    command: ['sh', '-c', 'allure-deployer deploy /allure-results --gcp-json /key.json --bucket gatedaccessdev.appspot.com']
+    volumes:
+      - ${PWD}/assets/allure-results:/allure-results
+      - ${PWD}/key.json:/key.json:ro
+
+

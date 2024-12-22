@@ -1,6 +1,6 @@
 {
   "name": "allure-deployer",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Deploy your Allure Reports to Firebase, and notify in Slack, No server required",
   "keywords": [
     "allure server",
@@ -19,7 +19,7 @@
   "main": "./dist/index.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/cybersokari/allure-report-deployer",
+    "url": "git+https://github.com/cybersokari/allure-report-deployer.git",
     "directory": "packages/cli"
   },
   "bugs": {
@@ -28,15 +28,14 @@
   "scripts": {
     "test": "",
     "build": "rm -rf ./dist && tsc",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run build && node version-update.cjs"
   },
   "type": "module",
   "dependencies": {
-    "allure-deployer-shared": "latest",
+    "allure-deployer-shared": "1.0.2",
     "chalk": "^5.4.0",
     "commander": "^12.1.0",
     "conf": "^13.1.0",
-    "firebase-tools": "^13.29.1",
     "inquirer": "^12.3.0",
     "ora": "^8.1.1"
   },
@@ -44,6 +43,6 @@
     "@types/conf": "^2.1.0"
   },
   "bin": {
-    "allure-deployer": "./dist/index.js"
+    "allure-deployer": "dist/index.js"
   }
 }

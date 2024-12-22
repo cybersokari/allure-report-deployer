@@ -35,6 +35,16 @@
 6. [License](#license)
 7. [Contributing](#contributing)
 
+## Usage
+
+This package can be used three different ways:
+
+- 🤖 A [**GitHub Action**](#github) as part of your CI/CD process
+
+- 🐳 A [**Docker image**](#local-test-runs) that you can run anywhere
+
+- 🖥 A [**CLI**](https://www.npmjs.com/package/allure-deployer) that you run in your terminal
+
 
 <h2 id="quick-start">🚀 Quick Start</h2>
 

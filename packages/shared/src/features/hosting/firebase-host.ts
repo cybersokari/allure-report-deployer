@@ -1,49 +1,43 @@
 import {HostingProvider} from "../../interfaces/hosting-provider.interface.js";
 import * as fs from "fs/promises";
-import {StringBuilder} from "../../utilities/string-builder.js";
 import {appLog, changePermissionsRecursively} from "../../utilities/util.js";
 import {ArgsInterface} from "../../interfaces/args.interface.js";
-import {ExecFunction} from "../../interfaces/exec-function.interface.js";
-import { promisify } from 'util';
-import { exec as execCallback } from 'child_process';
-const exec = promisify(execCallback);
+// @ts-ignore
+import firebase from 'firebase-tools'
 
 export class FirebaseHost implements HostingProvider {
     public command: string | undefined
-    private readonly commandExec: ExecFunction | undefined
 
-    constructor(readonly websiteId: string, readonly args: ArgsInterface, commandExec?: ExecFunction) {
-        if(!commandExec){
-            this.commandExec = exec
-        }
+    constructor(readonly websiteId: string, readonly args: ArgsInterface) {
     }
 
     async deploy(): Promise<undefined|string> {
-        if(!this.command){
-            throw new Error('Firebase hosting not initialized. Call init() first.')
-        }
+        // Make Allure report files executable
         await changePermissionsRecursively(this.args.REPORTS_DIR, 0o755, 6)
-        const {stdout, stderr} = await this.commandExec!(this.command)
-        if (stderr && !stdout) {
-            appLog(`Deployment failed: ${stderr}`)
-            return undefined;
-        }
-        // Regex to retrieve URL from logs
-        const projectId = this.args.firebaseProjectId
-        const match = RegExp(`https://${projectId}-.*?web\\.app`).exec(stdout)
 
-        if (match) {
-            const url = match[0]
-            return url as string
-        } else {
-            appLog('Could not retrieve URL from Firebase Hosting.')
-            appLog(stdout)
-            return undefined
+        let expires = process.env.WEBSITE_EXPIRES
+        if (!this.validateWebsiteExpires(expires)) {
+            expires = '7d'
         }
+        return new Promise<any>(async (resolve, reject) => {
+
+            firebase.hosting.channel.deploy(this.args.websiteId, {
+                config: `${this.args.REPORTS_DIR}/firebase.json`,
+                project: this.args.firebaseProjectId,
+                expires: expires,
+                'no-authorized-domains': '',
+            }).then((data: any) => {
+                const url: string | undefined = data[this.args.firebaseProjectId]?.url;
+                resolve(url)
+            }).catch((err: any) => {
+                console.error('Failed to deploy report to Firebase hosting', err);
+                resolve(undefined)
+            });
+        })
     }
 
 
-    async init(): Promise<string|null> {
+    async init(): Promise<void> {
         const config = {
             "hosting": {
                 "public": ".",
@@ -60,26 +54,8 @@ export class FirebaseHost implements HostingProvider {
         } catch (e) {
             // Overwrite fail, this is not supposed to happen
             appLog(`Cannot create firebase.json. Aborting deployment ${e}`)
-            return null;
+            throw e
         }
-        const builder = new StringBuilder()
-        builder.append('firebase hosting:channel:deploy').append(' ')
-            .append(`--config ${this.args.REPORTS_DIR}/firebase.json`).append(' ')
-            .append(`--project ${this.args.firebaseProjectId}`).append(' ')
-            .append('--no-authorized-domains').append(' ')
-            .append(this.websiteId)
-        // Website expiration setup
-        builder.append(' ')
-            .append('--expires')
-            .append(' ')
-        const expires = process.env.WEBSITE_EXPIRES
-        if (expires && this.validateWebsiteExpires(expires)) {
-            builder.append(expires)
-        } else {
-            builder.append('7d')
-        }
-        this.command = builder.toString()
-        return this.command
     }
 
     /**
@@ -88,7 +64,9 @@ export class FirebaseHost implements HostingProvider {
      * @param expires - The expiration string
      * @returns {boolean} - True if valid, false otherwise
      */
-    private validateWebsiteExpires(expires: string): boolean {
+    private validateWebsiteExpires(expires: string | undefined): boolean {
+
+        if(!expires) return false
 
         const length = expires.length
         if (length < 2 || length > 3) {
