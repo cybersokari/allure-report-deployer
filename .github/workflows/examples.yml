@@ -99,8 +99,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4.1.5
+#        with:
+#          ref: main
+#          token: '${{ secrets.GITHUB_TOKEN }}'
       - name: Allure Deployer Action
-        uses: ./packages/action
+        uses: ./.github/actions
         env:
           SLACK_TOKEN: ${{secrets.SLACK_TOKEN}}
           GOOGLE_CREDENTIALS_JSON: ${{ secrets.GCP_CREDENTIALS}}
