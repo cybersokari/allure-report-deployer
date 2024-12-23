@@ -15,6 +15,7 @@ runs:
     - allure_results_path=${{ inputs.allure_results_path }}
     - show_retries=${{ inputs.show_retries }}
     - show_history=${{ inputs.show_history }}
+    - prefix=${{ inputs.prefix}}
 
 inputs:
   storage_bucket:
@@ -46,7 +47,10 @@ inputs:
   show_history:
     description: 'Show history in the test report (true/false)'
     default: 'true'
+  prefix:
+    description: 'The storage bucket path to back up Allure results and history files'
+    required: false
 
 outputs:
   report_url:
-    description: 'URL to your report if enabled'
+    description: 'URL to your report'

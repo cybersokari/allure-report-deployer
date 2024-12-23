@@ -3,6 +3,7 @@
   "compilerOptions": {
     "rootDirs": ["./test"],
     "esModuleInterop": true,
+    "types": ["jest","node"]
   },
   "include": ["src/**/*"]
 }

@@ -76,6 +76,7 @@ export function addDeployCommand(defaultProgram: Command, onCommand: (args: CliA
         .addOption(new Option("-b, --bucket <bucket>", "Firebase/GCP Storage bucket"))
         .addOption(new Option("-sc,  --slack-channel <channel>","Slack channel ID"))
         .addOption(new Option("-st,  --slack-token <token>","Slack token"))
+        .addOption(new Option("-p, --prefix <prefix>", "The storage bucket path to back up Allure results and history files"))
         .action(async (resultPath, reportId, options) => {
             try {
                 await validateResultsPath(resultPath);
@@ -90,6 +91,7 @@ export function addDeployCommand(defaultProgram: Command, onCommand: (args: CliA
                 const showRetries = options.showRetries ?? true
                 const showHistory = options.showHistory ?? true
                 const cliArgs: CliArguments = {
+                    prefix: options.prefix,
                     runtimeCredentialDir: options.gcpJson || (await getSavedCredentialDirectory()),
                     ARCHIVE_DIR: `${runtimeDir}/archive`,
                     HOME_DIR: runtimeDir,

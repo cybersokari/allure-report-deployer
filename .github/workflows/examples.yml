@@ -33,6 +33,10 @@ on:
         description: 'Test Report site expiry. Example: 1h, 2d or 3w. Max is 30d'
         required: false
         default: '1h'
+      prefix:
+        description: 'The storage bucket path to back up Allure results and history files'
+        required: false
+
 
 jobs:
   test-docker:
@@ -110,3 +114,4 @@ jobs:
           keep_results: ${{github.event.inputs.keep-results}}
           show_retries: ${{github.event.inputs.show-retries}}
           show_history: ${{github.event.inputs.show-history}}
+          prefix: ${{github.event.inputs.prefix}}

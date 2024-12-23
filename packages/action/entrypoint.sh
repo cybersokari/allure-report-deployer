@@ -12,6 +12,7 @@ export SLACK_CHANNEL_ID="${6#*=}"
 export ALLURE_RESULTS_PATH="${7#*=}"
 export SHOW_RETRIES="${8#*=}"
 export SHOW_HISTORY="${9#*=}"
+export PREFIX="${10#*=}"
 
 
 if [ -z "$GOOGLE_CREDENTIALS_JSON" ]; then

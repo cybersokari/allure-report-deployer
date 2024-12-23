@@ -1,4 +1,4 @@
-FROM node:22-alpine AS deps
+FROM node:20-alpine AS deps
 LABEL authors="cybersokari"
 RUN apk add openjdk17-jre
 

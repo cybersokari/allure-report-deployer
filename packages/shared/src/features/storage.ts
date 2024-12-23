@@ -21,8 +21,6 @@ export class Storage {
         this.unzipper = unzipper;
     }
 
-    private storageHomeDir = process.env.PREFIX || ''
-
     // Download remote files to staging area
     public async stageFilesFromStorage(): Promise<any> {
         // Create directories for staging
@@ -31,7 +29,7 @@ export class Storage {
             await fs.mkdir(this.args.ARCHIVE_DIR, {recursive: true})
         ])
         const localFilePaths = await this.provider.download({
-            prefix: this.storageHomeDir,
+            prefix: this.args.prefix ?? '',
             destination: this.args.ARCHIVE_DIR
         })
         const limit = pLimit(this.args.fileProcessingConcurrency);
@@ -65,15 +63,16 @@ export class Storage {
         }
         const outputFileName = path.join(this.args.ARCHIVE_DIR, this.args.reportId.concat('.zip'))
         await zipFolder(foldersToBackup, outputFileName)
+        const cloudStorageFilePath = path.join(this.args.prefix ?? '', path.basename(outputFileName))
         // Count while uploading
         await Promise.all([
             counter.addFilesUploaded(await countFiles(foldersToCount)),
-            this.provider.upload(outputFileName, path.basename(outputFileName))
+            this.provider.upload(outputFileName, cloudStorageFilePath)
         ])
     }
 
     public async unzipAllureResult(zipFilePath: string, outputDir: string): Promise<boolean> {
-        return await new Promise((resolve) => {
+        return await new Promise((resolve, reject) => {
             fsSync.createReadStream(zipFilePath)
                 .pipe(this.unzipper.Parse())
                 .on('entry', async (entry: Entry) => {
@@ -101,8 +100,8 @@ export class Storage {
                     resolve(true);
                 })
                 .on('error', (err) => {
-                    console.error('Unzip file error:', err);
-                    resolve(false);
+                    console.warn('Unzip file error');
+                    reject(err)
                 });
         });
     }

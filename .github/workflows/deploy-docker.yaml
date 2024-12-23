@@ -38,7 +38,9 @@ jobs:
         run: npm run test --workspaces
 
       - name: Compile JS
-        run: npm run build --workspaces
+        run: |
+          npm run build --workspace=packages/shared
+          npm run build --workspace=packages/docker
 
       - name: Remove dev deps
         run: |
