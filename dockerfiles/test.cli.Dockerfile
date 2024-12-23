@@ -1,5 +1,5 @@
 # This image npm pack the CLI for testing
-FROM node:22-alpine AS javanode
+FROM node:20-alpine AS javanode
 RUN apk add openjdk17-jre
 
 FROM node:22-alpine AS testdeps

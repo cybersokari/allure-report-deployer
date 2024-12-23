@@ -65,7 +65,7 @@ services:
       - ./assets/allure-results:/allure-results
       - ./key.json:/key.json:ro
   test-action:
-    image: act-packages-action:latest
+    image: act-github-actions-dockeraction:latest
     build:
       context: .
       dockerfile: dockerfiles/action.Dockerfile

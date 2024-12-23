@@ -44,6 +44,7 @@ allure-deployer deploy ./allure-results my-report-id --keep-history
 - `-r, --show-retries`: Show retries in the upcoming report.
 - `--bucket <bucket-name>`: Directly provide a Firebase/GCP bucket name for deployment.
 - `--gcp-json <json-path>`: Directly provide a Firebase/GCP JSON credential file for deployment.
+- `-p, --prefix <prefix>`: The storage bucket path to back up Allure results and history files
 
 ### `gcp-json:set`
 Set Firebase/GCP credentials for reuse.
