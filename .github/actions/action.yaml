@@ -16,6 +16,7 @@ runs:
     - show_retries=${{ inputs.show_retries }}
     - show_history=${{ inputs.show_history }}
     - prefix=${{ inputs.prefix}}
+    - v3=${{inputs.v3}}
 
 inputs:
   storage_bucket:
@@ -50,6 +51,10 @@ inputs:
   prefix:
     description: 'The storage bucket path to back up Allure results and history files'
     required: false
+  v3:
+    description: 'Try Allure version 3. Still in beta.'
+    required: false
+    default: 'false'
 
 outputs:
   report_url:

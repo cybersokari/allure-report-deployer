@@ -7,13 +7,15 @@ import firebase from 'firebase-tools'
 
 export class FirebaseHost implements HostingProvider {
     public command: string | undefined
+    private reportDir: string
 
     constructor(readonly args: ArgsInterface) {
+        this.reportDir = this.args.v3 ? `${this.args.REPORTS_DIR}/plugin-awesome` : this.args.REPORTS_DIR
     }
 
     async deploy(): Promise<undefined|string> {
         // Make Allure report files executable
-        await changePermissionsRecursively(this.args.REPORTS_DIR, 0o755, 6)
+        await changePermissionsRecursively(this.reportDir, 0o755, 6)
 
         let expires = process.env.WEBSITE_EXPIRES
         if (!this.validateWebsiteExpires(expires)) {
@@ -22,7 +24,7 @@ export class FirebaseHost implements HostingProvider {
         return new Promise<any>(async (resolve, reject) => {
 
             firebase.hosting.channel.deploy(this.args.reportId, {
-                config: `${this.args.REPORTS_DIR}/firebase.json`,
+                config: `${this.reportDir}/firebase.json`,
                 project: this.args.firebaseProjectId,
                 expires: expires,
                 'no-authorized-domains': '',
@@ -48,8 +50,9 @@ export class FirebaseHost implements HostingProvider {
             }
         }
         try {
-            const configDir = `${this.args.REPORTS_DIR}/firebase.json`
-            await fs.mkdir(this.args.REPORTS_DIR, {recursive: true,})
+
+            const configDir = `${this.reportDir}/firebase.json`
+            await fs.mkdir(this.reportDir, {recursive: true,})
             await fs.writeFile(configDir, JSON.stringify(config), {mode: 0o755, encoding: 'utf-8'})
         } catch (e) {
             // Overwrite fail, this is not supposed to happen

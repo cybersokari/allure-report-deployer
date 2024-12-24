@@ -5,6 +5,7 @@ export const HOME_DIR = '/app'
 export const RESULTS_STAGING_PATH = `${HOME_DIR}/allure-results`;
 export const ARCHIVE_DIR = `${HOME_DIR}/archive`;
 export const REPORTS_DIR = `${HOME_DIR}/allure-report`
+export const V3 = process.env.V3?.toLowerCase() === 'true' || false;
 //TODO: Remove deprecated websiteId
 export const reportId = process.env.WEBSITE_ID || process.env.REPORT_ID || 'default';
 export const STORAGE_BUCKET = process.env.STORAGE_BUCKET || undefined;

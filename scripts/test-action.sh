@@ -15,6 +15,6 @@ docker-compose build test-action
 # Trigger 'test-action-local' job in .github/workflows/example.yaml
 act push --job test-action-local --secret-file ./config/act.secrets \
  -e ./config/act.event.json \
-  --container-architecture linux/amd64 --rm --rebuild --pull=false
+  --container-architecture linux/amd64 --rm --rebuild=false --pull=false
 
 popd || exit

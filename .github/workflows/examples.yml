@@ -36,6 +36,11 @@ on:
       prefix:
         description: 'The storage bucket path to back up Allure results and history files'
         required: false
+      v3:
+        description: 'Try Allure version 3. Still in beta.'
+        required: false
+        default: 'false'
+
 
 
 jobs:
@@ -115,3 +120,4 @@ jobs:
           show_retries: ${{github.event.inputs.show-retries}}
           show_history: ${{github.event.inputs.show-history}}
           prefix: ${{github.event.inputs.prefix}}
+          v3: ${{github.event.inputs.v3}}

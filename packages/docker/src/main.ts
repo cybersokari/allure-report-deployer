@@ -4,7 +4,7 @@ import {
     FirebaseHost,
     printStats,
     counter,
-    GCPStorage, appLog, Icon,
+    GCPStorage, appLog, Icon, AllureV3Service,
 } from "allure-deployer-shared";
 import {readFile} from "fs/promises";
 import * as path from "node:path";
@@ -15,7 +15,7 @@ import {
     HOME_DIR, keepHistory, keepResults,
     MOUNTED_PATH,
     REPORTS_DIR,
-    RESULTS_STAGING_PATH, showRetries, STORAGE_BUCKET, uploadRequired, reportId
+    RESULTS_STAGING_PATH, showRetries, STORAGE_BUCKET, uploadRequired, reportId, V3
 } from "./constants.js";
 
 
@@ -33,15 +33,16 @@ export function main(): void {
                 REPORTS_DIR: REPORTS_DIR,
                 RESULTS_STAGING_PATH: RESULTS_STAGING_PATH,
                 fileProcessingConcurrency: fileProcessingConcurrency,
-                keepHistory: keepHistory,
+                keepHistory: keepHistory && !V3,
                 keepResults: keepResults,
-                showHistory: keepHistory,
+                showHistory: keepHistory && !V3,
                 showRetries: showRetries,
                 storageBucket: STORAGE_BUCKET,
                 reportId: reportId,
                 uploadRequired: uploadRequired,
                 downloadRequired: downloadRequired,
-                firebaseProjectId: credential.projectId
+                firebaseProjectId: credential.projectId,
+                v3: true
             }
             printStats(args);
         } catch (error) {
@@ -60,7 +61,7 @@ export function main(): void {
         let firebaseHost: FirebaseHost | undefined
         firebaseHost = new FirebaseHost(args);
 
-        const allure = new Allure({args: args})
+        const allure = new Allure({args: args, allureRunner: new AllureV3Service()})
         // Stage files
         await Promise.all([
             allure.stageFilesFromMount(),
@@ -70,8 +71,10 @@ export function main(): void {
         appLog(`${Icon.HOUR_GLASS}  Generating Allure report...`)
         await allure.generate()
         // Init hosting
+        appLog(`${Icon.HOUR_GLASS}  Init FIrebase...`)
         await firebaseHost.init()
         // Handle initialized features
+        appLog(`${Icon.HOUR_GLASS}  Deploying...`)
         const [reportUrl] = (await Promise.all([
             firebaseHost?.deploy(),
             cloudStorage?.uploadArtifacts()

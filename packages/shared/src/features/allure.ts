@@ -7,13 +7,14 @@ import * as path from "node:path";
 import {CommandRunner} from "../interfaces/command.interface.js";
 import {ArgsInterface} from "../interfaces/args.interface.js";
 import {AllureService} from "../services/allure-service.js";
+import {AllureV3Service} from "../services/v3-service.js";
 
 export class Allure {
-    private allureRunner: CommandRunner;
+    private readonly allureRunner: CommandRunner;
     private args: ArgsInterface;
 
     constructor({allureRunner, args}: {allureRunner?: CommandRunner , args: ArgsInterface}) {
-        this.allureRunner = allureRunner ?? new AllureService();
+        this.allureRunner = allureRunner ?? (args.v3 ? new AllureV3Service() : new AllureService());
         this.args = args;
     }
 
@@ -26,13 +27,25 @@ export class Allure {
     }
 
     async generate(): Promise<string> {
-        const { exitCode} = await this.allureRunner.runCommand([
-            'generate',
-            this.args.RESULTS_STAGING_PATH,
-            '--report-dir',
-            this.args.REPORTS_DIR,
-            '--clean',
-        ]);
+        let command: string[] = []
+        if(this.allureRunner instanceof AllureService){
+            command = [
+                'generate',
+                this.args.RESULTS_STAGING_PATH,
+                '--report-dir',
+                this.args.REPORTS_DIR,
+                '--clean',
+            ]
+        }else { //V3
+            command = [
+                'allure',
+                'awesome',
+                this.args.RESULTS_STAGING_PATH,
+                '--output',
+                this.args.REPORTS_DIR,
+            ]
+        }
+        const { exitCode} = await this.allureRunner.runCommand(command);
         if (exitCode !== 0) {
             throw new Error("Failed to generate Allure report");
         }

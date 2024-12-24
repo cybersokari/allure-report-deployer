@@ -30,5 +30,6 @@ export function getArgs(credentials: ActionsCredentials): ArgsInterface {
         showRetries: showRetries,
         downloadRequired: downloadRequired,
         uploadRequired: uploadRequired,
+        v3: process.env.V3?.toLowerCase() === "true" || false,
     };
 }

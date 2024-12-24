@@ -13,6 +13,7 @@ export ALLURE_RESULTS_PATH="${7#*=}"
 export SHOW_RETRIES="${8#*=}"
 export SHOW_HISTORY="${9#*=}"
 export PREFIX="${10#*=}"
+export V3="${11#*=}"
 
 
 if [ -z "$GOOGLE_CREDENTIALS_JSON" ]; then

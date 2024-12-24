@@ -16,4 +16,5 @@ export interface ArgsInterface {
     firebaseProjectId: string;
     uploadRequired: boolean;
     downloadRequired: boolean;
+    v3?: boolean;
 }
