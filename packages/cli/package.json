@@ -1,6 +1,6 @@
 {
   "name": "allure-deployer",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Deploy your Allure Reports to Firebase, and notify in Slack, No server required",
   "keywords": [
     "allure server",
@@ -32,7 +32,7 @@
   },
   "type": "module",
   "dependencies": {
-    "allure-deployer-shared": "1.0.4",
+    "allure-deployer-shared": "1.0.5",
     "chalk": "^5.4.0",
     "commander": "^12.1.0",
     "conf": "^13.1.0",
