@@ -1,6 +1,6 @@
 FROM node:20-alpine AS deps
 RUN apk add openjdk17-jre
-RUN npm i -g allure #Allure V3
+#RUN npm i -g allure #Allure V3
 
 FROM deps AS prod
 USER root

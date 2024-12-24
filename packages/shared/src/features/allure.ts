@@ -28,23 +28,30 @@ export class Allure {
 
     async generate(): Promise<string> {
         let command: string[] = []
-        if(this.allureRunner instanceof AllureService){
-            command = [
-                'generate',
-                this.args.RESULTS_STAGING_PATH,
-                '--report-dir',
-                this.args.REPORTS_DIR,
-                '--clean',
-            ]
-        }else { //V3
-            command = [
-                'allure',
-                'awesome',
-                this.args.RESULTS_STAGING_PATH,
-                '--output',
-                this.args.REPORTS_DIR,
-            ]
-        }
+        // if(this.allureRunner instanceof AllureService){
+        //     command = [
+        //         'generate',
+        //         this.args.RESULTS_STAGING_PATH,
+        //         '--report-dir',
+        //         this.args.REPORTS_DIR,
+        //         '--clean',
+        //     ]
+        // }else { //V3
+        //     command = [
+        //         'allure',
+        //         'awesome',
+        //         this.args.RESULTS_STAGING_PATH,
+        //         '--output',
+        //         this.args.REPORTS_DIR,
+        //     ]
+        // }
+        command = [
+            'generate',
+            this.args.RESULTS_STAGING_PATH,
+            '--report-dir',
+            this.args.REPORTS_DIR,
+            '--clean',
+        ]
         const { exitCode} = await this.allureRunner.runCommand(command);
         if (exitCode !== 0) {
             throw new Error("Failed to generate Allure report");

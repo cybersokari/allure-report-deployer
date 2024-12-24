@@ -4,7 +4,7 @@ import {
     FirebaseHost,
     printStats,
     counter,
-    GCPStorage, appLog, Icon, AllureV3Service,
+    GCPStorage, appLog, Icon, AllureService,
 } from "allure-deployer-shared";
 import {readFile} from "fs/promises";
 import * as path from "node:path";
@@ -42,7 +42,7 @@ export function main(): void {
                 uploadRequired: uploadRequired,
                 downloadRequired: downloadRequired,
                 firebaseProjectId: credential.projectId,
-                v3: true
+                v3: process.env.V3?.toLowerCase() === 'true' || false,
             }
             printStats(args);
         } catch (error) {
@@ -61,7 +61,7 @@ export function main(): void {
         let firebaseHost: FirebaseHost | undefined
         firebaseHost = new FirebaseHost(args);
 
-        const allure = new Allure({args: args, allureRunner: new AllureV3Service()})
+        const allure = new Allure({args: args, allureRunner: new AllureService()})
         // Stage files
         await Promise.all([
             allure.stageFilesFromMount(),
@@ -70,8 +70,7 @@ export function main(): void {
         // Build report
         appLog(`${Icon.HOUR_GLASS}  Generating Allure report...`)
         await allure.generate()
-        // Init hosting
-        appLog(`${Icon.HOUR_GLASS}  Init FIrebase...`)
+
         await firebaseHost.init()
         // Handle initialized features
         appLog(`${Icon.HOUR_GLASS}  Deploying...`)
