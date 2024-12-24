@@ -14,14 +14,13 @@ jobs:
 
       - name: Install deps
         run: |
-          npm install --workspace=allure-deployer-shared
           npm install --workspace=@allure/cli
 
       - name: Run test
-        run: npm run test --workspaces
+        run: npm run test --workspace=packages/cli
 
       - name: Compile JS
-        run: npm run build --workspaces
+        run: npm run build --workspace=packages/cli
 
       - name: NPM Publish
         uses: JS-DevTools/npm-publish@v3.1.1
@@ -30,7 +29,7 @@ jobs:
           package: packages/cli
 
   deploy-shared:
-    runs-on: ubuntu_latest
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4.1.5
       - name: Setup Node.js
@@ -45,7 +44,7 @@ jobs:
         run: npm run test --workspaces
 
       - name: Compile JS
-        run: npm run build --workspaces
+        run: npm run build --workspace=packages/shared
 
       - name: NPM Publish
         uses: JS-DevTools/npm-publish@v3.1.1

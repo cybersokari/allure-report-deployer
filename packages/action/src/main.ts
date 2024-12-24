@@ -5,7 +5,7 @@ import {
     FirebaseStorageService, getDashboardUrl,
     GitHubNotifier, NotificationData, Notifier, NotifierService,
     printStats, RealSlackClient, SlackNotifier,
-    Storage, GCPStorage, appLog, Icon
+    Storage, GCPStorage, appLog, Icon, ExecutorInterface
 } from "allure-deployer-shared";
 import {ActionsCredentials} from "./credentials.js";
 import {getArgs} from "./constants.js";
@@ -36,24 +36,27 @@ export function main() {
             cloudStorage = new Storage(new FirebaseStorageService(bucket), args)
         }
 
-
         const allure = new Allure({args: args})
         // Stage files
         await Promise.all([
             allure.stageFilesFromMount(),
             args.downloadRequired ? cloudStorage?.stageFilesFromStorage() : null,
         ])
-        // Build report
         appLog(`${Icon.HOUR_GLASS}  Generating Allure report...`)
-        await allure.generate()
-        // Init hosting
         const firebaseHost = new FirebaseHost(args);
-        await firebaseHost.init()
+        const reportUrl = await firebaseHost.init()
+        const executor: ExecutorInterface = {
+            name: 'Allure Report Deployer',
+            type: 'github',
+            buildUrl: args.buildUrl,
+            reportUrl: reportUrl
+        }
+        await allure.generate(executor)
         // Handle initialized features
-        const [reportUrl] = (await Promise.all([
-            firebaseHost?.deploy(),
+        await Promise.all([
+            firebaseHost.deploy(),
             cloudStorage?.uploadArtifacts()
-        ]))
+        ])
         await sendNotifications(reportUrl, args)
     })()
 }

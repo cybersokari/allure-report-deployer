@@ -4,7 +4,7 @@ import {Storage} from "../src";
 import * as fs from "fs/promises";
 import {jest} from "@jest/globals";
 import {Order, StorageProvider} from "../src/interfaces/storage-provider.interface.js";
-import {fakeArgs} from "./mocks/fake-args";
+import {fakeArgs} from "./mocks/fake-args.js";
 
 
 // Partially mock the module

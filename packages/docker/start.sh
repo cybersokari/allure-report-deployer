@@ -35,3 +35,4 @@ if [ -f "$GITHUB_STEP_SUMMARY" ]; then
 fi
 
 node --disable-warning=ExperimentalWarning /app/packages/docker/dist/index.js
+#tail -f /dev/null

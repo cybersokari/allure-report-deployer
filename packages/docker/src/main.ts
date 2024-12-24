@@ -4,7 +4,7 @@ import {
     FirebaseHost,
     printStats,
     counter,
-    GCPStorage, appLog, Icon, AllureService,
+    GCPStorage, appLog, Icon, AllureService, ExecutorInterface,
 } from "allure-deployer-shared";
 import {readFile} from "fs/promises";
 import * as path from "node:path";
@@ -69,17 +69,22 @@ export function main(): void {
         ])
         // Build report
         appLog(`${Icon.HOUR_GLASS}  Generating Allure report...`)
-        await allure.generate()
+        const reportUrl = await firebaseHost.init()
+        const executor: ExecutorInterface = {
+            name: 'Allure Report Deployer',
+            reportUrl: reportUrl
+        }
+        await allure.generate(executor)
 
-        await firebaseHost.init()
         // Handle initialized features
         appLog(`${Icon.HOUR_GLASS}  Deploying...`)
-        const [reportUrl] = (await Promise.all([
+        await Promise.all([
             firebaseHost?.deploy(),
             cloudStorage?.uploadArtifacts()
-        ]))
+        ])
         await sendNotifications(reportUrl, args.firebaseProjectId)
     })()
 
 }
+
 

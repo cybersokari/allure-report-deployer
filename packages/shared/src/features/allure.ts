@@ -8,6 +8,7 @@ import {CommandRunner} from "../interfaces/command.interface.js";
 import {ArgsInterface} from "../interfaces/args.interface.js";
 import {AllureService} from "../services/allure-service.js";
 import {AllureV3Service} from "../services/v3-service.js";
+import {ExecutorInterface} from "../interfaces/executor.interface.js";
 
 export class Allure {
     private readonly allureRunner: CommandRunner;
@@ -26,26 +27,10 @@ export class Allure {
         }
     }
 
-    async generate(): Promise<string> {
-        let command: string[] = []
-        // if(this.allureRunner instanceof AllureService){
-        //     command = [
-        //         'generate',
-        //         this.args.RESULTS_STAGING_PATH,
-        //         '--report-dir',
-        //         this.args.REPORTS_DIR,
-        //         '--clean',
-        //     ]
-        // }else { //V3
-        //     command = [
-        //         'allure',
-        //         'awesome',
-        //         this.args.RESULTS_STAGING_PATH,
-        //         '--output',
-        //         this.args.REPORTS_DIR,
-        //     ]
-        // }
-        command = [
+    async generate(data: ExecutorInterface): Promise<string> {
+        const executorPath = path.normalize(`${this.args.RESULTS_STAGING_PATH}/executor.json`)
+        await fs.writeFile(executorPath, JSON.stringify(data, null, 2), {mode: 0o755, encoding: 'utf8'});
+        const command = [
             'generate',
             this.args.RESULTS_STAGING_PATH,
             '--report-dir',
@@ -58,6 +43,7 @@ export class Allure {
         }
         return this.args.REPORTS_DIR;
     }
+
 
     async stageFilesFromMount(): Promise<void> {
         // Ensure staging directory exists and fetch list

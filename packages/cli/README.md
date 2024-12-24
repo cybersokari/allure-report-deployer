@@ -35,7 +35,7 @@ allure-deployer deploy ./allure-results my-report-id --keep-history
 
 #### Arguments
 - `<allure-results-path>`: Path to the directory containing Allure results (Default: `./allure-results`).
-- `<website-id>`: A unique identifier for the deployed report (Default: `allure-report`).
+- `<report-id>`: A unique identifier for the deployed report (Default: `allure-report`).
 
 #### Options
 - `-kh, --keep-history`: Upload history to storage to enable history in the next report. Default is true.

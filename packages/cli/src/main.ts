@@ -1,7 +1,7 @@
 import * as process from "node:process";
 import {
     Allure,
-    ConsoleNotifier, counter,
+    ConsoleNotifier, counter, ExecutorInterface,
     FirebaseHost,
     FirebaseStorageService,
     GCPStorage, getDashboardUrl,
@@ -46,9 +46,7 @@ async function runDeploy(args: CliArguments) {
         cloudStorage = new Storage(new FirebaseStorageService(bucket), args)
     }
 
-    // const spinner = Ora()
     const allure = new Allure({args: args})
-
     await oraPromise((ora)=> {
         ora.start('Staging files...')
         // Stage files
@@ -62,21 +60,24 @@ async function runDeploy(args: CliArguments) {
         console.error('Error: JAVA_HOME not found. Allure commandline requires JAVA installed')
         process.exit(1)
     }
-    // Build report
+    const firebaseHost = new FirebaseHost(args);
+    const reportUrl = await firebaseHost.init()
+    const executor: ExecutorInterface = {
+        name: 'Allure Report Deployer',
+        reportUrl: reportUrl
+    }
+    // Generate the report
     await oraPromise((ora)=> {
         ora.start('Generating Allure report... ')
-        return allure.generate()
+        return allure.generate(executor)
     }, {successText: 'Report generated successfully.'})
     // Init hosting
-    const firebaseHost = new FirebaseHost(args);
-    await firebaseHost.init()
 
     // Handle initialized features
-    const [reportUrl] = await oraPromise((ora)=> {
+    await oraPromise((ora)=> {
         ora.start('Deploying...')
-        // Stage files
         return Promise.all([
-            firebaseHost?.deploy(),
+            firebaseHost.deploy(),
             cloudStorage?.uploadArtifacts()
         ])
     },{successText: 'Deployment successfully.'})
@@ -92,6 +93,7 @@ async function runDeploy(args: CliArguments) {
     const notificationData = new NotificationData(counter, reportUrl, dashboardUrl())
     await notificationService.sendNotifications(notificationData)
 }
+
 
 
 

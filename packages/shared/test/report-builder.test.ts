@@ -1,4 +1,4 @@
-import {Allure} from "../src";
+import {Allure, ExecutorInterface} from "../src";
 import {AllureService} from "../src";
 // @ts-ignore
 import mock from "mock-fs";
@@ -22,6 +22,9 @@ jest.mock("fs/promises", () => ({
     cp: jest.fn(),
 }));
 
+const executor: ExecutorInterface = {
+    reportUrl: 'http://localhost',
+}
 
 describe("ReportBuilder", () => {
     let mockAllureService: AllureService | null = null;
@@ -58,12 +61,15 @@ describe("ReportBuilder", () => {
     });
 
     test("generate should throw error if allure command fails", async () => {
+        mock({
+            '/app/allure-results': {},
+        });
         mockAllureService = {
             runCommand: jest.fn(allureCommandFail), // Mock the AllureCommandRunner interface
         };
         reportBuilder = new Allure({allureRunner: mockAllureService, args: fakeArgs});
 
-        await expect(reportBuilder.generate()).rejects.toThrow("Failed to generate Allure report");
+        await expect(reportBuilder.generate(executor)).rejects.toThrow("Failed to generate Allure report");
     });
 
     test("stageFilesFromMount should stage files correctly", async () => {
@@ -87,11 +93,14 @@ describe("ReportBuilder", () => {
     });
 
     test("generate should return report directory path on success", async () => {
+        mock({
+            '/app/allure-results': {},
+        });
         mockAllureService = {
             runCommand: jest.fn(allureCommandSuccess), // Mock the AllureCommandRunner interface
         };
         reportBuilder = new Allure({allureRunner: mockAllureService, args: fakeArgs});
-        const result = await reportBuilder.generate();
+        const result = await reportBuilder.generate(executor);
 
         expect(result).toBe(REPORTS_DIR);
         expect(mockAllureService.runCommand).toHaveBeenCalledWith([

@@ -4,41 +4,34 @@ import {changePermissionsRecursively} from "../../utilities/util.js";
 import {ArgsInterface} from "../../interfaces/args.interface.js";
 // @ts-ignore
 import firebase from 'firebase-tools'
+import path from "node:path";
 
 const maxFirebaseAllowedSites = 36;
 
 export class FirebaseHost implements HostingProvider {
     public command: string | undefined
     private readonly reportDir: string
-    private readonly expires: string | undefined;
     private hostedSiteUrl: string | undefined
+    private readonly configPath: string
+    private newSiteId = `report-${this.args.reportId}-${Date.now()}-${this.generateRandomString(8)}`
+
 
     constructor(readonly args: ArgsInterface) {
-        this.reportDir = this.args.v3 ? `${this.args.REPORTS_DIR}/plugin-awesome` : this.args.REPORTS_DIR
-        this.expires = this.validateWebsiteExpires(this.args.websiteExpires)
+        this.reportDir = this.args.REPORTS_DIR
+        this.configPath = path.join(this.args.REPORTS_DIR, "firebase.json")
+        console.warn('firebase json path: ', this.configPath)
     }
 
     async deploy(): Promise<undefined | string> {
+        await this.createConfigJson();
         // Make Allure report files executable
-        await changePermissionsRecursively(this.reportDir, 0o755, 6)
-
+        await changePermissionsRecursively(this.reportDir, 0o755, 10)
         try {
-            if (this.expires) {
-                const data = await firebase.hosting.channel.deploy(this.args.reportId, {
-                    config: `${this.reportDir}/firebase.json`,
-                    project: this.args.firebaseProjectId,
-                    expires: this.expires,
-                    'no-authorized-domains': '',
-                });
-                this.hostedSiteUrl = data[this.args.firebaseProjectId]?.url;
-            } else {
-                const data = await firebase.deploy({
-                    only: 'hosting',
-                    config: `${this.reportDir}/firebase.json`,
-                    project: this.args.firebaseProjectId,
-                });
-                console.log(`Hosting complete`, data);
-            }
+            await firebase.deploy({
+                only: 'hosting',
+                config: this.configPath,
+                project: this.args.firebaseProjectId,
+            });
             return this.hostedSiteUrl;
         } catch (err) {
             console.warn('Failed to deploy report to Firebase hosting', err);
@@ -46,43 +39,13 @@ export class FirebaseHost implements HostingProvider {
         }
     }
 
-
-    async init(): Promise<void> {
-        let config
-        const newSiteId = `report-${this.args.reportId}-${Date.now()}-${this.generateRandomString(8)}`
-        if (this.expires) {
-            config = {
-                "hosting": {
-                    "public": ".",
-                    "ignore": [
-                        "firebase.json",
-                        "**/.*",
-                    ]
-                }
-            }
-        } else {
-            config = {
-                "hosting": {
-                    "site": newSiteId,
-                    "public": ".",
-                    "ignore": [
-                        "firebase.json",
-                        "**/.*",
-                    ]
-                }
-            }
-        }
+    async init(): Promise<string> {
+        // Add date to URL for ordering and sorting of Firebase sites
 
         try {
-            const configDir = `${this.reportDir}/firebase.json`
-            await fs.mkdir(this.reportDir, {recursive: true,})
-            await fs.writeFile(configDir, JSON.stringify(config), {mode: 0o755, encoding: 'utf-8'})
-
-            if (!this.expires) {
-                // If user did not provide expiry, we need to create a Firebase Hosting site
-                const data = await this.createFirebaseSite(newSiteId)
-                this.hostedSiteUrl = data.defaultUrl as string;
-            }
+            const data = await this.createFirebaseSite()
+            this.hostedSiteUrl = data.defaultUrl as string;
+            return this.hostedSiteUrl
         } catch (e) {
             // File creation failed, this is not supposed to happen, but if it does, abort.
             console.error(`Cannot create firebase.json. Aborting deployment...`)
@@ -90,12 +53,28 @@ export class FirebaseHost implements HostingProvider {
         }
     }
 
-    private async createFirebaseSite(siteId: string): Promise<any> {
+    private async createConfigJson(): Promise<void> {
+        const config = {
+            "hosting": {
+                "site": this.newSiteId,
+                "public": ".",
+                "ignore": [
+                    "firebase.json",
+                    "**/.*",
+                ]
+            }
+        }
+        await fs.mkdir(this.reportDir, {recursive: true,})
+        await fs.writeFile(this.configPath, JSON.stringify(config), {mode: 0o755, encoding: 'utf-8'})
+    }
+
+    private async createFirebaseSite(): Promise<any> {
         const sites = await this.getExistingFirebaseSiteIds();
         if (sites.length >= maxFirebaseAllowedSites) {
             await this.deleteFirebaseSite(sites[0]);
+            console.log(`Firebase site deleted successfully.`);
         }
-        return firebase.hosting.sites.create(siteId, {
+        return firebase.hosting.sites.create(this.newSiteId, {
             project: this.args.firebaseProjectId,
         });
     }
@@ -105,7 +84,6 @@ export class FirebaseHost implements HostingProvider {
             const data = await firebase.hosting.sites.list({
                 project: this.args.firebaseProjectId,
             });
-
             return data.sites
                 .map((site: any) => this.extractSubdomain(site.defaultUrl))
                 .filter(this.hasValidTimestamp)
@@ -135,9 +113,10 @@ export class FirebaseHost implements HostingProvider {
     }
 
     private async deleteFirebaseSite(siteId: string): Promise<void> {
+        await this.createConfigJson(); // Site deletion requires firebase.json
         return await firebase.hosting.sites.delete(siteId, {
             project: this.args.firebaseProjectId,
-            config: `${this.reportDir}/firebase.json`,
+            config: this.configPath,
             force: true,
         });
     }
@@ -146,25 +125,6 @@ export class FirebaseHost implements HostingProvider {
         return Array.from({length}, () =>
             Math.random().toString(36).charAt(2)
         ).join('');
-    }
-
-    /**
-     * Validates the expiration format for the website hosting link.
-     * Ensures the format is a number followed by 'h', 'd', or 'w' and is within 30 days.
-     * @param expires - The expiration string
-     * @returns {string|undefined} - The data if valid, undefined if invalid, '30d' if
-     * the format valid but duration is more than 30 days
-     */
-    private validateWebsiteExpires(expires: string | undefined): string | undefined {
-        if (!expires) return undefined;
-
-        const match = expires.match(/^(\d+)([hdw])$/);
-        if (!match) return undefined;
-
-        const [_, value, unit] = match;
-        const days = unit === 'h' ? +value / 24 : unit === 'd' ? +value : +value * 7;
-
-        return days <= 30 ? expires : '30d';
     }
 
 }
