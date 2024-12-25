@@ -41,8 +41,7 @@ jobs:
 
       - name: Bump version
         run: |
-          cd packages/cli
-          npm version ${{inputs.semver}}
+          cd packages/cli && npm version ${{github.event.inputs.semver}}
 
       - name: NPM Publish
         id: publish
@@ -82,8 +81,7 @@ jobs:
 
       - name: Bump version
         run: |
-          cd packages/shared
-          npm version ${{inputs.semver}}
+          cd packages/shared && npm version ${{github.event.inputs.semver}}
 
       - name: NPM Publish
         id: publish
@@ -91,6 +89,7 @@ jobs:
         with:
           token: ${{ secrets.NPM_TOKEN }}
           package: packages/shared
+          dry-run: true
       - name: Commit and Push Changes
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
