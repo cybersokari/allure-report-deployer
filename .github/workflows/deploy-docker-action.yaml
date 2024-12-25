@@ -1,6 +1,14 @@
 name: Build GitHub Action
 on:
   workflow_dispatch:
+      semver:
+        description: Bump version
+        required: true
+        type: choice
+        options:
+          - major
+          - minor
+          - patch
 
 jobs:
   deploy-docker-action:

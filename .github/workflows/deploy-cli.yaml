@@ -1,9 +1,26 @@
 name: Build CLI
 on:
   workflow_dispatch:
+    inputs:
+      job:
+        description: NPM Package
+        required: true
+        type: choice
+        options:
+          - cli
+          - shared
+      semver:
+        description: Bump version
+        required: true
+        type: choice
+        options:
+          - major
+          - minor
+          - patch
 
 jobs:
   deploy-cli:
+    if: ${{ github.event.inputs.job == 'cli' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4.1.5
@@ -19,16 +36,33 @@ jobs:
       - name: Run test
         run: npm run test --workspace=packages/cli
 
-      - name: Compile JS
+      - name: Compile
         run: npm run build --workspace=packages/cli
 
+      - name: Bump version
+        run: |
+          cd packages/cli
+          npm version ${{inputs.semver}}
+
       - name: NPM Publish
+        id: publish
         uses: JS-DevTools/npm-publish@v3.1.1
         with:
           token: ${{ secrets.NPM_TOKEN }}
           package: packages/cli
 
+      - name: Commit and Push Changes
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .
+          git commit -m "Release packages/cli version ${{steps.publish.outputs.version}}"
+          git push origin main
+
   deploy-shared:
+    if: ${{ github.event.inputs.job == 'shared' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4.1.5
@@ -41,13 +75,30 @@ jobs:
         run: |
           npm install --workspace=allure-deployer-shared
       - name: Run test
-        run: npm run test --workspaces
+        run: npm run test --workspace=packages/shared
 
-      - name: Compile JS
+      - name: Compile
         run: npm run build --workspace=packages/shared
 
+      - name: Bump version
+        run: |
+          cd packages/shared
+          npm version ${{inputs.semver}}
+
       - name: NPM Publish
+        id: publish
         uses: JS-DevTools/npm-publish@v3.1.1
         with:
           token: ${{ secrets.NPM_TOKEN }}
           package: packages/shared
+      - name: Commit and Push Changes
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add .
+          git commit -m "Release packages/shared version ${{steps.publish.outputs.version}}"
+          git push origin main
+          
+

@@ -18,7 +18,6 @@ export function getArgs(credentials: ActionsCredentials): ActionArgsInterface {
         storageBucket: process.env.STORAGE_BUCKET || undefined,
         prefix: prefix,
         reportId: process.env.REPORT_ID || 'default',
-        websiteExpires: process.env.WEBSITE_EXPIRES || "7d",
         keepHistory: keepHistory,
         keepResults: keepResults,
         ARCHIVE_DIR: '/app/archive',

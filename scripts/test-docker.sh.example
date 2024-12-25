@@ -1,6 +1,16 @@
-#!/bin/bash
-npm install --workspaces
-npm run build
+pushd ..
+# Install deps
+npm install --workspace=allure-deployer-shared
+npm install --workspace=@allure/docker
+# build
+npm run build --workspace=packages/shared
+npm run build --workspace=packages/docker
+# Remove devDeps
+npm install --workspace=allure-deployer-shared --omit=dev
+npm install --workspace=@allure/docker --omit=dev
+
 export GCP_BUCKET=
 
-docker-compose -f ../docker-compose.yaml up test-docker --build
+docker-compose up test-docker --build
+
+popd || exit
