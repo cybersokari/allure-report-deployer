@@ -30,12 +30,12 @@ allure-deployer deploy <allure-results-path> <website-id>
 
 #### Example
 ```bash
-allure-deployer deploy ./allure-results my-report-id --keep-history
+allure-deployer deploy ./allure-results my-report-name --keep-history
 ```
 
 #### Arguments
 - `<allure-results-path>`: Path to the directory containing Allure results (Default: `./allure-results`).
-- `<report-id>`: A unique identifier for the deployed report (Default: `allure-report`).
+- `<report-name>`: The name/title of your report (Default: `Allure Report`).
 
 #### Options
 - `-kh, --keep-history`: Upload history to storage to enable history in the next report. Default is true.

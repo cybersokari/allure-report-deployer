@@ -1,7 +1,7 @@
 import * as process from "node:process";
 import {
     Allure,
-    ConsoleNotifier, counter, ExecutorInterface,
+    ConsoleNotifier, counter,
     FirebaseHost,
     FirebaseStorageService,
     GCPStorage, getDashboardUrl, GitHubNotifier,
@@ -13,85 +13,105 @@ import {Command} from "commander";
 import {addDeployCommand} from "./commands/deploy.command.js";
 import {addCredentialsCommand} from "./commands/credentials.command.js";
 import {addStorageBucketCommand} from "./commands/storage.command.js";
-import {isJavaInstalled, readJsonFile} from "./utils/file-util.js";
+import {readJsonFile} from "./utils/file-util.js";
 import {CliArguments} from "./utils/cli-arguments.js";
 import {oraPromise} from "ora";
 import {addVersionCommand} from "./commands/version.command.js";
 import {addSlackTokenCommand} from "./commands/slack-setup.command.js";
 
-
 export function main() {
-    const defaultProgram = new Command();
-    (async ()=> {
-        addVersionCommand(defaultProgram);
-        addCredentialsCommand(defaultProgram);
-        addStorageBucketCommand(defaultProgram);
-        addDeployCommand(defaultProgram, runDeploy);
-        addSlackTokenCommand(defaultProgram);
-        // Default action to show help
-        defaultProgram.action(() => {
-            defaultProgram.outputHelp();
+    const program = new Command();
+    (async () => {
+        setupCommands(program);
+        // Show help if no command is provided
+        program.action(() => {
+            program.outputHelp();
             process.exit(0);
         });
-        await defaultProgram.parseAsync(process.argv);
-    })()
+        await program.parseAsync(process.argv);
+    })();
+}
+
+function setupCommands(program: Command) {
+    addVersionCommand(program);
+    addCredentialsCommand(program);
+    addStorageBucketCommand(program);
+    addSlackTokenCommand(program);
+    addDeployCommand(program, runDeploy);
 }
 
 async function runDeploy(args: CliArguments) {
-
-    let cloudStorage: Storage | undefined = undefined;
-    if (args.storageBucket) {
-        const creds =  await readJsonFile(args.runtimeCredentialDir)
-        const bucket = new GCPStorage({credentials: creds}).bucket(args.storageBucket)
-        cloudStorage = new Storage(new FirebaseStorageService(bucket), args)
-    }
-
-    const allure = new Allure({args: args})
-    await oraPromise((ora)=> {
-        ora.start('Staging files...')
-        // Stage files
-        return Promise.all([
-            allure.stageFilesFromMount(),
-            args.downloadRequired ? cloudStorage?.stageFilesFromStorage() : null,
-        ])
-    },{successText: 'Files staged successfully.'})
-
-    if(!isJavaInstalled()){
-        console.error('Error: JAVA_HOME not found. Allure commandline requires JAVA installed')
-        process.exit(1)
-    }
+    const cloudStorage = await initializeCloudStorage(args);
+    const allure = new Allure({ args });
     const firebaseHost = new FirebaseHost(args);
-    const reportUrl = await firebaseHost.init()
-    const executor: ExecutorInterface = {
-        name: 'Allure Report Deployer',
-        reportUrl: reportUrl
+
+    try {
+        const [reportUrl] = await setupStaging(firebaseHost, cloudStorage, allure);
+        await generateReport({ allure, reportUrl, buildUrl: args.buildUrl });
+        await deploy(firebaseHost, cloudStorage);
+        await notify(args, reportUrl);
+    } catch (error) {
+        console.error("Deployment failed:", error);
+        process.exit(1);
     }
-    // Generate the report
-    await oraPromise((ora)=> {
-        ora.start('Generating Allure report... ')
-        return allure.generate(executor)
-    }, {successText: 'Report generated successfully.'})
-    // Init hosting
+}
 
-    // Handle initialized features
-    await oraPromise((ora)=> {
-        ora.start('Deploying...')
+async function initializeCloudStorage(args: CliArguments): Promise<Storage | undefined> {
+    if (!args.storageBucket) return undefined;
+
+    const credentials = await readJsonFile(args.runtimeCredentialDir);
+    const bucket = new GCPStorage({ credentials }).bucket(args.storageBucket);
+    return new Storage(new FirebaseStorageService(bucket), args);
+}
+
+
+async function setupStaging(host: FirebaseHost, storage: Storage | undefined, allure: Allure) {
+    return await oraPromise(() => {
         return Promise.all([
-            firebaseHost.deploy(),
-            cloudStorage?.uploadArtifacts()
+            host.init(),//Returns reportUrl
+            allure.stageFilesFromMount(),
+            storage?.stageFilesFromStorage(),
         ])
-    },{successText: 'Deployment successfully.'})
+    }, {text: 'Staging files...', successText: 'Files staged successfully.'})
+}
 
+async function generateReport({allure, reportUrl, buildUrl}: { allure: Allure, reportUrl: string, buildUrl?: string }) {
+    return await oraPromise(() => {
+        return allure.generate({
+            name: 'Allure Report Deployer',
+            reportUrl: reportUrl,
+            buildUrl: buildUrl,
+            type: buildUrl ? 'github' : undefined,
+        })
+    }, {
+        text: 'Generating Allure report...',
+        successText: 'Report generated successfully.'
+    })
+}
+
+async function deploy(host: FirebaseHost, storage: Storage | undefined) {
+    return await oraPromise(() => {
+        return Promise.all([
+            host.deploy(), // Returns reportUrl
+            storage?.uploadArtifacts()
+        ])
+    }, {text: 'Deploying...', successText: 'Deployment successfully.'})
+}
+
+async function notify(args: CliArguments, reportUrl: string) {
     const notifiers: Notifier[] = [new ConsoleNotifier()]
-    if(args.slack_token && args.slack_channel){
+    if (args.slack_token && args.slack_channel) {
         new SlackNotifier(new RealSlackClient(args.slack_token, args.slack_channel))
     }
     const notificationService = new NotifierService(notifiers)
-    const dashboardUrl = ()=> {
-        return args.storageBucket ? getDashboardUrl({storageBucket: args.storageBucket, projectId: args.firebaseProjectId}) : undefined
+    const dashboardUrl = () => {
+        return args.storageBucket ? getDashboardUrl({
+            storageBucket: args.storageBucket,
+            projectId: args.firebaseProjectId
+        }) : undefined
     }
     const githubSummaryPath = process.env.GITHUB_STEP_SUMMARY
-    if(githubSummaryPath){
+    if (githubSummaryPath) {
         notifiers.push(new GitHubNotifier(githubSummaryPath))
     }
     const notificationData = new NotificationData(counter, reportUrl, dashboardUrl())

@@ -93,19 +93,16 @@ export function getDashboardUrl({projectId, storageBucket}:{projectId?: string, 
  * history retention and retries.
  */
 export function printStats(args: ArgsInterface) {
-    if (!args.reportId) {
-        appLog('Report publishing disabled because WEBSITE_ID is not provided');
-    }
     if (args.storageBucket) {
-        if (args.keepHistory && args.keepResults) {
-            appLog(`KEEP_HISTORY and KEEP_RESULTS enabled`)
-        } else if (args.keepHistory) {
-            appLog(`KEEP_HISTORY enabled`)
-        } else if (args.keepResults) {
-            appLog(`KEEP_RESULTS enabled`)
+        if (args.showHistory && args.showRetries) {
+            appLog(`History and Retries enabled`)
+        } else if (args.showHistory) {
+            appLog(`History enabled`)
+        } else if (args.showRetries) {
+            appLog(`Retries enabled`)
         }
     } else {
-        appLog('STORAGE_BUCKET is not provided, KEEP_HISTORY and KEEP_RESULTS disabled')
+        appLog('Storage bucket is not provided, History and Retries disabled')
     }
 }
 

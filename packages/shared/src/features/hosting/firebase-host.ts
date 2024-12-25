@@ -5,20 +5,32 @@ import {ArgsInterface} from "../../interfaces/args.interface.js";
 // @ts-ignore
 import firebase from 'firebase-tools'
 import path from "node:path";
+import {generate} from "random-words";
+import {StringBuilder} from "../../utilities/string-builder.js";
 
-const maxFirebaseAllowedSites = 36;
+const maxFirebaseAllowedSites = 30;
 
 export class FirebaseHost implements HostingProvider {
     public command: string | undefined
     private readonly reportDir: string
     private hostedSiteUrl: string | undefined
     private readonly configPath: string
-    private newSiteId = `report-${this.args.reportId}-${Date.now()}-${this.generateRandomString(8)}`
+    private readonly newSiteId: string
 
 
     constructor(readonly args: ArgsInterface) {
         this.reportDir = this.args.REPORTS_DIR
         this.configPath = path.join(this.args.REPORTS_DIR, "firebase.json")
+        this.newSiteId = this.getSiteId()
+    }
+
+    private getSiteId(): string {
+        const builder = new StringBuilder()
+            .append(`${generate({maxLength: 6, minLength: 4})}`)
+            .append(Date.now().toString())
+            .append(`${generate({maxLength: 6, minLength: 4})}`)
+            .append(`${generate({maxLength: 6, minLength: 4})}`)
+        return builder.values().join('-')
     }
 
     async deploy(): Promise<undefined | string> {
@@ -73,8 +85,10 @@ export class FirebaseHost implements HostingProvider {
             await this.deleteFirebaseSite(sites[0]);
             console.log(`Firebase site deleted successfully.`);
         }
+        // console.warn(`Creating Firebase site with:`, this.newSiteId);
         return firebase.hosting.sites.create(this.newSiteId, {
             project: this.args.firebaseProjectId,
+            'non-interactive': undefined
         });
     }
 
@@ -118,12 +132,6 @@ export class FirebaseHost implements HostingProvider {
             config: this.configPath,
             force: true,
         });
-    }
-
-    private generateRandomString(length: number): string {
-        return Array.from({length}, () =>
-            Math.random().toString(36).charAt(2)
-        ).join('');
     }
 
 }

@@ -7,7 +7,7 @@ runs:
 #  image: 'docker://sokari/allure-deployer-action:latest'
   args:
     - storage_bucket=${{ inputs.storage_bucket }}
-    - report_id=${{ inputs.report_id }}
+    - report_name=${{ inputs.report_name }}
     - keep_history=${{ inputs.keep_history }}
     - keep_results=${{ inputs.keep_results }}
     - slack_channel=${{ inputs.slack_channel }}
@@ -20,16 +20,10 @@ inputs:
   storage_bucket:
     description: 'Google Cloud Storage bucket name'
     required: true
-  report_id:
-    description: 'Unique identifier for the hosted report'
-    required: true
-    default: 'default'
-  keep_history:
-    description: 'Save Report history to storage (true/false)'
-    default: 'true'
-  keep_results:
-    description: 'Save Report retries (result files) to storage (true/false)'
-    default: 'true'
+  report_name:
+    description: 'Name/Title of your report'
+    required: false
+    default: 'Allure Report'
   slack_channel:
     description: 'Slack channel ID for notifications (optional)'
     required: false

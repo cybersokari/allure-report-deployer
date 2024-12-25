@@ -30,7 +30,7 @@ echo "Deploying Allure report from: $ALLURE_RESULTS_PATH"
 # Construct the command with all optional variables
 deploy_command="allure-deployer deploy \"$ALLURE_RESULTS_PATH\""
 
-[ -n "$REPORT_ID" ] && deploy_command="$deploy_command $REPORT_ID"
+[ -n "$REPORT_NAME" ] && deploy_command="$deploy_command $REPORT_NAME"
 [ -n "$GOOGLE_APPLICATION_CREDENTIALS" ] && deploy_command="$deploy_command --gcp-json $GOOGLE_APPLICATION_CREDENTIALS"
 [ -n "$STORAGE_BUCKET" ] && deploy_command="$deploy_command --bucket $STORAGE_BUCKET"
 [ "$KEEP_HISTORY" = "true" ] && deploy_command="$deploy_command --keep-history"

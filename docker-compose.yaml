@@ -24,7 +24,7 @@ services:
       FIREBASE_STORAGE_EMULATOR_HOST: 127.0.0.1:9199 # Dev mode
       STORAGE_BUCKET: $GCP_BUCKET
       PREFIX: 'project-999'
-      REPORT_ID: 'fir-demo-project'
+      REPORT_NAME: 'Demo Report 1'
       KEEP_HISTORY: true # Default is true when STORAGE_BUCKET is provided
       KEEP_RESULTS: false # Default is false
       SHOW_HISTORY: false
@@ -41,7 +41,7 @@ services:
   test-cli:
     build:
       context: .
-      dockerfile: dockerfiles/test.cli.Dockerfile
+      dockerfile: test.cli.Dockerfile
     container_name: allure-cli
     tty: false
     command: ['sh', '-c', 'allure-deployer deploy /allure-results --gcp-json /key.json --bucket $GCP_BUCKET']

@@ -9,14 +9,6 @@ on:
       storage-bucket:
         description: 'Your Firebase (GCP) storage bucket'
         required: true
-      keep-results:
-        description: 'Backup results to keep retries' 
-        required: false
-        default: 'false'
-      keep-history:
-        description: 'Backup history'
-        required: false
-        default: 'true'
       show-retries:
         description: 'Show keep retries in report'
         required: false
@@ -25,10 +17,10 @@ on:
         description: 'Show keep history in report'
         required: false
         default: 'true'
-      report-id:
-        description: 'Unique identifier for the site'
+      report-name:
+        description: 'Title of the report'
         required: false
-        default: 'default'
+        default: 'Allure Report'
       prefix:
         description: 'The storage bucket path to back up Allure results and history files'
         required: false
@@ -62,7 +54,6 @@ jobs:
         run: |
           docker run --rm \
           -e STORAGE_BUCKET=${{github.event.inputs.storage-bucket}} \
-          -e REPORT_ID=${{ github.event.inputs.website-id }} \
           -e WEBSITE_EXPIRES=${{ github.event.inputs.website-expires }} \
           -e KEEP_RETRIES=${{ github.event.inputs.keep-retries }} \
           -e KEEP_HISTORY=${{ github.event.inputs.keep-history }} \
@@ -86,7 +77,6 @@ jobs:
         with:
           allure_results_path: '/assets/allure-results'
           storage_bucket: ${{github.event.inputs.storage-bucket}}
-          report_id: ${{ github.event.inputs.website-id }}
           website_expires: ${{github.event.inputs.website-expires}}
           slack_channel_id: ${{secrets.SLACK_CHANNEL_ID}}
           keep_history: ${{github.event.inputs.keep-history}}
@@ -105,10 +95,8 @@ jobs:
         with:
           allure_results_path: 'assets/allure-results'
           storage_bucket: ${{github.event.inputs.storage-bucket}}
-          report_id: ${{ github.event.inputs.website-id }}
+          report_name: ${{ github.event.inputs.report-name }}
           slack_channel: ${{github.event.inputs.slack_channel}}
-          keep_history: ${{github.event.inputs.keep-history}}
-          keep_results: ${{github.event.inputs.keep-results}}
           show_retries: ${{github.event.inputs.show-retries}}
           show_history: ${{github.event.inputs.show-history}}
           prefix: ${{github.event.inputs.prefix}}

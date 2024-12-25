@@ -1,7 +1,7 @@
 import { Argument, Command, Option } from "commander";
 import {db} from "../utils/database.js";
 import process from "node:process";
-import { getRuntimeDirectory, getSavedCredentialDirectory, readJsonFile } from "../utils/file-util.js";
+import {getRuntimeDirectory, getSavedCredentialDirectory, isJavaInstalled, readJsonFile} from "../utils/file-util.js";
 import { CliArguments } from "../utils/cli-arguments.js";
 import fs from "fs/promises";
 import path from "node:path";
@@ -13,8 +13,8 @@ const ERROR_MESSAGES = {
     NO_RESULTS_DIR: "Error: No Allure result files in the specified directory.",
     MISSING_CREDENTIALS: "Error: Firebase/GCP credentials must be set using 'gcp-json:set' or provided via '--gcp-json'.",
     MISSING_BUCKET: "Error: A Firebase/GCP bucket must be set using 'bucket:set' or provided via '--bucket'.",
-    MISSING_WEBSITE_ID: "Error: The 'website-id' argument or '--bucket' option is required.",
     INVALID_SLACK_CRED: `Invalid Slack credential. ${chalk.blue('slack_channel')} and ${chalk.blue('slack_token')} must be provided together`,
+    NO_JAVA: 'Error: JAVA_HOME not found. Allure 2.32 requires JAVA installed'
 };
 
 async function validateResultsPath(resultPath: string): Promise<void> {
@@ -45,13 +45,10 @@ async function getFirebaseCredentials(gcpJson: string | undefined): Promise<stri
     return "";
 }
 
-function validateBucket(options: any, websiteId: string): void {
+function validateBucket(options: any): void {
     if (!options.bucket && !db.get(KEY_BUCKET)) {
-        if (options.showRetries || options.showHistory || options.keepHistory || options.keepResults) {
+        if (options.showRetries || options.showHistory) {
             throw new Error(ERROR_MESSAGES.MISSING_BUCKET);
-        }
-        if (!websiteId) {
-            throw new Error(ERROR_MESSAGES.MISSING_WEBSITE_ID);
         }
     }
 }
@@ -77,9 +74,7 @@ export function addDeployCommand(defaultProgram: Command, onCommand: (args: CliA
         .command("deploy")
         .description("Generate and deploy Allure report")
         .addArgument(new Argument("<allure-results-path>", "Allure results path").default("./allure-results").argOptional())
-        .addArgument(new Argument("<report-id>", "Unique identifier for the report").default("default").argOptional())
-        .addOption(new Option("-kh, --keep-history", "Upload history to enable report history"))
-        .addOption(new Option("-kr, --keep-results", "Upload results to enable retries"))
+        .addArgument(new Argument("<report-name>", "Name of your report. Default is 'Allure Report'").argOptional())
         .addOption(new Option("-r, --show-retries", "Show retries in the report"))
         .addOption(new Option("-h, --show-history", "Show history in the report"))
         .addOption(new Option("--gcp-json <json-path>", "Path to Firebase/GCP JSON credential"))
@@ -87,17 +82,19 @@ export function addDeployCommand(defaultProgram: Command, onCommand: (args: CliA
         .addOption(new Option("-sc,  --slack-channel <channel>","Slack channel ID"))
         .addOption(new Option("-st,  --slack-token <token>","Slack token"))
         .addOption(new Option("-p, --prefix <prefix>", "The storage bucket path to back up Allure results and history files"))
-        .action(async (resultPath, reportId, options) => {
+        .action(async (resultPath, reportName, options) => {
             try {
+                if(!isJavaInstalled()){
+                    console.warn(ERROR_MESSAGES.NO_JAVA)
+                    process.exit(1)
+                }
                 await validateResultsPath(resultPath);
                 const firebaseProjectId = await getFirebaseCredentials(options.gcpJson);
-                validateBucket(options, reportId);
+                validateBucket(options);
                 validateSlackCredentials(options.slackChannel, options.slackToken);
 
                 const runtimeDir = await getRuntimeDirectory();
                 // Default true if not set
-                const keepHistory = options.keepHistory ?? true
-                const keepResults = options.keepResults ?? true
                 const showRetries = options.showRetries ?? true
                 const showHistory = options.showHistory ?? true
                 const cliArgs: CliArguments = {
@@ -111,13 +108,11 @@ export function addDeployCommand(defaultProgram: Command, onCommand: (args: CliA
                     downloadRequired: showHistory || showRetries,
                     fileProcessingConcurrency: 10,
                     firebaseProjectId: firebaseProjectId || db.get(KEY_PROJECT_ID),
-                    uploadRequired: keepHistory || keepResults,
+                    uploadRequired: showHistory || showRetries,
                     storageBucket: options.bucket || db.get(KEY_BUCKET),
-                    keepHistory: keepHistory,
-                    keepResults: keepResults,
                     showRetries: showRetries,
                     showHistory: showHistory,
-                    reportId: reportId,
+                    reportName: reportName,
                     slack_channel: options.slackChannel || db.get(KEY_SLACK_CHANNEL, undefined),
                     slack_token: options.slackToken || db.get(KEY_SLACK_TOKEN, undefined),
                     buildUrl: getGitHubBuildUrl()

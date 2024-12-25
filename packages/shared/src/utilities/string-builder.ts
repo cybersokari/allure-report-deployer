@@ -6,6 +6,8 @@ export class StringBuilder {
         return this;
     }
 
+    values() {return this.strings}
+
     toString(): string {
         return this.strings.join('');
     }
