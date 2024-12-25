@@ -89,15 +89,17 @@ jobs:
         with:
           token: ${{ secrets.NPM_TOKEN }}
           package: packages/shared
-          dry-run: true
       - name: Commit and Push Changes
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git remote set-url origin https://x-access-token:${{ secrets.PERSONAL_ACCESS_TOKEN }}@github.com/cybersokari/allure-report-deployer.git
           git add .
           git commit -m "Release packages/shared version ${{steps.publish.outputs.version}}"
           git push origin main
+        
+
+
           
 
