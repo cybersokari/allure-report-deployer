@@ -32,7 +32,7 @@
   },
   "type": "module",
   "dependencies": {
-    "allure-deployer-shared": "file:../shared",
+    "allure-deployer-shared": "1.0.6",
     "chalk": "^5.4.0",
     "commander": "^12.1.0",
     "conf": "^13.1.0",
