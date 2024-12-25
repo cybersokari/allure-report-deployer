@@ -2,5 +2,3 @@
 packages/shared/test
 packages/shared/jest*
 packages/action/action.yaml
-packages/docker/test
-

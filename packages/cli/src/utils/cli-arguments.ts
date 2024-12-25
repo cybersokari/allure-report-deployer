@@ -4,4 +4,5 @@ export interface CliArguments extends ArgsInterface{
     runtimeCredentialDir: string
     slack_channel?: string
     slack_token?: string
+    buildUrl?: string
 }

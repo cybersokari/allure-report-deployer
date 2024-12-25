@@ -5,15 +5,13 @@ set -e
 # Set environment variables by stripping "key=" and keeping only the value
 export STORAGE_BUCKET="${1#*=}"
 export REPORT_ID="${2#*=}"
-export WEBSITE_EXPIRES="${3#*=}"
-export KEEP_HISTORY="${4#*=}"
-export KEEP_RESULTS="${5#*=}"
-export SLACK_CHANNEL_ID="${6#*=}"
-export ALLURE_RESULTS_PATH="${7#*=}"
-export SHOW_RETRIES="${8#*=}"
-export SHOW_HISTORY="${9#*=}"
-export PREFIX="${10#*=}"
-export V3="${11#*=}"
+export KEEP_HISTORY="${3#*=}"
+export KEEP_RESULTS="${4#*=}"
+export SLACK_CHANNEL="${5#*=}"
+export ALLURE_RESULTS_PATH="${6#*=}"
+export SHOW_RETRIES="${7#*=}"
+export SHOW_HISTORY="${8#*=}"
+export PREFIX="${9#*=}"
 
 
 if [ -z "$GOOGLE_CREDENTIALS_JSON" ]; then
@@ -29,9 +27,20 @@ else
   export GOOGLE_APPLICATION_CREDENTIALS="$JSON_FILE"
 fi
 
-echo "Starting Allure Deployer..."
 echo "Deploying Allure report from: $ALLURE_RESULTS_PATH"
+# Construct the command with all optional variables
+deploy_command="allure-deployer deploy \"$ALLURE_RESULTS_PATH\""
 
-node /app/packages/action/dist/index.js
+[ -n "$REPORT_ID" ] && deploy_command="$deploy_command $REPORT_ID"
+[ -n "$GOOGLE_APPLICATION_CREDENTIALS" ] && deploy_command="$deploy_command --gcp-json $GOOGLE_APPLICATION_CREDENTIALS"
+[ -n "$STORAGE_BUCKET" ] && deploy_command="$deploy_command --bucket $STORAGE_BUCKET"
+[ "$KEEP_HISTORY" = "true" ] && deploy_command="$deploy_command --keep-history"
+[ "$KEEP_RESULTS" = "true" ] && deploy_command="$deploy_command --keep-results"
+[ "$SHOW_RETRIES" = "true" ] && deploy_command="$deploy_command --show-retries"
+[ "$SHOW_HISTORY" = "true" ] && deploy_command="$deploy_command --show-history"
+[ -n "$SLACK_CHANNEL" ] && deploy_command="$deploy_command --slack-channel $SLACK_CHANNEL"
+[ -n "$SLACK_TOKEN" ] && deploy_command="$deploy_command --slack-token $SLACK_TOKEN"
+[ -n "$PREFIX" ] && deploy_command="$deploy_command --prefix $PREFIX"
 
-echo "Report deployed successfully."
+# Execute the constructed command
+eval "$deploy_command"

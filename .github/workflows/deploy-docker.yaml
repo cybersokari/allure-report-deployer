@@ -24,34 +24,11 @@ jobs:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Set up Nodejs
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-
-      - name: Install deps
-        run: |
-          npm install --workspace=allure-deployer-shared
-          npm install --workspace=@allure/docker
-
-      - name: Run test
-        run: npm run test --workspaces
-
-      - name: Compile JS
-        run: |
-          npm run build --workspace=packages/shared
-          npm run build --workspace=packages/docker
-
-      - name: Remove dev deps
-        run: |
-          npm install --workspace=allure-deployer-shared --omit=dev
-          npm install --workspace=@allure/docker --omit=dev
-
       - name: Build and push
         uses: docker/build-push-action@v6.10.0
         with:
           context: .
-          file: Dockerfile
+          file: ./packages/docker/Dockerfile
           platforms: linux/amd64,linux/arm64
           push: true
           tags: |

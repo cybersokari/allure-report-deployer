@@ -1,0 +1,6 @@
+{
+  "inputs": {
+    "job": "shared",
+    "semver": "patch"
+  }
+}

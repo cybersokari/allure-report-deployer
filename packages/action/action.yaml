@@ -3,20 +3,18 @@ description: 'Deploy Allure Reports as a website, with unique Ephemeral URLs per
 author: 'Sokari Gillis-Harry'
 runs:
   using: 'docker'
-  image: 'act-github-actions-dockeraction:latest'
-#  image: 'sokari/allure-deployer-action:latest'
+  image: 'docker://sokari/act-github-actions-dockeraction:latest'
+#  image: 'docker://sokari/allure-deployer-action:latest'
   args:
     - storage_bucket=${{ inputs.storage_bucket }}
     - report_id=${{ inputs.report_id }}
-    - website_expires=${{ inputs.website_expires }}
     - keep_history=${{ inputs.keep_history }}
     - keep_results=${{ inputs.keep_results }}
-    - slack_channel_id=${{ inputs.slack_channel_id }}
+    - slack_channel=${{ inputs.slack_channel }}
     - allure_results_path=${{ inputs.allure_results_path }}
     - show_retries=${{ inputs.show_retries }}
     - show_history=${{ inputs.show_history }}
     - prefix=${{ inputs.prefix}}
-    - v3=${{inputs.v3}}
 
 inputs:
   storage_bucket:
@@ -26,16 +24,13 @@ inputs:
     description: 'Unique identifier for the hosted report'
     required: true
     default: 'default'
-  website_expires:
-    description: "Expiration duration for Report's website (e.g., 2h, 7d, 3w) Max. 30d"
-    default: '7d'
   keep_history:
     description: 'Save Report history to storage (true/false)'
     default: 'true'
   keep_results:
     description: 'Save Report retries (result files) to storage (true/false)'
     default: 'true'
-  slack_channel_id:
+  slack_channel:
     description: 'Slack channel ID for notifications (optional)'
     required: false
   allure_results_path:
@@ -51,10 +46,6 @@ inputs:
   prefix:
     description: 'The storage bucket path to back up Allure results and history files'
     required: false
-  v3:
-    description: 'Try Allure version 3. Still in beta.'
-    required: false
-    default: 'false'
 
 outputs:
   report_url:

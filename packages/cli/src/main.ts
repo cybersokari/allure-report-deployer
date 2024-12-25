@@ -4,7 +4,7 @@ import {
     ConsoleNotifier, counter, ExecutorInterface,
     FirebaseHost,
     FirebaseStorageService,
-    GCPStorage, getDashboardUrl,
+    GCPStorage, getDashboardUrl, GitHubNotifier,
     NotificationData, Notifier,
     NotifierService, RealSlackClient, SlackNotifier,
     Storage,
@@ -89,6 +89,10 @@ async function runDeploy(args: CliArguments) {
     const notificationService = new NotifierService(notifiers)
     const dashboardUrl = ()=> {
         return args.storageBucket ? getDashboardUrl({storageBucket: args.storageBucket, projectId: args.firebaseProjectId}) : undefined
+    }
+    const githubSummaryPath = process.env.GITHUB_STEP_SUMMARY
+    if(githubSummaryPath){
+        notifiers.push(new GitHubNotifier(githubSummaryPath))
     }
     const notificationData = new NotificationData(counter, reportUrl, dashboardUrl())
     await notificationService.sendNotifications(notificationData)

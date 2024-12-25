@@ -1,6 +1,6 @@
 allure-firebase.iml
 .idea
-*/node_modules
+packages/**/node_modules
 node_modules
 
 .env.slack
@@ -10,8 +10,11 @@ node_modules
 */act.event.json
 
 *key.json
+*.js
+*.d.ts
 packages/**/dist
 #jest
 packages/**/coverage
 */test*.sh
+*/**/test*.sh
 !*/test-action.sh

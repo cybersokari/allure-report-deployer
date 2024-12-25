@@ -6,6 +6,7 @@ import { CliArguments } from "../utils/cli-arguments.js";
 import fs from "fs/promises";
 import path from "node:path";
 import {KEY_BUCKET, KEY_PROJECT_ID, KEY_SLACK_CHANNEL, KEY_SLACK_TOKEN} from "../utils/constants.js";
+import chalk from "chalk";
 
 const ERROR_MESSAGES = {
     EMPTY_RESULTS: "Error: The specified results directory is empty.",
@@ -13,7 +14,7 @@ const ERROR_MESSAGES = {
     MISSING_CREDENTIALS: "Error: Firebase/GCP credentials must be set using 'gcp-json:set' or provided via '--gcp-json'.",
     MISSING_BUCKET: "Error: A Firebase/GCP bucket must be set using 'bucket:set' or provided via '--bucket'.",
     MISSING_WEBSITE_ID: "Error: The 'website-id' argument or '--bucket' option is required.",
-    INVALID_SLACK_CRED: "Invalid Slack credential",
+    INVALID_SLACK_CRED: `Invalid Slack credential. ${chalk.blue('slack_channel')} and ${chalk.blue('slack_token')} must be provided together`,
 };
 
 async function validateResultsPath(resultPath: string): Promise<void> {
@@ -57,9 +58,18 @@ function validateBucket(options: any, websiteId: string): void {
 
 function validateSlackCredentials(channel: any, token: any): void {
     if(channel === undefined && token === undefined) return
-    if(channel || token){
-        throw new Error(`${ERROR_MESSAGES.INVALID_SLACK_CRED}: channel="${channel}", token="${token}"`);
+    if(!channel || !token){
+        throw new Error(ERROR_MESSAGES.INVALID_SLACK_CRED);
     }
+}
+
+function getGitHubBuildUrl(): string|undefined {
+    const repo = process.env.GITHUB_REPOSITORY
+    const runId = process.env.GITHUB_RUN_ID
+    if(repo && runId){
+        return `https://github.com/${repo}/actions/runs/${runId}`
+    }
+    return undefined
 }
 
 export function addDeployCommand(defaultProgram: Command, onCommand: (args: CliArguments) => Promise<void>) {
@@ -110,6 +120,7 @@ export function addDeployCommand(defaultProgram: Command, onCommand: (args: CliA
                     reportId: reportId,
                     slack_channel: options.slackChannel || db.get(KEY_SLACK_CHANNEL, undefined),
                     slack_token: options.slackToken || db.get(KEY_SLACK_TOKEN, undefined),
+                    buildUrl: getGitHubBuildUrl()
                 };
 
                 await onCommand(cliArgs);

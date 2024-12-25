@@ -7,7 +7,6 @@ import * as path from "node:path";
 import {CommandRunner} from "../interfaces/command.interface.js";
 import {ArgsInterface} from "../interfaces/args.interface.js";
 import {AllureService} from "../services/allure-service.js";
-import {AllureV3Service} from "../services/v3-service.js";
 import {ExecutorInterface} from "../interfaces/executor.interface.js";
 
 export class Allure {
@@ -15,7 +14,7 @@ export class Allure {
     private args: ArgsInterface;
 
     constructor({allureRunner, args}: {allureRunner?: CommandRunner , args: ArgsInterface}) {
-        this.allureRunner = allureRunner ?? (args.v3 ? new AllureV3Service() : new AllureService());
+        this.allureRunner = allureRunner ?? new AllureService()
         this.args = args;
     }
 

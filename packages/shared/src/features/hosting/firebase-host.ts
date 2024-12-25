@@ -19,7 +19,6 @@ export class FirebaseHost implements HostingProvider {
     constructor(readonly args: ArgsInterface) {
         this.reportDir = this.args.REPORTS_DIR
         this.configPath = path.join(this.args.REPORTS_DIR, "firebase.json")
-        console.warn('firebase json path: ', this.configPath)
     }
 
     async deploy(): Promise<undefined | string> {

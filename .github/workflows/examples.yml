@@ -29,19 +29,12 @@ on:
         description: 'Unique identifier for the site'
         required: false
         default: 'default'
-      website-expires:
-        description: 'Test Report site expiry. Example: 1h, 2d or 3w. Max is 30d'
-        required: false
-        default: '1h'
       prefix:
         description: 'The storage bucket path to back up Allure results and history files'
         required: false
-      v3:
-        description: 'Try Allure version 3. Still in beta.'
+      slack_channel:
+        description: 'Slack channel ID'
         required: false
-        default: 'false'
-
-
 
 jobs:
   test-docker:
@@ -105,7 +98,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4.1.5
       - name: Allure Deployer Action
-        uses: ./.github/actions
+        uses: ./packages/action
         env:
           SLACK_TOKEN: ${{secrets.SLACK_TOKEN}}
           GOOGLE_CREDENTIALS_JSON: ${{ secrets.GCP_CREDENTIALS}}
@@ -113,11 +106,9 @@ jobs:
           allure_results_path: 'assets/allure-results'
           storage_bucket: ${{github.event.inputs.storage-bucket}}
           report_id: ${{ github.event.inputs.website-id }}
-          website_expires: ${{github.event.inputs.website-expires}}
-          slack_channel_id: ${{secrets.SLACK_CHANNEL_ID}}
+          slack_channel: ${{github.event.inputs.slack_channel}}
           keep_history: ${{github.event.inputs.keep-history}}
           keep_results: ${{github.event.inputs.keep-results}}
           show_retries: ${{github.event.inputs.show-retries}}
           show_history: ${{github.event.inputs.show-history}}
           prefix: ${{github.event.inputs.prefix}}
-          v3: ${{github.event.inputs.v3}}

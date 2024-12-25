@@ -82,7 +82,7 @@ jobs:
           allure_results_path: '/assets/allure-results'
           report_id: 'custom-website-id'
           storage_bucket: ${{vars.storage-bucket}}
-          slack_channel_id: ${{vars.SLACK_CHANNEL_ID}}
+          slack_channel: ${{vars.SLACK_CHANNEL}}
           keep_history: 'true'
           show_history: 'true' # Requires keep_history to be enabled
           keep_results: 'true'
@@ -249,17 +249,17 @@ https://github.com/marketplace/actions/allure-deployer-action
 
 #### Inputs
 
-| Input                 | Description                                                                                  | Required | Default           |
-|-----------------------|----------------------------------------------------------------------------------------------|----------|-------------------|
+| Input              | Description                                                                                  | Required | Default           |
+|--------------------|----------------------------------------------------------------------------------------------|----------|-------------------|
 | `allure_results_path` | Path to the directory containing Allure results files.                                       | ✅ Yes    | `/allure-results` |
-| `report_id`           | Unique identifier for the Allure report website. Ensures no overwriting of other reports.    | ✅ Yes    | `default`         |
-| `storage_bucket`      | Name of the Google Cloud Storage bucket for backup and history storage.                      | ❌ No     | None              |
-| `slack_channel_id`    | ID of the Slack channel to send notifications about report links.                            | ❌ No     | None              |
-| `keep_history`        | Whether to enable history backup in reports.                                                 | ❌ No     | `true`            |
-| `show_history`        | Display history from previous test runs. Requires `keep_history` to be enabled.              | ❌ No     | `true`            |
-| `keep_results`        | Backup all the `/allure-results` files into cloud storage for retries and archives.          | ❌ No     | `false`           |
-| `show_retries`        | Include retries from previous test runs. Requires `keep_results` to be enabled.              | ❌ No     | `true`            |
-| `prefix`              | Path prefix in the Cloud Storage bucket for archiving files.                                 | ❌ No     | None              |
+| `report_id`        | Unique identifier for the Allure report website. Ensures no overwriting of other reports.    | ✅ Yes    | `default`         |
+| `storage_bucket`   | Name of the Google Cloud Storage bucket for backup and history storage.                      | ❌ No     | None              |
+| `slack_channel`    | ID of the Slack channel to send notifications about report links.                            | ❌ No     | None              |
+| `keep_history`     | Whether to enable history backup in reports.                                                 | ❌ No     | `true`            |
+| `show_history`     | Display history from previous test runs. Requires `keep_history` to be enabled.              | ❌ No     | `true`            |
+| `keep_results`     | Backup all the `/allure-results` files into cloud storage for retries and archives.          | ❌ No     | `false`           |
+| `show_retries`     | Include retries from previous test runs. Requires `keep_results` to be enabled.              | ❌ No     | `true`            |
+| `prefix`           | Path prefix in the Cloud Storage bucket for archiving files.                                 | ❌ No     | None              |
 
 ---
 
@@ -272,7 +272,7 @@ https://github.com/marketplace/actions/allure-deployer-action
 | `GCP_CREDENTIALS_JSON` | Content of the Google Cloud service account credentials file. | `${{ secrets.GCP_APPLICATION_CREDENTIALS }}` | ✅ Yes    | None    |
 **Notes**:
 - `GCP_CREDENTIALS_JSON` must be set with a service account that has access to Firebase Hosting and Cloud Storage.
-- Ensure `SLACK_TOKEN` and `SLACK_CHANNEL_ID` are configured to enable Slack integration.
+- Ensure `SLACK_TOKEN` and `SLACK_CHANNEL` are configured to enable Slack integration.
 
 
 
@@ -285,17 +285,17 @@ docker pull sokari/allure-deployer:latest
 <h4 id="environment-variables-docker">Environment Variables</h3>
 
 
-| Variable           | Description                                                                                   | Example                        | Default   |
-|--------------------|-----------------------------------------------------------------------------------------------|--------------------------------|-----------|
-| `STORAGE_BUCKET`   | Google Cloud Storage bucket name                                                              | project-id.firebasestorage.app | None      |
-| `PREFIX`           | A path in your Storage bucket. Optional.                                                      | project-123                    | None      |
-| `REPORT_ID`        | Unique identifier for hosted reports                                                          | test-report-id                 | `default` |
-| `KEEP_HISTORY`     | Backup `allure-reports/history` directory after every report generation.                      | true                           | true      |
-| `KEEP_RESULTS`     | Backup `/allure-results` directory after report generation..                                  | false                          | true      |
-| `SHOW_HISTORY`     | Show history in the current report by pulling the history from the last Cloud Storage backup  | true                           | true      |
-| `SHOW_RETRIES`     | Show retries in the current report by pulling result files from all archives in Cloud Storage | true                           | true      |
-| `SLACK_TOKEN`      | Your Slack App token                                                                          | xoxb-XXXXXXXXXX-XXXXXXXX       | None      |
-| `SLACK_CHANNEL_ID` | The Slack channel or conversation to notify with Allure report details                        | DC56JYGT8                      | None      |
+| Variable         | Description                                                                                   | Example                        | Default   |
+|------------------|-----------------------------------------------------------------------------------------------|--------------------------------|-----------|
+| `STORAGE_BUCKET` | Google Cloud Storage bucket name                                                              | project-id.firebasestorage.app | None      |
+| `PREFIX`         | A path in your Storage bucket. Optional.                                                      | project-123                    | None      |
+| `REPORT_ID`      | Unique identifier for hosted reports                                                          | test-report-id                 | `default` |
+| `KEEP_HISTORY`   | Backup `allure-reports/history` directory after every report generation.                      | true                           | true      |
+| `KEEP_RESULTS`   | Backup `/allure-results` directory after report generation..                                  | false                          | true      |
+| `SHOW_HISTORY`   | Show history in the current report by pulling the history from the last Cloud Storage backup  | true                           | true      |
+| `SHOW_RETRIES`   | Show retries in the current report by pulling result files from all archives in Cloud Storage | true                           | true      |
+| `SLACK_TOKEN`    | Your Slack App token                                                                          | xoxb-XXXXXXXXXX-XXXXXXXX       | None      |
+| `SLACK_CHANNEL`  | The Slack channel ID or conversation to notify with Allure report details                     | DC56JYGT8                      | None      |
 
 
 ---
@@ -306,8 +306,6 @@ docker pull sokari/allure-deployer:latest
 |-----------------------------|-------------------------|--------------------------------------------------------------------------------------------------------------------------------------|
 | `/path/to/allure-results`   | `/allure-results`       | Allure test results directory.                                                                                                       |
 | `/path/to/credentials.json` | `/credentials/key.json` | Google Cloud service account JSON file.                                                                                              |
-| `$GITHUB_STEP_SUMMARY`      | `/github/summary.txt`   | [GitHub Actions summary](https://github.blog/news-insights/product-news/supercharging-github-actions-with-job-summaries/) (optional) |
-
 **Notes**:
 - Ensure that the directories and files exist on your local machine or CI environment.
 - Use absolute paths to avoid errors with relative paths in Docker commands.
@@ -385,7 +383,7 @@ See how [Allure Retries](https://allurereport.org/docs/history-and-retries/#how-
 
 To notify stakeholders with secure test report links after each test run,
 create a [simple Slack app](https://youtu.be/SbUv1nCS7a0?si=8rjWDQh6wfeAztxu&t=266) and set `SLACK_TOKEN`
-and `SLACK_CHANNEL_ID` environment variable when you run the Docker image.
+and `SLACK_CHANNEL` environment variable when you run the Docker image.
 
 <div style="text-align: left"><img src="assets/slack-bot.png" alt="Slack app notification example"></div>
 
@@ -439,7 +437,7 @@ gcloud firebase hosting:list
 #### Q6: How do I configure Slack notifications?
 - **A**: Set the following environment variables:
   - `SLACK_TOKEN`: Your Slack Bot's token.
-  - `SLACK_CHANNEL_ID`: The ID of the channel where you want to send notifications.
+  - `SLACK_CHANNEL`: The ID of the channel where you want to send notifications.
   - Test the bot by sending a manual message before integrating with the container.
 
 ---

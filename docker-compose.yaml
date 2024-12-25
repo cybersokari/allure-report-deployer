@@ -15,24 +15,9 @@ services:
       retries: 3
       timeout: 5s
   test-docker:
-    tty: false
     build:
-      dockerfile: dockerfiles/Dockerfile
+      dockerfile: packages/docker/Dockerfile
       context: .
-    develop:
-      watch:
-        - action: sync+restart
-          path: ./packages/docker/dist
-          target: /app/packages/docker/dist
-        - action: sync+restart
-          path: ./packages/shared/dist
-          target: /app/packages/shared/dist
-        - action: rebuild
-          path: ./packages/docker/package.json
-          target: /app/packages/docker/package.json
-        - action: rebuild
-          path: packages/shared/package.json
-          target: /app/packages/shared/package.json
     container_name: allure-docker
 #    env_file: .env.slack
     environment:
@@ -40,7 +25,6 @@ services:
       STORAGE_BUCKET: $GCP_BUCKET
       PREFIX: 'project-999'
       REPORT_ID: 'fir-demo-project'
-      WEBSITE_EXPIRES: 12h
       KEEP_HISTORY: true # Default is true when STORAGE_BUCKET is provided
       KEEP_RESULTS: false # Default is false
       SHOW_HISTORY: false
@@ -68,6 +52,6 @@ services:
     image: act-github-actions-dockeraction:latest
     build:
       context: .
-      dockerfile: dockerfiles/action.Dockerfile
+      dockerfile: packages/action/action.Dockerfile
 
 

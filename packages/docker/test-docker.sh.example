@@ -1,0 +1,7 @@
+pushd ..
+
+export GCP_BUCKET=
+
+docker-compose up test-docker --build
+
+popd || exit
