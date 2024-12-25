@@ -6,7 +6,7 @@ No server Required.
 
 ## Features
 
-- **Ephemeral URLs**: No need to clean up outdated test reports. [Firebase Hosting channels](https://firebase.google.com/docs/hosting/manage-hosting-resources#preview-channel-expiration) takes care of it.
+- **Web hosting**: Host your Allure reports on web, not storage.
 - **History and Retries**: Show Allure [History and Retries](https://allurereport.org/docs/history-and-retries/) in your report.
 - **Cloud Backup**: Save test results in storage for future analysis.
 - **Slack integration**: Send report URL to Slack.
@@ -38,8 +38,6 @@ allure-deployer deploy ./allure-results my-report-name --keep-history
 - `<report-name>`: The name/title of your report (Default: `Allure Report`).
 
 #### Options
-- `-kh, --keep-history`: Upload history to storage to enable history in the next report. Default is true.
-- `-kr, --keep-results`: Upload results to storage to enable retries in the next report. Default is true.
 - `-h, --show-history`: Show history in the upcoming report.
 - `-r, --show-retries`: Show retries in the upcoming report.
 - `--bucket <bucket-name>`: Directly provide a Firebase/GCP bucket name for deployment.

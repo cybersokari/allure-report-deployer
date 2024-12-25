@@ -14,9 +14,9 @@ on:
         required: true
         type: choice
         options:
-          - major
-          - minor
           - patch
+          - minor
+          - major
 
 jobs:
   deploy-cli:
@@ -50,16 +50,17 @@ jobs:
           token: ${{ secrets.NPM_TOKEN }}
           package: packages/cli
 
-      - name: Commit and Push Changes
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Notify Docker jobs
+        id: version-out
         run: |
-          git config --global user.name "GitHub Actions Bot"
-          git config --global user.email "actions@github.com"
-          git remote set-url origin https://x-access-token:${{ secrets.PERSONAL_ACCESS_TOKEN }}@github.com/cybersokari/allure-report-deployer.git
-          git add .
-          git commit -m "Release packages/cli version ${{steps.publish.outputs.version}}"
-          git push origin main
+          echo "version=${{steps.publish.outputs.version}}" >> $GITHUB_ENV
+
+      - name: Add & Commit
+        uses: EndBug/add-and-commit@v9.1.4
+        with:
+          author_name: Bot
+          author_email: bot@github.com
+          message: "Release packages/cli version ${{steps.publish.outputs.version}}"
 
   deploy-shared:
     if: ${{ github.event.inputs.job == 'shared' }}
@@ -90,18 +91,67 @@ jobs:
         with:
           token: ${{ secrets.NPM_TOKEN }}
           package: packages/shared
-      - name: Commit and Push Changes
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          
-          git config --global user.name "GitHub Actions Bot"
-          git config --global user.email "actions@github.com"
-          git remote set-url origin https://x-access-token:${{ secrets.PERSONAL_ACCESS_TOKEN }}@github.com/cybersokari/allure-report-deployer.git
-          git add .
-          git commit -m "Release packages/shared version ${{steps.publish.outputs.version}}"
-          git push origin main
+
+      - name: Add & Commit
+        uses: EndBug/add-and-commit@v9.1.4
+        with:
+          author_name: Bot
+          author_email: bot@github.com
+          message: "Release packages/shared version ${{steps.publish.outputs.version}}"
 
 
-          
+  deploy-docker-action:
+    if: ${{ github.event.inputs.job == 'cli' }}
+    runs-on: ubuntu-latest
+    needs: deploy-cli
+    steps:
+      - uses: actions/checkout@v4.1.5
+      - name: Docker login
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+      - name: Build and push
+        uses: docker/build-push-action@v6.10.0
+        with:
+          context: .
+          file: ./packages/action/action.Dockerfile
+          platforms: linux/amd64
+          push: true
+          tags: |
+            sokari/allure-deployer-action:${{needs.deploy-cli.outputs.version}}
+            sokari/allure-deployer-action:${{ github.sha }}
+
+
+  deploy-docker:
+    if: ${{ github.event.inputs.job == 'cli' }}
+    runs-on: ubuntu-latest
+    needs: deploy-cli
+    steps:
+      - uses: actions/checkout@v4.1.5
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+        with:
+          platforms: arm64,amd64
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Docker login
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v6.10.0
+        with:
+          context: .
+          file: ./packages/docker/Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: |
+            sokari/allure-deployer:latest
+            sokari/allure-deployer:${{ github.sha }}
+            sokari/allure-deployer:${{needs.deploy-cli.outputs.version}}
