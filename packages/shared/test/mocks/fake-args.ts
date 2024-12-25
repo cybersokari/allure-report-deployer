@@ -4,10 +4,8 @@ export const fakeArgs : ArgsInterface = {
 
     firebaseProjectId: 'credentials.projectId',
     storageBucket: 'bucket',
-    reportId: 'dd-site',
+    reportName: 'dd-site',
     websiteExpires: "9d",
-    keepHistory: true,
-    keepResults: true,
     ARCHIVE_DIR: '/app/archive',
     HOME_DIR: "/app",
     RESULTS_PATH: '/allure-results',
