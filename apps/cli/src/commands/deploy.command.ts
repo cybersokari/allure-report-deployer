@@ -1,12 +1,12 @@
 import { Argument, Command, Option } from "commander";
-import {db} from "../utils/database.js";
+import {db} from "../utilities/database.js";
 import process from "node:process";
-import {getRuntimeDirectory, getSavedCredentialDirectory, isJavaInstalled, readJsonFile} from "../utils/file-util.js";
-import { CliArguments } from "../utils/cli-arguments.js";
+import {getRuntimeDirectory, getSavedCredentialDirectory, isJavaInstalled, readJsonFile} from "../utilities/file-util.js";
 import fs from "fs/promises";
 import path from "node:path";
-import {KEY_BUCKET, KEY_PROJECT_ID, KEY_SLACK_CHANNEL, KEY_SLACK_TOKEN} from "../utils/constants.js";
+import {KEY_BUCKET, KEY_PROJECT_ID, KEY_SLACK_CHANNEL, KEY_SLACK_TOKEN} from "../utilities/constants.js";
 import chalk from "chalk";
+import {ArgsInterface} from "../interfaces/args.interface";
 
 const ERROR_MESSAGES = {
     EMPTY_RESULTS: "Error: The specified results directory is empty.",
@@ -69,7 +69,7 @@ function getGitHubBuildUrl(): string|undefined {
     return undefined
 }
 
-export function addDeployCommand(defaultProgram: Command, onCommand: (args: CliArguments) => Promise<void>) {
+export function addDeployCommand(defaultProgram: Command, onCommand: (args: ArgsInterface) => Promise<void>) {
     defaultProgram
         .command("deploy")
         .description("Generate and deploy Allure report")
@@ -97,7 +97,7 @@ export function addDeployCommand(defaultProgram: Command, onCommand: (args: CliA
                 // Default true if not set
                 const showRetries = options.showRetries ?? true
                 const showHistory = options.showHistory ?? true
-                const cliArgs: CliArguments = {
+                const cliArgs: ArgsInterface = {
                     prefix: options.prefix,
                     runtimeCredentialDir: options.gcpJson || (await getSavedCredentialDirectory()),
                     ARCHIVE_DIR: `${runtimeDir}/archive`,

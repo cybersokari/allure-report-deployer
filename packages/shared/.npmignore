@@ -1,7 +1,0 @@
-jest.config.ts
-tsconfig.test.json
-tsconfig.tsbuildinfo
-node_modules
-coverage
-test
-src

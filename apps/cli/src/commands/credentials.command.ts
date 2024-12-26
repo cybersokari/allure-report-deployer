@@ -1,9 +1,9 @@
 import {Command} from "commander";
-import {getSavedCredentialDirectory, getUserAppDirectory, readJsonFile} from "../utils/file-util.js";
+import {getSavedCredentialDirectory, getUserAppDirectory, readJsonFile} from "../utilities/file-util.js";
 import fs from 'fs/promises'
 import chalk from "chalk";
-import {db} from "../utils/database.js";
-import {KEY_PROJECT_ID} from "../utils/constants.js";
+import {KEY_PROJECT_ID} from "../utilities/constants.js";
+import {db} from "../utilities/database.js";
 
 
 export function addCredentialsCommand(defaultProgram: Command) {

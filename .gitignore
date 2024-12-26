@@ -1,9 +1,7 @@
 allure-firebase.iml
 .idea
-packages/**/node_modules
-node_modules
-
-.env.slack
+cli/node_modules
+*/.env.slack
 # Act
 */act.secrets
 */act.variables
@@ -12,9 +10,9 @@ node_modules
 *key.json
 *.js
 *.d.ts
-packages/**/dist
-#jest
-packages/**/coverage
+*/dist
+
+*/coverage
 */test*.sh
 */**/test*.sh
 !*/test-action.sh

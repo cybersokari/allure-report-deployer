@@ -1,6 +1,6 @@
 import {Command} from "commander";
-import {db} from "../utils/database.js";
-import {KEY_SLACK, KEY_SLACK_CHANNEL} from "../utils/constants.js";
+import {db} from "../utilities/database.js";
+import {KEY_SLACK, KEY_SLACK_CHANNEL} from "../utilities/constants.js";
 import chalk from "chalk";
 
 

@@ -1,13 +1,29 @@
 {
-  "name": "allure-deployer-shared",
-  "version": "1.0.7",
-  "description": "Allure Deployer CLI companion module ",
+  "name": "allure-deployer",
+  "version": "1.1.2",
+  "description": "Deploy your Allure Reports to Firebase, and notify in Slack, No server required",
+  "keywords": [
+    "allure server",
+    "allure test report",
+    "allure report",
+    "allure github",
+    "allure docker",
+    "allure hosting",
+    "allure github action",
+    "allure results",
+    "allure cli",
+    "allure serverless"
+  ],
   "author": "Sokari Gillis-Harry",
   "license": "MIT",
+  "main": "./dist/index.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/cybersokari/allure-report-deployer",
-    "directory": "packages/shared"
+    "url": "git+https://github.com/cybersokari/allure-report-deployer.git",
+    "directory": "packages/cli"
+  },
+  "bugs": {
+    "url": "https://github.com/cybersokari/allure-report-deployer/issues"
   },
   "scripts": {
     "lint": "eslint --ext .js,.ts .",
@@ -15,25 +31,20 @@
     "build:watch": "tsc --watch",
     "test": "NODE_OPTIONS=--experimental-vm-modules jest",
     "coverage": "NODE_OPTIONS=--experimental-vm-modules jest --coverage",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run build && node version-update.cjs"
   },
   "type": "module",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
-  "exports": {
-    ".": "./dist/index.js"
-  },
-  "files": [
-    "dist/"
-  ],
   "dependencies": {
+    "chalk": "^5.4.0",
+    "commander": "^12.1.0",
+    "conf": "^13.1.0",
+    "ora": "^8.1.1",
     "@google-cloud/storage": "^7.14.0",
     "@slack/web-api": "^7.8.0",
     "allure-commandline": "^2.32.0",
     "ansi-escapes": "^7.0.0",
     "archiver": "^7.0.1",
     "async-mutex": "^0.5.0",
-    "chalk": "^5.3.0",
     "firebase-tools": "^13.29.1",
     "p-limit": "^6.1.0",
     "random-words": "^2.0.1",
@@ -58,5 +69,11 @@
     "ts-jest": "^29.2.5",
     "ts-node": "^10.9.2",
     "typescript": "^4.9.0"
+  },
+  "bin": {
+    "allure-deployer": "dist/index.js"
+  },
+  "overrides": {
+    "whatwg-url": "^14.0.0"
   }
 }

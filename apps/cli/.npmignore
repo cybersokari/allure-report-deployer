@@ -1,0 +1,8 @@
+node_modules
+src
+version-update.cjs
+tsconfig.json
+jest.config.ts
+tsconfig.test.json
+tsconfig.tsbuildinfo
+coverage

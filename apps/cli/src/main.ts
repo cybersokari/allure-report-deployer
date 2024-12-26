@@ -1,23 +1,23 @@
 import * as process from "node:process";
 import {
-    Allure,
+    Allure, ArgsInterface,
     ConsoleNotifier, counter,
     FirebaseHost,
     FirebaseStorageService,
-    GCPStorage, getDashboardUrl, GitHubNotifier,
+    getDashboardUrl, GitHubNotifier,
     NotificationData, Notifier,
     NotifierService, RealSlackClient, SlackNotifier,
     Storage,
-} from "allure-deployer-shared";
+} from "./lib.js";
 import {Command} from "commander";
 import {addDeployCommand} from "./commands/deploy.command.js";
 import {addCredentialsCommand} from "./commands/credentials.command.js";
 import {addStorageBucketCommand} from "./commands/storage.command.js";
-import {readJsonFile} from "./utils/file-util.js";
-import {CliArguments} from "./utils/cli-arguments.js";
 import {oraPromise} from "ora";
 import {addVersionCommand} from "./commands/version.command.js";
 import {addSlackTokenCommand} from "./commands/slack-setup.command.js";
+import {Storage as GCPStorage} from '@google-cloud/storage'
+import {readJsonFile} from "./utilities/file-util.js";
 
 export function main() {
     const program = new Command();
@@ -40,7 +40,7 @@ function setupCommands(program: Command) {
     addDeployCommand(program, runDeploy);
 }
 
-async function runDeploy(args: CliArguments) {
+async function runDeploy(args: ArgsInterface) {
     const cloudStorage = await initializeCloudStorage(args);
     const allure = new Allure({ args });
     const firebaseHost = new FirebaseHost(args);
@@ -56,7 +56,7 @@ async function runDeploy(args: CliArguments) {
     }
 }
 
-async function initializeCloudStorage(args: CliArguments): Promise<Storage | undefined> {
+async function initializeCloudStorage(args: ArgsInterface): Promise<Storage | undefined> {
     if (!args.storageBucket) return undefined;
 
     const credentials = await readJsonFile(args.runtimeCredentialDir);
@@ -98,7 +98,7 @@ async function deploy(host: FirebaseHost, storage: Storage | undefined) {
     }, {text: 'Deploying...', successText: 'Deployment successfully.'})
 }
 
-async function notify(args: CliArguments, reportUrl: string) {
+async function notify(args: ArgsInterface, reportUrl: string) {
     const notifiers: Notifier[] = [new ConsoleNotifier()]
     if (args.slack_token && args.slack_channel) {
         new SlackNotifier(new RealSlackClient(args.slack_token, args.slack_channel))

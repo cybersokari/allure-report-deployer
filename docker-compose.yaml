@@ -16,8 +16,8 @@ services:
       timeout: 5s
   test-docker:
     build:
-      dockerfile: packages/docker/Dockerfile
-      context: .
+      dockerfile: Dockerfile
+      context: apps/docker
     container_name: allure-docker
 #    env_file: .env.slack
     environment:
@@ -40,8 +40,8 @@ services:
         condition: service_healthy
   test-cli:
     build:
-      context: .
-      dockerfile: test.cli.Dockerfile
+      context: apps/cli
+      dockerfile: test.Dockerfile
     container_name: allure-cli
     tty: false
     command: ['sh', '-c', 'allure-deployer deploy /allure-results --gcp-json /key.json --bucket $GCP_BUCKET']
@@ -51,7 +51,7 @@ services:
   test-action:
     image: act-github-actions-dockeraction:latest
     build:
-      context: .
-      dockerfile: packages/action/action.Dockerfile
+      context: apps/action
+      dockerfile: action.Dockerfile
 
 

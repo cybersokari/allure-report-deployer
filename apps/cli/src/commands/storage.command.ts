@@ -1,10 +1,11 @@
 import {Command} from "commander";
-import {db} from "../utils/database.js";
+import {db} from "../utilities/database.js";
 import chalk from "chalk";
-import {getSavedCredentialDirectory} from "../utils/file-util.js";
+import {getSavedCredentialDirectory} from "../utilities/file-util.js";
 import {readFile} from "fs/promises";
-import {GCPStorage} from "allure-deployer-shared";
-import {KEY_BUCKET} from "../utils/constants.js";
+import {KEY_BUCKET} from "../utilities/constants.js";
+import {Storage as GCPStorage} from '@google-cloud/storage'
+
 
 export function addStorageBucketCommand(defaultProgram: Command) {
     defaultProgram.command('bucket:set <bucket-name>')
