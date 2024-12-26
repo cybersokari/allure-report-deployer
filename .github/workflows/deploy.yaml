@@ -1,4 +1,4 @@
-name: Build CLI
+name: Deploy
 on:
   workflow_dispatch:
     inputs:

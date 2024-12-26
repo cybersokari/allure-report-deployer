@@ -1,7 +1,6 @@
 # Allure Report Deployer
 
-![Docker](https://github.com/cybersokari/allure-docker-deploy/actions/workflows/deploy-docker.yaml/badge.svg?branch=main)
-![GitHub Action](https://github.com/cybersokari/allure-docker-deploy/actions/workflows/deploy-docker-action.yaml/badge.svg?branch=main)
+![Deploy](https://github.com/cybersokari/allure-docker-deploy/actions/workflows/deploy.yaml/badge.svg?branch=main)
 
 ![](https://img.shields.io/docker/pulls/sokari/allure-deployer-action)
 
