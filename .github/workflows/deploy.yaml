@@ -24,6 +24,8 @@ jobs:
   deploy-cli:
     if: ${{ github.event.inputs.job == 'cli' }}
     runs-on: ubuntu-latest
+    outputs:
+      version: ${{steps.version-out.outputs.version}}
     steps:
       - uses: actions/checkout@v4.1.5
         with:
@@ -56,7 +58,7 @@ jobs:
 
       - name: Notify Docker jobs
         id: version-out
-        run: echo "::set-output name=version::${{ steps.publish.outputs.version}}"
+        run: echo "version=${{ steps.publish.outputs.version}}" >> $GITHUB_OUTPUT
 
       - name: Add & Commit
         uses: EndBug/add-and-commit@v9.1.4
