@@ -2,7 +2,7 @@
 FROM node:20-alpine AS javanode
 RUN apk add openjdk17-jre
 
-FROM node:22-alpine AS testdeps
+FROM node:20-alpine AS testdeps
 WORKDIR /app
 COPY src src
 COPY package*.json .

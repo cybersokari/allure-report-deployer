@@ -31,11 +31,15 @@ export class GitHubNotifier implements Notifier {
 
         markdown += `\n\n⭐ Like this? [Star us on GitHub](https://github.com/cybersokari/allure-report-deployer)!`;
 
-
         try {
             fs.writeFileSync(this.summaryPath, markdown.trim(), {flag: 'a'}); // Append to the file
         } catch (err) {
             console.warn('Failed to write to $GITHUB_STEP_SUMMARY:', err);
+        }
+        try {
+            fs.writeFileSync(process.env.GITHUB_OUTPUT!, `report_url=${data.reportUrl}`, {flag: 'a'}); // Append to the file
+        }catch (e) {
+            console.warn('Failed to write to $GITHUB_OUTPUT:', e);
         }
     }
 }

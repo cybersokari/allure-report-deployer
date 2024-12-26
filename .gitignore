@@ -12,6 +12,7 @@ allure-firebase.iml
 *key.json
 *.js
 *.d.ts
+*/**/dist
 */dist
 
 */coverage

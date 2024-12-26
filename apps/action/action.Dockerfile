@@ -4,7 +4,7 @@ RUN apk add --no-cache openjdk17-jre
 
 FROM deps AS prod
 
-ARG CLI_VERSION=1.0.6
+ARG CLI_VERSION
 RUN npm i -g allure-deployer@$CLI_VERSION
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh

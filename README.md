@@ -4,7 +4,7 @@
 
 ![](https://img.shields.io/docker/pulls/sokari/allure-deployer-action)
 
-**Host your Allure test reports on Firebase with history, retries, and Slack integration—no server required.**
+**Host your Allure test reports on the Web with history, retries, and Slack integration—no server required.**
 
 ![Demo](assets/demo.gif)
 

@@ -14,7 +14,7 @@ case "$GOOGLE_APPLICATION_CREDENTIALS" in
     export GOOGLE_APPLICATION_CREDENTIALS
     ;;
   *)
-    echo "$GOOGLE_APPLICATION_CREDENTIALS"
+    echo "$GOOGLE_APPLICATION_CREDENTIALS is not a .json credential"
     exit 1
     ;;
 esac
@@ -33,8 +33,6 @@ deploy_command="allure-deployer deploy \"$ALLURE_RESULTS_PATH\""
 [ -n "$REPORT_NAME" ] && deploy_command="$deploy_command $REPORT_NAME"
 [ -n "$GOOGLE_APPLICATION_CREDENTIALS" ] && deploy_command="$deploy_command --gcp-json $GOOGLE_APPLICATION_CREDENTIALS"
 [ -n "$STORAGE_BUCKET" ] && deploy_command="$deploy_command --bucket $STORAGE_BUCKET"
-[ "$KEEP_HISTORY" = "true" ] && deploy_command="$deploy_command --keep-history"
-[ "$KEEP_RESULTS" = "true" ] && deploy_command="$deploy_command --keep-results"
 [ "$SHOW_RETRIES" = "true" ] && deploy_command="$deploy_command --show-retries"
 [ "$SHOW_HISTORY" = "true" ] && deploy_command="$deploy_command --show-history"
 [ -n "$SLACK_CHANNEL" ] && deploy_command="$deploy_command --slack-channel $SLACK_CHANNEL"
