@@ -1,7 +1,7 @@
-import {ArgsInterface} from "../../src";
+import {ArgsInterface} from "../../src/interfaces/args.interface.js";
 
 export const fakeArgs : ArgsInterface = {
-
+    runtimeCredentialDir: "",
     firebaseProjectId: 'credentials.projectId',
     storageBucket: 'bucket',
     reportName: 'dd-site',
@@ -15,5 +15,5 @@ export const fakeArgs : ArgsInterface = {
     showHistory: true,
     showRetries: true,
     downloadRequired: true,
-    uploadRequired: true,
+    uploadRequired: true
 }

@@ -1,10 +1,10 @@
 // @ts-ignore
 import mock from "mock-fs";
-import {Storage} from "../src";
 import * as fs from "fs/promises";
 import {jest} from "@jest/globals";
 import {Order, StorageProvider} from "../src/interfaces/storage-provider.interface.js";
 import {fakeArgs} from "./mocks/fake-args.js";
+import {Storage} from '../src/features/storage.js'
 
 
 // Partially mock the module
