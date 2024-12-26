@@ -8,8 +8,6 @@ runs:
   args:
     - storage_bucket=${{ inputs.storage_bucket }}
     - report_name=${{ inputs.report_name }}
-    - keep_history=${{ inputs.keep_history }}
-    - keep_results=${{ inputs.keep_results }}
     - slack_channel=${{ inputs.slack_channel }}
     - allure_results_path=${{ inputs.allure_results_path }}
     - show_retries=${{ inputs.show_retries }}
@@ -43,4 +41,4 @@ inputs:
 
 outputs:
   report_url:
-    description: 'URL to your report'
+    description: 'URL to your test report'

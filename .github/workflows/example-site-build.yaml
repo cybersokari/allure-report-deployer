@@ -11,17 +11,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4.1.5
       - name: Allure Deployer Action
-        uses: cybersokari/allure-deployer-action@v1.0.1
+        uses: cybersokari/allure-deployer-action@v1.1.2
         env:
           SLACK_TOKEN: ${{secrets.SLACK_TOKEN}}
           GOOGLE_CREDENTIALS_JSON: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
         with:
           allure_results_path: '/assets/allure-results'
           storage_bucket: ${{vars.STORAGE_BUCKET}}
-          website_id: 'example-site-readme'
-          website_expires: '30d'
           slack_channel_id: ${{secrets.SLACK_CHANNEL_ID}}
-          keep_history: 'true'
-          keep_results: 'true'
           show_history: 'true'
           show_retries: 'true'
+          report_name: 'new report'
+

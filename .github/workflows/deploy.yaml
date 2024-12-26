@@ -75,6 +75,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4.1.5
+        with:
+          token: '${{ secrets.PERSONAL_ACCESS_TOKEN }}'
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -103,8 +105,8 @@ jobs:
       - name: Add & Commit
         uses: EndBug/add-and-commit@v9.1.4
         with:
-          author_name: Bot
-          author_email: bot@github.com
+          author_name: Sokari
+          author_email: sokariharry@gmail.com
           message: "Release packages/shared version ${{steps.publish.outputs.version}}"
           github_token: '${{ github.token }}'
 
