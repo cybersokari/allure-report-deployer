@@ -55,6 +55,7 @@ jobs:
         with:
           token: ${{ secrets.NPM_TOKEN }}
           package: packages/cli
+          ignore-scripts: false
 
       - name: Notify Docker jobs
         id: version-out
