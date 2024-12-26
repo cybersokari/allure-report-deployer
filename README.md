@@ -82,9 +82,7 @@ jobs:
           report_name: 'Notification module Q2'
           storage_bucket: ${{vars.storage-bucket}}
           slack_channel: ${{vars.SLACK_CHANNEL}}
-          keep_history: 'true'
           show_history: 'true' # Requires keep_history to be enabled
-          keep_results: 'true'
           show_retries: 'true' # Requires keep_results to be enabled
 ```
 ___
@@ -117,8 +115,6 @@ variables:
   STORAGE_BUCKET: my-test-results-bucket
   PREFIX: project-123
   REPORT_NAME: Notification module Q2
-  KEEP_HISTORY: "true"
-  KEEP_RESULTS: "true"
 
 before_script:
   - mkdir -p ./allure-results
@@ -149,8 +145,8 @@ deploy:
       -e STORAGE_BUCKET=$STORAGE_BUCKET \
       -e PREFIX=$PREFIX \
       -e REPORT_NAME=$REPORT_NAME \
-      -e KEEP_HISTORY=$KEEP_HISTORY \
-      -e KEEP_RESULTS=$KEEP_RESULTS \
+      -e SHOW_HISTORY=true \
+      -e SHOW_RESULTS=true \
       -v ${CI_PROJECT_DIR}/allure-results:/allure-results \
       -v ${GCP_CREDENTIALS_FILE_PATH}:/credentials/key.json \
       sokari/allure-deployer:latest
@@ -194,8 +190,6 @@ workflows:
           cd appium && echo $ALLURE_GOOGLE_KEY >> service-key.json
           allure-deployer deploy /allure-results my-report-name \
           --gcp-json /credentials/key.json \
-          --keep-history \
-          --keep-results \
           --show-history \
           --show-retries \
           --slack-token $SLACK_TOKEN \
@@ -231,8 +225,6 @@ allure-deployer slack:set <channel> <token>
 #### 5. Generate and host your reports
 ```shell
 allure-deployer deploy ./allure-results my-report-name \
-          --keep-history \
-          --keep-results \
           --show-history \
           --show-retries
 ```
@@ -252,9 +244,7 @@ https://github.com/marketplace/actions/allure-deployer-action
 | `report_name`         | The name/title of your report.                                                      | ❌ No     | `Allure Report`   |
 | `storage_bucket`      | Name of the Google Cloud Storage bucket for backup and history storage.             | ❌ No     | None              |
 | `slack_channel`       | ID of the Slack channel to send notifications about report links.                   | ❌ No     | None              |
-| `keep_history`        | Whether to enable history backup in reports.                                        | ❌ No     | `true`            |
 | `show_history`        | Display history from previous test runs. Requires `keep_history` to be enabled.     | ❌ No     | `true`            |
-| `keep_results`        | Backup all the `/allure-results` files into cloud storage for retries and archives. | ❌ No     | `false`           |
 | `show_retries`        | Include retries from previous test runs. Requires `keep_results` to be enabled.     | ❌ No     | `true`            |
 | `prefix`              | Path prefix in the Cloud Storage bucket for archiving files.                        | ❌ No     | None              |
 
@@ -287,8 +277,6 @@ docker pull sokari/allure-deployer:latest
 | `STORAGE_BUCKET` | Google Cloud Storage bucket name                                                              | project-id.firebasestorage.app | None           |
 | `PREFIX`         | A path in your Storage bucket. Optional.                                                      | project-123                    | None           |
 | `REPORT_NAME`    | The name/title of your report                                                                 | Space ship report              | `Alure Report` |
-| `KEEP_HISTORY`   | Backup `allure-reports/history` directory after every report generation.                      | true                           | true           |
-| `KEEP_RESULTS`   | Backup `/allure-results` directory after report generation..                                  | false                          | true           |
 | `SHOW_HISTORY`   | Show history in the current report by pulling the history from the last Cloud Storage backup  | true                           | true           |
 | `SHOW_RETRIES`   | Show retries in the current report by pulling result files from all archives in Cloud Storage | true                           | true           |
 | `SLACK_TOKEN`    | Your Slack App token                                                                          | xoxb-XXXXXXXXXX-XXXXXXXX       | None           |
