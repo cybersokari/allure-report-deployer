@@ -5,9 +5,9 @@ RUN apk add openjdk17-jre
 
 FROM deps AS prod
 
-ENV CLI_VERSION=1.0.6
+ARG CLI_VERSION=1.0.6
 RUN npm i -g allure-deployer@$CLI_VERSION
-COPY packages/docker/start.sh /start.sh
+COPY start.sh /start.sh
 RUN chmod +x /start.sh
 
 ENTRYPOINT ["/start.sh"]

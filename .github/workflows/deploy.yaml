@@ -9,6 +9,7 @@ on:
         options:
           - cli
           - shared
+        default: cli
       semver:
         description: Bump version
         required: true
@@ -17,6 +18,7 @@ on:
           - patch
           - minor
           - major
+        default: patch
 
 jobs:
   deploy-cli:
@@ -24,6 +26,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4.1.5
+        with:
+          token: '${{ secrets.PERSONAL_ACCESS_TOKEN }}'
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -52,15 +56,17 @@ jobs:
 
       - name: Notify Docker jobs
         id: version-out
-        run: |
-          echo "version=${{steps.publish.outputs.version}}" >> $GITHUB_ENV
+        run: echo "::set-output name=version::${{ steps.publish.outputs.version}}"
 
       - name: Add & Commit
         uses: EndBug/add-and-commit@v9.1.4
         with:
-          author_name: Bot
-          author_email: bot@github.com
+          author_name: Sokari
+          author_email: sokariharry@gmail.com
           message: "Release packages/cli version ${{steps.publish.outputs.version}}"
+          add: 'packages/cli/*.json'
+          push: 'origin main --force'
+          tag: 'v${{steps.publish.outputs.version}} --force'
 
   deploy-shared:
     if: ${{ github.event.inputs.job == 'shared' }}
@@ -98,6 +104,7 @@ jobs:
           author_name: Bot
           author_email: bot@github.com
           message: "Release packages/shared version ${{steps.publish.outputs.version}}"
+          github_token: '${{ github.token }}'
 
 
   deploy-docker-action:
@@ -115,10 +122,11 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v6.10.0
         with:
-          context: .
+          context: ./packages/action
           file: ./packages/action/action.Dockerfile
           platforms: linux/amd64
           push: true
+          build-args: CLI_VERSION=${{needs.deploy-cli.outputs.version}}
           tags: |
             sokari/allure-deployer-action:${{needs.deploy-cli.outputs.version}}
             sokari/allure-deployer-action:${{ github.sha }}
@@ -147,10 +155,11 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v6.10.0
         with:
-          context: .
+          context: ./packages/docker
           file: ./packages/docker/Dockerfile
           platforms: linux/amd64,linux/arm64
           push: true
+          build-args: CLI_VERSION=${{needs.deploy-cli.outputs.version}}
           tags: |
             sokari/allure-deployer:latest
             sokari/allure-deployer:${{ github.sha }}
