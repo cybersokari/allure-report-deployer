@@ -1,6 +1,8 @@
 allure-firebase.iml
 .idea
-cli/node_modules
+*/**/node_modules
+*/node_modules
+
 */.env.slack
 # Act
 */act.secrets
