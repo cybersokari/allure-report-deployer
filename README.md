@@ -82,11 +82,11 @@ jobs:
           report_name: 'Notification module Q2'
           storage_bucket: ${{vars.storage-bucket}}
           slack_channel: ${{vars.SLACK_CHANNEL}}
-          show_history: 'true' # Requires keep_history to be enabled
-          show_retries: 'true' # Requires keep_results to be enabled
+          show_history: 'true' 
+          show_retries: 'true'
 ```
 ___
-
+ 
 #### 2.	Check your GitHub Actions [summary](https://github.com/cybersokari/allure-report-deployer/actions/runs/12376413839):
 Live report website example: https://gatedaccessdev--example-site-readme-1c8flvtu.web.app
 ```markdown
@@ -238,15 +238,15 @@ https://github.com/marketplace/actions/allure-deployer-action
 
 #### Inputs
 
-| Input                 | Description                                                                         | Required | Default           |
-|-----------------------|-------------------------------------------------------------------------------------|----------|-------------------|
-| `allure_results_path` | Path to the directory containing Allure results files.                              | ✅ Yes    | `/allure-results` |
-| `report_name`         | The name/title of your report.                                                      | ❌ No     | `Allure Report`   |
-| `storage_bucket`      | Name of the Google Cloud Storage bucket for backup and history storage.             | ❌ No     | None              |
-| `slack_channel`       | ID of the Slack channel to send notifications about report links.                   | ❌ No     | None              |
-| `show_history`        | Display history from previous test runs. Requires `keep_history` to be enabled.     | ❌ No     | `true`            |
-| `show_retries`        | Include retries from previous test runs. Requires `keep_results` to be enabled.     | ❌ No     | `true`            |
-| `prefix`              | Path prefix in the Cloud Storage bucket for archiving files.                        | ❌ No     | None              |
+| Input                 | Description                                                             | Required | Default           |
+|-----------------------|-------------------------------------------------------------------------|----------|-------------------|
+| `allure_results_path` | Path to the directory containing Allure results files.                  | ✅ Yes    | `/allure-results` |
+| `report_name`         | The name/title of your report.                                          | ❌ No     | `Allure Report`   |
+| `storage_bucket`      | Name of the Google Cloud Storage bucket for backup and history storage. | ❌ No     | None              |
+| `slack_channel`       | ID of the Slack channel to send notifications about report links.       | ❌ No     | None              |
+| `show_history`        | Display history from previous test runs.                                | ❌ No     | `true`            |
+| `show_retries`        | Include retries from previous test runs.                                | ❌ No     | `true`            |
+| `prefix`              | Path prefix in the Cloud Storage bucket for archiving files.            | ❌ No     | None              |
 
 ---
 
@@ -310,12 +310,12 @@ For more information, check the [Configuration](#configuration) section.
 
 <h3 id="cloud-storage">☁️ Cloud Storage</h3>
 
-Your files are backed up as a `.zip` archive when you set `KEEP_HISTORY` or `KEEP_RESULTS`.
-*  `KEEP_RESULTS` adds all the files in your `/allure-results` mount directory to the archive
-*  `KEEP_HISTORY` adds the `history` [subdirectory of your latest report](https://allurereport.org/docs/how-it-works-history-files/#history-files) to the archive
+Your files are backed up as a `.zip` archive when you set `SHOW_HISTORY` or `SHOW_RETRIES`.
+*  `SHOW_RETRIES` adds all the files in your `/allure-results` mount directory to the archive
+*  `SHOW_HISTORY` adds the `history` [subdirectory of your latest report](https://allurereport.org/docs/how-it-works-history-files/#history-files) to the archive
 
 
-Example of an archive when both `KEEP_RESULTS` and `KEEP_HISTORY` are enabled
+Example of an archive when both `SHOW_RETRIES` and `SHOW_RETRIES` are enabled
 ```text
 1784839939391.zip/
             ├── history/
@@ -353,14 +353,14 @@ Zipped archives examples in the Firebase Developer console
 #### History
 Set `SHOW_HISTORY` to `true` to enable history in your incoming test report.
 This feature uses the history of your last archive in Cloud Storage, which means that 
-you will need to enable `KEEP_HISTORY` so that your history file will be uploaded to storage 
+you will need to enable `SHOW_HISTORY` so that your history file will be uploaded to storage 
 for subsequent `SHOW_HISTORY` usage. 
 This is enabled by default.
 See how [Allure History works](https://allurereport.org/docs/history-and-retries/#tests-history)
 #### Retries
 Set `SHOW_RETRIES` to true to show retries in the incoming test report.
 This feature combines all the test result files from Cloud Storage before running the new report
-Enable `KEEP_RESULTS` so that all your test result files will be uploaded to Cloud Storage for
+Enable `SHOW_RETRIES` so that all your test result files will be uploaded to Cloud Storage for
 subsequent test report generation.
 See how [Allure Retries](https://allurereport.org/docs/history-and-retries/#how-to-keep-retries) work
 
