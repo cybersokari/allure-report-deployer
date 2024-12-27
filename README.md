@@ -1,6 +1,6 @@
 # Allure Report Deployer
 
-![Deploy](https://github.com/cybersokari/allure-docker-deploy/actions/workflows/deploy.yaml/badge.svg?branch=main) ![](https://img.shields.io/docker/pulls/sokari/allure-deployer-action)
+![Deploy](https://github.com/cybersokari/allure-docker-deploy/actions/workflows/deploy.yaml/badge.svg?branch=main) ![](https://img.shields.io/docker/pulls/sokari/allure-deployer-action) [![Docker Image Version (latest semver)](https://img.shields.io/docker/v/sokari/allure-deployer?color=blue&label=docker&sort=semver)](https://hub.docker.com/r/sokari/allure-deployer)
 
 **Host your Allure test reports on the web with history, retries, and Slack integration—no server required.**
 </br>
