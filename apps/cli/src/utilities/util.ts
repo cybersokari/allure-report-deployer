@@ -5,6 +5,8 @@ import archiver from 'archiver';
 
 import {StringBuilder} from "./string-builder.js";
 import {ArgsInterface} from "../interfaces/args.interface.js";
+import process from "node:process";
+import {oraPromise} from "ora";
 export function appLog(data: string) {
     console.log(data)
 }
@@ -103,6 +105,27 @@ export function printStats(args: ArgsInterface) {
         }
     } else {
         appLog('Storage bucket is not provided, History and Retries disabled')
+    }
+}
+
+export interface WithOraParams<T> {
+    start: string;
+    success: string;
+    work: () => Promise<T>;
+}
+export async function withOra<T>({start, success, work}: WithOraParams<T>): Promise<T> {
+    if (process.env.CI === 'true') {
+        // Plain logging for CI
+        console.log(start);
+        const result = await work();
+        console.log(success);
+        return result;
+    } else {
+        // Use ora when not running in a CI
+        return await oraPromise(work, {
+            text: start,
+            successText: success,
+        });
     }
 }
 

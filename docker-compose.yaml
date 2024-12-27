@@ -43,6 +43,8 @@ services:
       context: apps/cli
       dockerfile: test.Dockerfile
     container_name: allure-cli
+    environment:
+      CI: 'true'
     tty: false
     command: ['sh', '-c', 'allure-deployer deploy /allure-results --gcp-json /key.json --bucket $GCP_BUCKET']
     volumes:

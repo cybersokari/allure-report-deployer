@@ -7,13 +7,12 @@ import {
     getDashboardUrl, GitHubNotifier,
     NotificationData, Notifier,
     NotifierService, RealSlackClient, SlackNotifier,
-    Storage,
+    Storage, withOra,
 } from "./lib.js";
 import {Command} from "commander";
 import {addDeployCommand} from "./commands/deploy.command.js";
 import {addCredentialsCommand} from "./commands/credentials.command.js";
 import {addStorageBucketCommand} from "./commands/storage.command.js";
-import {oraPromise} from "ora";
 import {addVersionCommand} from "./commands/version.command.js";
 import {addSlackTokenCommand} from "./commands/slack-setup.command.js";
 import {Storage as GCPStorage} from '@google-cloud/storage'
@@ -66,36 +65,27 @@ async function initializeCloudStorage(args: ArgsInterface): Promise<Storage | un
 
 
 async function setupStaging(host: FirebaseHost, storage: Storage | undefined, allure: Allure) {
-    return await oraPromise(() => {
-        return Promise.all([
+    return await withOra({ work: () => Promise.all([
             host.init(),//Returns reportUrl
             allure.stageFilesFromMount(),
             storage?.stageFilesFromStorage(),
-        ])
-    }, {text: 'Staging files...', successText: 'Files staged successfully.'})
+        ]), start: 'Staging files...', success: 'Files staged successfully.',})
 }
 
 async function generateReport({allure, reportUrl, buildUrl}: { allure: Allure, reportUrl: string, buildUrl?: string }) {
-    return await oraPromise(() => {
-        return allure.generate({
+    return await withOra({ work: () => allure.generate({
             name: 'Allure Report Deployer',
             reportUrl: reportUrl,
             buildUrl: buildUrl,
             type: buildUrl ? 'github' : undefined,
-        })
-    }, {
-        text: 'Generating Allure report...',
-        successText: 'Report generated successfully.'
-    })
+        }), start: 'Generating Allure report...', success: 'Report generated successfully.',})
 }
 
 async function deploy(host: FirebaseHost, storage: Storage | undefined) {
-    return await oraPromise(() => {
-        return Promise.all([
+    return await withOra({work: () => Promise.all([
             host.deploy(), // Returns reportUrl
             storage?.uploadArtifacts()
-        ])
-    }, {text: 'Deploying...', successText: 'Deployment successfully.'})
+        ]),start: 'Deploying...', success: 'Deployment successfully.',})
 }
 
 async function notify(args: ArgsInterface, reportUrl: string) {
