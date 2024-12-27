@@ -1,10 +1,12 @@
 # Allure Report Deployer
 
-![Deploy](https://github.com/cybersokari/allure-docker-deploy/actions/workflows/deploy.yaml/badge.svg?branch=main)
+![Deploy](https://github.com/cybersokari/allure-docker-deploy/actions/workflows/deploy.yaml/badge.svg?branch=main) ![](https://img.shields.io/docker/pulls/sokari/allure-deployer-action)
 
-![](https://img.shields.io/docker/pulls/sokari/allure-deployer-action)
-
-**Host your Allure test reports on the Web with history, retries, and Slack integration—no server required.**
+**Host your Allure test reports on the web with history, retries, and Slack integration—no server required.**
+</br>
+</br>
+Example report: https://gatedaccessdev.web.app
+</br>
 
 ![Demo](assets/demo.gif)
 
@@ -73,12 +75,12 @@ jobs:
           echo ' Nothing here for now, waiting for results'
           
       - name: Allure Deployer Action
-        uses: cybersokari/allure-deployer-action@v1.0.1
+        uses: cybersokari/allure-deployer-action@v1.1.7
         env:
           SLACK_TOKEN: ${{secrets.SLACK_TOKEN}}
           GOOGLE_CREDENTIALS_JSON: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
         with:
-          allure_results_path: '/assets/allure-results'
+          allure_results_path: 'path/to/allure-results'
           report_name: 'Notification module Q2'
           storage_bucket: ${{vars.storage-bucket}}
           slack_channel: ${{vars.SLACK_CHANNEL}}
@@ -88,7 +90,7 @@ jobs:
 ___
  
 #### 2.	Check your GitHub Actions [summary](https://github.com/cybersokari/allure-report-deployer/actions/runs/12376413839):
-Live report website example: https://gatedaccessdev--example-site-readme-1c8flvtu.web.app
+Live report website example: https://gatedaccessdev.web.app
 ```markdown
 📊 Your Test Report is ready
 
@@ -146,7 +148,7 @@ deploy:
       -e PREFIX=$PREFIX \
       -e REPORT_NAME=$REPORT_NAME \
       -e SHOW_HISTORY=true \
-      -e SHOW_RESULTS=true \
+      -e SHOW_RETRIES=true \
       -v ${CI_PROJECT_DIR}/allure-results:/allure-results \
       -v ${GCP_CREDENTIALS_FILE_PATH}:/credentials/key.json \
       sokari/allure-deployer:latest
@@ -188,7 +190,7 @@ workflows:
         script: |
           npm i -g allure-deployer
           cd appium && echo $ALLURE_GOOGLE_KEY >> service-key.json
-          allure-deployer deploy /allure-results my-report-name \
+          allure-deployer deploy path/to/allure-results my-report-name \
           --gcp-json /credentials/key.json \
           --show-history \
           --show-retries \
@@ -224,7 +226,7 @@ allure-deployer slack:set <channel> <token>
 
 #### 5. Generate and host your reports
 ```shell
-allure-deployer deploy ./allure-results my-report-name \
+allure-deployer deploy path/to/allure-results my-report-name \
           --show-history \
           --show-retries
 ```

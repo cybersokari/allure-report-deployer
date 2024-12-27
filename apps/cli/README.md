@@ -3,11 +3,13 @@
 
 A command-line tool for deploying Allure test reports to Firebase Hosting. History and Retries and Slack notification.
 No server Required.
-
+</br>
+</br>
+Example report: https://gatedaccessdev.web.app
 ## Features
 
 - **Web hosting**: Host your Allure reports on web, not storage.
-- **History and Retries**: Show Allure [History and Retries](https://allurereport.org/docs/history-and-retries/) in your report.
+- **History and Retries**: Show Allure [History and Retries](https://allurereport.org/docs/history-and-retries/) in reports with history linking to previous reports.
 - **Cloud Backup**: Save test results in storage for future analysis.
 - **Slack integration**: Send report URL to Slack.
 
@@ -21,11 +23,12 @@ npm install -g allure-deployer
 ## Commands
 
 ### `deploy`
-Deploy an Allure test report to Firebase Hosting.
+Host your Allure test report on Firebase.
+
 
 #### Syntax
 ```bash
-allure-deployer deploy <allure-results-path> <website-id>
+allure-deployer deploy <allure-results-path> <report-name>
 ```
 
 #### Example
@@ -38,9 +41,9 @@ allure-deployer deploy ./allure-results my-report-name --keep-history
 - `<report-name>`: The name/title of your report (Default: `Allure Report`).
 
 #### Options
-- `-h, --show-history`: Show history in the upcoming report.
-- `-r, --show-retries`: Show retries in the upcoming report.
-- `--bucket <bucket-name>`: Directly provide a Firebase/GCP bucket name for deployment.
+- `-h, --show-history`: Show history in the upcoming report. Requires `--bucket` option
+- `-r, --show-retries`: Show retries in the upcoming report. Requires `--bucket` option
+- `--bucket <bucket-name>`: Directly provide a Firebase/GCP bucket name for History and Retries.
 - `--gcp-json <json-path>`: Directly provide a Firebase/GCP JSON credential file for deployment.
 - `-p, --prefix <prefix>`: The storage bucket path to back up Allure results and history files
 

@@ -41,12 +41,12 @@ function setupCommands(program: Command) {
 
 async function runDeploy(args: ArgsInterface) {
     const cloudStorage = await initializeCloudStorage(args);
-    const allure = new Allure({ args });
+    const allure = new Allure({args});
     const firebaseHost = new FirebaseHost(args);
 
     try {
         const [reportUrl] = await setupStaging(firebaseHost, cloudStorage, allure);
-        await generateReport({ allure, reportUrl, buildUrl: args.buildUrl });
+        await generateReport({allure, reportUrl, args: args});
         await deploy(firebaseHost, cloudStorage);
         await notify(args, reportUrl);
     } catch (error) {
@@ -59,33 +59,41 @@ async function initializeCloudStorage(args: ArgsInterface): Promise<Storage | un
     if (!args.storageBucket) return undefined;
 
     const credentials = await readJsonFile(args.runtimeCredentialDir);
-    const bucket = new GCPStorage({ credentials }).bucket(args.storageBucket);
+    const bucket = new GCPStorage({credentials}).bucket(args.storageBucket);
     return new Storage(new FirebaseStorageService(bucket), args);
 }
 
 
 async function setupStaging(host: FirebaseHost, storage: Storage | undefined, allure: Allure) {
-    return await withOra({ work: () => Promise.all([
+    return await withOra({
+        work: () => Promise.all([
             host.init(),//Returns reportUrl
             allure.stageFilesFromMount(),
             storage?.stageFilesFromStorage(),
-        ]), start: 'Staging files...', success: 'Files staged successfully.',})
+        ]), start: 'Staging files...', success: 'Files staged successfully.',
+    })
 }
 
-async function generateReport({allure, reportUrl, buildUrl}: { allure: Allure, reportUrl: string, buildUrl?: string }) {
-    return await withOra({ work: () => allure.generate({
+async function generateReport({allure, reportUrl, args}: { allure: Allure, reportUrl: string, args: ArgsInterface }) {
+    const githubRunID = process.env.GITHUB_RUN_ID
+    return await withOra({
+        work: () => allure.generate({
             name: 'Allure Report Deployer',
             reportUrl: reportUrl,
-            buildUrl: buildUrl,
-            type: buildUrl ? 'github' : undefined,
-        }), start: 'Generating Allure report...', success: 'Report generated successfully.',})
+            buildUrl: args.buildUrl,
+            buildName: args.reportName || `run-${githubRunID}`,
+            type: githubRunID ? 'github' : undefined,
+        }), start: 'Generating Allure report...', success: 'Report generated successfully.',
+    })
 }
 
 async function deploy(host: FirebaseHost, storage: Storage | undefined) {
-    return await withOra({work: () => Promise.all([
+    return await withOra({
+        work: () => Promise.all([
             host.deploy(), // Returns reportUrl
             storage?.uploadArtifacts()
-        ]),start: 'Deploying...', success: 'Deployment successfully.',})
+        ]), start: 'Deploying...', success: 'Deployment successfully.',
+    })
 }
 
 async function notify(args: ArgsInterface, reportUrl: string) {

@@ -71,7 +71,7 @@ export class FirebaseHost implements HostingProvider {
                 "public": ".",
                 "ignore": [
                     "firebase.json",
-                    "**/.*",
+                    "**/.*"
                 ]
             }
         }
