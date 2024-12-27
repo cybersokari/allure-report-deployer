@@ -3,6 +3,7 @@ import {CounterInterface, ResultsStatus} from "../interfaces/counter.interface.j
 import fs from "fs/promises";
 import {readJsonFile} from "./file-util.js";
 import path from "node:path";
+import pLimit from "p-limit";
 /**
  * Counter Class
  *
@@ -49,10 +50,15 @@ class Counter implements CounterInterface{
         const entries = await fs.readdir(resultDir, {withFileTypes: true});
         const resultFiles = entries.filter((entry) => entry.isFile() && entry.name.endsWith('result.json'));
 
+        const promises = [];
+        const limit = pLimit(10);
         for (const file of resultFiles) {
-            const result = await readJsonFile(path.join(resultDir, path.basename(file.name)));
-            if (result.status === 'passed') passed++
+            promises.push(limit(async () => {
+                const result = await readJsonFile(path.join(resultDir, path.basename(file.name)));
+                if (result.status === 'passed') passed++
+            }))
         }
+        await Promise.all(promises);
         return {passed: passed, failed: resultFiles.length - passed}
     }
 }
