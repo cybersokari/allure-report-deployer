@@ -5,6 +5,7 @@ import {getSavedCredentialDirectory} from "../utilities/file-util.js";
 import {readFile} from "fs/promises";
 import {KEY_BUCKET} from "../utilities/constants.js";
 import {Storage as GCPStorage} from '@google-cloud/storage'
+import {handleStorageError} from "../main";
 
 
 export function addStorageBucketCommand(defaultProgram: Command) {
@@ -13,18 +14,22 @@ export function addStorageBucketCommand(defaultProgram: Command) {
         .action(async (bucketName: string) => {
             const creds = await getSavedCredentialDirectory()
             if(!creds){
-                console.error("You must set your Firebase/GCP credential JSON first: Use gcp-json:set")
+                console.error("You must set your Firebase/GCP credential JSON first: Use the 'gcp-json:set' command")
                 process.exit(1)
             }
 
             try {
                 const gcpJson = JSON.parse(await readFile(creds, "utf-8"));
-                new GCPStorage({credentials: gcpJson}).bucket(bucketName)
+                const bucket = new GCPStorage({credentials: gcpJson}).bucket(bucketName)
+                const [exists] = await bucket.exists();
+                if (!exists) {
+                    console.error(`Storage bucket ${chalk.red(bucketName)} does not exist`);
+                    process.exit(1)
+                }
                 db.set(KEY_BUCKET, bucketName);
                 console.log(`Storage bucket set to: ${chalk.cyan(bucketName)}`);
             }catch(err) {
-                //TODO: Remove this error from log
-                console.error('Failed to set bucket: ', err)
+                handleStorageError(err)
                 process.exit(1)
             }
         })

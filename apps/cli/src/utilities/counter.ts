@@ -54,8 +54,10 @@ class Counter implements CounterInterface{
         const limit = pLimit(10);
         for (const file of resultFiles) {
             promises.push(limit(async () => {
-                const result = await readJsonFile(path.join(resultDir, path.basename(file.name)));
-                if (result.status === 'passed') passed++
+                try {
+                    const result = await readJsonFile(path.join(resultDir, path.basename(file.name)));
+                    if (result.status === 'passed') passed++
+                }catch (e) {}
             }))
         }
         await Promise.all(promises);

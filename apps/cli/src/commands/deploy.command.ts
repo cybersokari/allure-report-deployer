@@ -69,10 +69,9 @@ function getGitHubBuildUrl(): string|undefined {
     return undefined
 }
 
-export function addDeployCommand(defaultProgram: Command, onCommand: (args: ArgsInterface) => Promise<void>) {
-    defaultProgram
+export function addDeployCommand(defaultProgram: Command, onCommand: (args: ArgsInterface) => Promise<void>): Command {
+    return defaultProgram
         .command("deploy")
-        .description("Generate and deploy Allure report")
         .addArgument(new Argument("<allure-results-path>", "Allure results path").default("./allure-results").argOptional())
         .addArgument(new Argument("<report-name>", "Name of your report. Default is 'Allure Report'").argOptional())
         .addOption(new Option("-r, --show-retries", "Show retries in the report"))

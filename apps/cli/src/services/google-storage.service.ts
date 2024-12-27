@@ -1,9 +1,9 @@
 import {Bucket, File} from "@google-cloud/storage";
 import pLimit from "p-limit";
 import {Order, StorageProvider} from "../interfaces/storage-provider.interface.js";
-import * as path from "node:path";
+import path from "node:path";
 
-export class FirebaseStorageService implements StorageProvider {
+export class GoogleStorageService implements StorageProvider {
     private bucket: Bucket;
 
     constructor(storageBucket: Bucket) {
