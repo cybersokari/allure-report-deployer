@@ -2,8 +2,7 @@
   "inputs": {
     "job": "test-action-local",
     "storage-bucket": "",
-    "website-id": "act-site",
-    "keep-results": "true",
-    "keep-history": "true"
+    "show-retries": "true",
+    "show-history": "true"
   }
 }

@@ -18,6 +18,10 @@ on:
           - minor
           - major
         default: patch
+      build-docker:
+        description: Release companion Docker and Action Docker images
+        type: boolean
+        default: true
 
 jobs:
   deploy-cli:
@@ -68,7 +72,7 @@ jobs:
           tag: 'v${{steps.publish.outputs.version}} --force'
 
   deploy-docker-action:
-    if: ${{ github.event.inputs.job == 'cli' }}
+    if: ${{ github.event.inputs.job == 'cli' && github.event.inputs.build-docker }}
     runs-on: ubuntu-latest
     needs: deploy-cli
     env:
@@ -94,7 +98,7 @@ jobs:
             sokari/allure-deployer-action:${{ github.sha }}
 
   deploy-docker:
-    if: ${{ github.event.inputs.job == 'cli' }}
+    if: ${{ github.event.inputs.job == 'cli' && github.event.inputs.build-docker }}
     runs-on: ubuntu-latest
     needs: deploy-cli
     env:

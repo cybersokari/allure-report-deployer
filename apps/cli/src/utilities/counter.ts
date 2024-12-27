@@ -1,5 +1,8 @@
 import {Mutex, MutexInterface} from 'async-mutex';
-import {CounterInterface} from "../interfaces/counter.interface";
+import {CounterInterface, ResultsStatus} from "../interfaces/counter.interface.js";
+import fs from "fs/promises";
+import {readJsonFile} from "./file-util.js";
+import path from "node:path";
 /**
  * Counter Class
  *
@@ -39,6 +42,18 @@ class Counter implements CounterInterface{
         }
         const elapsed = Date.now() - this.startTime;
         return (elapsed / 1000).toFixed()
+    }
+
+    async countResults(resultDir: string): Promise<ResultsStatus> {
+        let passed = 0
+        const entries = await fs.readdir(resultDir, {withFileTypes: true});
+        const resultFiles = entries.filter((entry) => entry.isFile() && entry.name.endsWith('result.json'));
+
+        for (const file of resultFiles) {
+            const result = await readJsonFile(path.join(resultDir, path.basename(file.name)));
+            if (result.status === 'passed') passed++
+        }
+        return {passed: passed, failed: resultFiles.length - passed}
     }
 }
 export const counter = new Counter()

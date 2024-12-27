@@ -4,6 +4,9 @@ export abstract class Icon {
     public static HOUR_GLASS = '\u23F3'
     public static ROCKET = '🚀'
     public static GLOBE = '🌐'
+    public static SUCCESS = `✅`
+    public static FAILURE = `❌`
+
     public static FILE_UPLOAD = `📤`
     public static CHART = '📊'
     public static FOLDER = '📁'

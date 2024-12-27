@@ -9,28 +9,29 @@ export class ConsoleNotifier implements Notifier {
     async notify(data: NotificationData): Promise<void> {
         const dashboardUrl = data.storageUrl
         const reportUrl = data.reportUrl
-        const counter = data.counter
 
         if (dashboardUrl && reportUrl) {
             appLog(`
 ${Icon.CHART} Test report URL   : ${ansiEscapes.link(chalk.blue(reportUrl), reportUrl)}
 ${Icon.FILE_UPLOAD} Storage URL       : ${ansiEscapes.link(chalk.blue(dashboardUrl), dashboardUrl)}
-${Icon.FOLDER} Files uploaded    : ${chalk.yellow(counter.uploaded)}
-${Icon.MAGNIFIER} Files processed   : ${chalk.yellow(counter.processed)}
+${Icon.SUCCESS} Passed            : ${chalk.yellow(data.resultStatus.passed)}
+${Icon.FAILURE} Failed            : ${chalk.yellow(data.resultStatus.failed)}
 `)
         }
 
         if (dashboardUrl && !reportUrl) {
             appLog(`
 ${Icon.FILE_UPLOAD} Storage URL       : ${ansiEscapes.link(chalk.blue(dashboardUrl), dashboardUrl)}
-${Icon.FOLDER} Files uploaded    : ${chalk.yellow(counter.uploaded)}
-${Icon.MAGNIFIER} Files processed   : ${chalk.yellow(counter.processed)}
+${Icon.SUCCESS} Passed            : ${chalk.yellow(data.resultStatus.passed)}
+${Icon.FAILURE} Failed            : ${chalk.yellow(data.resultStatus.failed)}
 `)
         }
 
         if (!dashboardUrl && reportUrl) {
             appLog(`
 ${Icon.CHART} Test report URL   : ${ansiEscapes.link(chalk.blue(reportUrl), reportUrl)}
+${Icon.SUCCESS} Passed            : ${chalk.yellow(data.resultStatus.passed)}
+${Icon.FAILURE} Failed            : ${chalk.yellow(data.resultStatus.failed)}
 `)
         }
     }

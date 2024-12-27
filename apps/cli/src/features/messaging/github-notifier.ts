@@ -21,13 +21,11 @@ export class GitHubNotifier implements Notifier {
             markdown += `- **File Storage**: [${data.storageUrl}](${data.storageUrl})\n`;
         }
 
-        if (data.counter) {
-            markdown += `
-| 📂 **Files Uploaded** | 🔍 **Files Processed** | ⏱ **Duration**     |
-|------------------------|------------------------|--------------------|
-| ${data.counter.uploaded}       | ${data.counter.processed}      | ${data.counter.getElapsedSeconds()} seconds |
+        markdown += `
+| ✅ **Passed** | ❌ **Failed** |
+|------------------------|------------------------|
+| ${data.resultStatus.passed}       | ${data.resultStatus.failed}      |
     `;
-        }
 
         markdown += `\n\n⭐ Like this? [Star us on GitHub](https://github.com/cybersokari/allure-report-deployer)!`;
 

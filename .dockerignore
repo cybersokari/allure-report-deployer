@@ -1,4 +1,0 @@
-# unused files and directories in shared package
-packages/shared/test
-packages/shared/jest*
-packages/action/action.yaml

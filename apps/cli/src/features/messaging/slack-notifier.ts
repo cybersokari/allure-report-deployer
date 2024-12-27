@@ -46,36 +46,24 @@ export class SlackNotifier implements Notifier {
                 "text": "*Your Allure report is ready* 📊"
             }
         })
-        if (data.storageUrl) {
-
-            blocks.push({
-                    "type": "context",
-                    "elements": [
-                        {
-                            "type": "mrkdwn",
-                            "text": `:file_folder:  *Files uploaded:* ${data.counter.uploaded}`
-                        }
-                    ]
-                },
-                {
-                    "type": "context",
-                    "elements": [
-                        {
-                            "type": "mrkdwn",
-                            "text": `:mag:  *Files processed:* ${data.counter.processed}`
-                        }
-                    ]
-                },)
-        }
         blocks.push({
-            "type": "context",
-            "elements": [
-                {
-                    "type": "mrkdwn",
-                    "text": `:stopwatch:  *Duration:* ${data.counter.getElapsedSeconds()} seconds`
-                }
-            ]
-        })
+                "type": "context",
+                "elements": [
+                    {
+                        "type": "mrkdwn",
+                        "text": `:white_check_mark:  *Passed:* ${data.resultStatus.passed}`,
+                    }
+                ]
+            },
+            {
+                "type": "context",
+                "elements": [
+                    {
+                        "type": "mrkdwn",
+                        "text": `:x:  *Failed:* ${data.resultStatus.failed}`
+                    }
+                ]
+            },)
         if (data.reportUrl) {
             blocks.push({
                 "type": "actions",

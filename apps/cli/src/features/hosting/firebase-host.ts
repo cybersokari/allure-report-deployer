@@ -83,7 +83,7 @@ export class FirebaseHost implements HostingProvider {
         const sites = await this.getExistingFirebaseSiteIds();
         if (sites.length >= maxFirebaseAllowedSites) {
             await this.deleteFirebaseSite(sites[0]);
-            console.log(`Firebase site deleted successfully.`);
+            console.log(`Oldest report deleted to create new report. Max. 30`);
         }
         // console.warn(`Creating Firebase site with:`, this.newSiteId);
         return firebase.hosting.sites.create(this.newSiteId, {

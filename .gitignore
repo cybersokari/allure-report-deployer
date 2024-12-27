@@ -21,3 +21,7 @@ allure-firebase.iml
 */test*.sh
 */**/test*.sh
 !*/test-action.sh
+
+allure-report
+*/allure-report
+*/**/allure-report
