@@ -114,7 +114,7 @@ export interface WithOraParams<T> {
     work: () => Promise<T>;
 }
 export async function withOra<T>({start, success, work}: WithOraParams<T>): Promise<T> {
-    if (process.env.CI === 'true') {
+    if (process.env.CI) {
         // Plain logging for CI
         console.log(start);
         const result = await work();
