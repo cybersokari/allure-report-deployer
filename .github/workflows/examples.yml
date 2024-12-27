@@ -69,14 +69,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4.1.5
       - name: Allure Deployer Action
-        uses: cybersokari/allure-deployer-action@v1.1.6
+        uses: cybersokari/allure-deployer-action@v1.1.8
         env:
           SLACK_TOKEN: ${{secrets.SLACK_TOKEN}}
           GOOGLE_CREDENTIALS_JSON: ${{ secrets.GCP_CREDENTIALS }}
         with:
           allure_results_path: 'assets/allure-results'
           storage_bucket: ${{github.event.inputs.storage-bucket}}
-          slack_channel: ${{secrets.SLACK_CHANNEL_ID}}
+          slack_channel: ${{secrets.SLACK_CHANNEL}}
           show_history: ${{github.event.inputs.show-history}}
           show_retries: ${{github.event.inputs.show-retries}}
           prefix: ${{github.event.inputs.prefix}}
