@@ -18,9 +18,5 @@ export interface ArgsInterface {
     slack_channel?: string
     slack_token?: string
     buildUrl?: string;
-    updatePr?: GitHubPRUpdateType;
-}
-export enum GitHubPRUpdateType {
-    comment,
-    summary
+    updatePr?: string;
 }

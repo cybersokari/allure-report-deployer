@@ -7,7 +7,7 @@ import {ArgsInterface} from "../../interfaces/args.interface.js";
 import path from "node:path";
 import {generate} from "random-words";
 import {StringBuilder} from "../../utilities/string-builder.js";
-import {FirebaseService} from "../../services/firebase.service.js";
+import {FirebaseInterface} from "../../interfaces/firebase.interface.js";
 
 // Max allowed Firebase sites to prevent exceeding quota
 // https://firebase.google.com/docs/hosting/multisites
@@ -20,13 +20,13 @@ export class FirebaseHost implements HostingProvider {
     private hostedSiteUrl: string | undefined;
     private configPath?: string;
     private readonly newSiteId: string;
-    private readonly service: FirebaseService;
+    private readonly service: FirebaseInterface;
 
     // Initialize class properties from input arguments
-    constructor(readonly args: ArgsInterface, service?: FirebaseService) {
+    constructor(readonly args: ArgsInterface, service: FirebaseInterface) {
         this.reportDir = this.args.REPORTS_DIR;
         this.newSiteId = this.getSiteId();
-        this.service = service ?? new FirebaseService(this.args.firebaseProjectId);
+        this.service = service
     }
 
     // Generates a unique site ID using random words and timestamps

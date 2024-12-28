@@ -1,6 +1,7 @@
 import {GithubInterface} from "../interfaces/github.interface.js";
 import fs from "fs/promises";
 import github from "@actions/github";
+import process from "node:process";
 
 export class GitHubService implements GithubInterface {
     outputPath: string;
@@ -20,8 +21,9 @@ export class GitHubService implements GithubInterface {
     }
 
     async updatePr({message, token}: { message: string, token: string }): Promise<void> {
-        const {owner, repo} = github.context.repo
+
         try {
+            const [owner, repo]  = process.env.GITHUB_REPOSITORY!.split('/')
             const pr = github.context.payload.pull_request!
             const octokit = github.getOctokit(token)
             // Update the PR body
@@ -34,8 +36,6 @@ export class GitHubService implements GithubInterface {
             console.log(`Pull Request #${pr.number} updated successfully!`);
         } catch (e) {
             console.warn('Failed to update PR:', e);
-            console.log(`Repository Owner: ${owner}`);
-            console.log(`Repository Name: ${repo}`);
         }
     }
 

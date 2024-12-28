@@ -436,9 +436,6 @@ gcloud firebase hosting:list
 
 ---
 
-#### Q8: Is Docker required to use this tool?
-- **A**: Yes, Docker is a core dependency for this project. Ensure Docker is installed and properly configured on your system.
-
 ## License
 
 This project is licensed under the [BSD-3 License](LICENSE). See the LICENSE file for details.

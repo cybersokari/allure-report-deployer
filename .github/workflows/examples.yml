@@ -24,9 +24,6 @@ on:
       prefix:
         description: 'The storage bucket path to back up Allure results and history files'
         required: false
-      slack_channel:
-        description: 'Slack channel ID'
-        required: false
 
 jobs:
   test-docker:
@@ -89,13 +86,15 @@ jobs:
       - name: Allure Deployer Action
         uses: ./apps/action
         env:
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
           SLACK_TOKEN: ${{secrets.SLACK_TOKEN}}
-          GOOGLE_CREDENTIALS_JSON: ${{ secrets.GCP_CREDENTIALS}}
+          GOOGLE_CREDENTIALS_JSON: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS}}
         with:
           allure_results_path: 'assets/allure-results'
           storage_bucket: ${{github.event.inputs.storage-bucket}}
           report_name: ${{ github.event.inputs.report-name }}
-          slack_channel: ${{github.event.inputs.slack_channel}}
+          slack_channel: ${{secrets.SLACK_CHANNEL}}
           show_retries: ${{github.event.inputs.show-retries}}
           show_history: ${{github.event.inputs.show-history}}
           prefix: ${{github.event.inputs.prefix}}
+          update_pr: 'comment'
