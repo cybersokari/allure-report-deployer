@@ -31,10 +31,10 @@ describe("ReportBuilder", () => {
     let mockAllureService: AllureService | null = null;
     let reportBuilder: Allure;
     const allureCommandSuccess = (s: string[]) => {
-        return Promise.resolve({ exitCode: 0, stdout: '', stderr: '' })
+        return Promise.resolve({exitCode: 0, stdout: '', stderr: ''})
     }
     const allureCommandFail = (s: string[]) => {
-        return Promise.resolve({ exitCode: 1, stdout: '', stderr: '' })
+        return Promise.resolve({exitCode: 1, stdout: '', stderr: ''})
     }
 
     afterEach(() => {
@@ -110,6 +110,8 @@ describe("ReportBuilder", () => {
             "--report-dir",
             REPORTS_DIR,
             "--clean",
+            "--report-name",
+            fakeArgs.reportName
         ]);
     });
 

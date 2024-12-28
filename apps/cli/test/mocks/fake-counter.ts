@@ -1,4 +1,4 @@
-import {CounterInterface} from "../../src/interfaces/counter.interface.js";
+import {CounterInterface, ResultsStatus} from "../../src/interfaces/counter.interface.js";
 import {Mutex} from "async-mutex";
 
 export class FakeCounter implements CounterInterface{
@@ -27,6 +27,10 @@ export class FakeCounter implements CounterInterface{
     }
 
     startTimer(): void {
+    }
+
+    countResults(resultDir: string): Promise<ResultsStatus> {
+        return Promise.resolve(undefined);
     }
 
 }
