@@ -400,7 +400,7 @@ gcloud firebase hosting:list
 ### ❓ FAQs
 
 #### Q1: Can I use this tool without Google Cloud Storage?
-- **A**: Yes, you can generate and share reports without using cloud storage. However, enabling `STORAGE_BUCKET` allows you back up results and history files.
+- **A**: Yes, you can generate and share reports without using cloud storage. However, enabling `STORAGE_BUCKET` allows you to enable test report History and Retries.
 
 ---
 
@@ -414,7 +414,8 @@ gcloud firebase hosting:list
 ---
 
 #### Q4: Do I need a paid Firebase plan?
-- **A**: No, the free Firebase plan is sufficient to host your reports. However, you will need to enable billing to use cloud storage, which has [free 5GB of storage](https://firebase.google.com/pricing)
+- **A**: No, the free Firebase plan is sufficient to host your reports. However, you will need to enable billing to use cloud storage for History and Retries.
+Firebase Storage is free for the first [5GB of storage](https://firebase.google.com/pricing)
 
 ---
 
