@@ -6,13 +6,13 @@ import fs from "fs/promises";
 import path from "node:path";
 import {KEY_BUCKET, KEY_PROJECT_ID, KEY_SLACK_CHANNEL, KEY_SLACK_TOKEN} from "../utilities/constants.js";
 import chalk from "chalk";
-import {ArgsInterface, GitHubPRUpdateType} from "../interfaces/args.interface.js";
+import {ArgsInterface} from "../interfaces/args.interface.js";
 
 const ERROR_MESSAGES = {
     EMPTY_RESULTS: "Error: The specified results directory is empty.",
     NO_RESULTS_DIR: "Error: No Allure result files in the specified directory.",
     MISSING_CREDENTIALS: "Error: Firebase/GCP credentials must be set using 'gcp-json:set' or provided via '--gcp-json'.",
-    MISSING_BUCKET: "Error: A Firebase/GCP bucket must be set using 'bucket:set' or provided via '--bucket'.",
+    MISSING_BUCKET: "Storage bucket not provided. History and Retries will not be available in report.",
     INVALID_SLACK_CRED: `Invalid Slack credential. ${chalk.blue('slack_channel')} and ${chalk.blue('slack_token')} must be provided together`,
     NO_JAVA: 'Error: JAVA_HOME not found. Allure 2.32 requires JAVA installed'
 };
@@ -48,7 +48,7 @@ async function getFirebaseCredentials(gcpJson: string | undefined): Promise<stri
 function validateBucket(options: any): void {
     if (!options.bucket && !db.get(KEY_BUCKET)) {
         if (options.showRetries || options.showHistory) {
-            throw new Error(ERROR_MESSAGES.MISSING_BUCKET);
+            console.warn(ERROR_MESSAGES.MISSING_BUCKET)
         }
     }
 }
@@ -69,6 +69,14 @@ function getGitHubBuildUrl(): string|undefined {
     return undefined
 }
 
+function validateUpdatePR(value: string): string {
+    if(value === 'comment' || value === 'summary') {
+        return value
+    }
+    console.warn(`Invalid value "${value}" for --update-pr. Falling back to "summary".`);
+    return 'summary'
+}
+
 export function addDeployCommand(defaultProgram: Command, onCommand: (args: ArgsInterface) => Promise<void>): Command {
     return defaultProgram
         .command("deploy")
@@ -82,15 +90,7 @@ export function addDeployCommand(defaultProgram: Command, onCommand: (args: Args
         .addOption(new Option("-st,  --slack-token <token>","Slack token"))
         .addOption(new Option("-p, --prefix <prefix>", "The storage bucket path to back up Allure results and history files"))
         .addOption(new Option("--update-pr <type>", "Update pull request with report url and info")
-            .default(GitHubPRUpdateType.summary.toString(), 'summary/comment').hideHelp()
-            .argParser((value)=> {
-                if(Object.values(GitHubPRUpdateType).includes(value)){
-                    return value
-                }
-                // Fallback to default if value is invalid
-                console.warn(`Invalid value "${value}" for --update-pr. Falling back to "summary".`);
-                return 'summary'
-            }))
+            .default('comment', 'summary/comment').hideHelp().argParser(validateUpdatePR))
         .action(async (resultPath, reportName, options) => {
             try {
                 if(!isJavaInstalled()){
@@ -125,7 +125,7 @@ export function addDeployCommand(defaultProgram: Command, onCommand: (args: Args
                     slack_channel: options.slackChannel || db.get(KEY_SLACK_CHANNEL, undefined),
                     slack_token: options.slackToken || db.get(KEY_SLACK_TOKEN, undefined),
                     buildUrl: getGitHubBuildUrl(),
-                    updatePr: options.updatePr as GitHubPRUpdateType
+                    updatePr: options.updatePr
                 };
 
                 await onCommand(cliArgs);

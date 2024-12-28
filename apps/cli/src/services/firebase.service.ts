@@ -1,7 +1,8 @@
 // @ts-ignore
 import firebase from 'firebase-tools'
+import {FirebaseInterface} from "../interfaces/firebase.interface.js";
 
-export class FirebaseService {
+export class FirebaseService implements FirebaseInterface{
     constructor(private readonly projectId: string) {}
 
     /**

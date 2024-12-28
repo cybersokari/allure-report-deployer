@@ -20,6 +20,7 @@ import {Storage as GCPStorage} from '@google-cloud/storage'
 import {readJsonFile} from "./utilities/file-util.js";
 import {ResultsStatus} from "./interfaces/counter.interface.js";
 import {GitHubService} from "./services/github.service.js";
+import {FirebaseService} from "./services/firebase.service.js";
 
 // Entry point for the application
 export function main() {
@@ -49,7 +50,8 @@ function setupCommands(program: Command) {
 // Executes the deployment process
 async function runDeploy(args: ArgsInterface) {
     const allure = new Allure({args});
-    const firebaseHost = new FirebaseHost(args);
+    const firebaseService = new FirebaseService(args.firebaseProjectId);
+    const firebaseHost = new FirebaseHost(args, firebaseService);
     try {
         const cloudStorage = await initializeCloudStorage(args); // Initialize storage bucket
         const [reportUrl, resultsStatus] = await setupStaging(firebaseHost, cloudStorage, allure, args);

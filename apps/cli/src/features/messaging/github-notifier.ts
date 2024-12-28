@@ -1,6 +1,6 @@
 import {Notifier} from "../../interfaces/notifier.interface.js";
 import {NotificationData} from "../../models/notification.model.js";
-import {ArgsInterface, GitHubPRUpdateType} from "../../interfaces/args.interface.js";
+import {ArgsInterface} from "../../interfaces/args.interface.js";
 import {GithubInterface} from "../../interfaces/github.interface.js";
 
 export class GitHubNotifier implements Notifier {
@@ -32,15 +32,12 @@ export class GitHubNotifier implements Notifier {
         const promises: Promise<void>[] = [];
         promises.push(this.client.updateOutput(`report_url=${data.reportUrl}`))
 
-        if(this.args.updatePr === GitHubPRUpdateType.comment){
-            const githubToken = process.env.GITHUB_TOKEN;
-            if (githubToken) {
-                promises.push(this.client.updatePr({message: markdown, token: githubToken}))
-            }
+        const githubToken = process.env.GITHUB_TOKEN;
+        if(githubToken && this.args.updatePr === 'comment'){
+            promises.push(this.client.updatePr({message: markdown, token: githubToken}))
         } else {
             promises.push(this.client.updateSummary(markdown.trim()))
         }
-
         await Promise.all(promises)
     }
 }
