@@ -399,7 +399,7 @@ gcloud firebase hosting:list
 
 ### ❓ FAQs
 
-#### Q1: Can I use this tool without Google Cloud Storage?
+#### Q1: Can I use this tool without Google Cloud Storage bucket?
 - **A**: Yes, you can generate and share reports without using cloud storage. However, enabling `STORAGE_BUCKET` allows you to enable test report History and Retries.
 
 ---
@@ -433,7 +433,7 @@ Firebase Storage is free for the first [5GB of storage](https://firebase.google.
 ---
 
 #### Q7: Can I merge results from multiple directories?
-- **A**: Not directly. You will need to merge allure-results directories manually before running the container.
+- **A**: Not directly. You will need to merge allure-results directories manually before generating a report.
 
 ---
 
