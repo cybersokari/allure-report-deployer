@@ -92,20 +92,19 @@ jobs:
 ```
 ___
  
-#### 2.	Check your GitHub Actions [summary](https://github.com/cybersokari/allure-report-deployer/actions/runs/12376413839):
-Live report website example: https://gatedaccessdev.web.app
+#### 2.	Check your Pull request or GitHub Actions summary:
+Pull request comment example: https://github.com/cybersokari/allure-report-deployer/pull/6
 ```markdown
 📊 Your Test Report is ready
 
 Test Report: https://your-example-url.web.app
 File Storage: https://console.firebase.google.com/project/${project-id}/storage/${storage-bucket}/files
 
-| 📂 Files Uploaded | 🔍 Files Processed | ⏱ Duration |
-|-------------------|--------------------|------------|
-| 5                 | 49                 | 8 seconds  |
+| ✅ Passed | ⚠️ Broken |
+|----------|-----------|
+| 15       | 2         |
 ```
 ___
-
 ### Gitlab
 #### Add the [docker image](https://hub.docker.com/r/sokari/allure-deployer) to your Gitlab workflow and run it.
     sokari/allure-deployer:latest
@@ -354,19 +353,14 @@ Zipped archives examples in the Firebase Developer console
 
 
 <h3 id="history-and-retries">🕗🔄 History and Retries</h3>
-
+This feature uses history and result files saved in Cloud Storage and requires a `STORAGE_BUCKET`.
 #### History
-Set `SHOW_HISTORY` to `true` to enable history in your incoming test report.
-This feature uses the history of your last archive in Cloud Storage, which means that 
-you will need to enable `SHOW_HISTORY` so that your history file will be uploaded to storage 
-for subsequent `SHOW_HISTORY` usage. 
-This is enabled by default.
+Set `SHOW_HISTORY` to `true` to enable history in your incoming test report. 
+This is enabled by default when `STORAGE_BUCKET` is provided.
 See how [Allure History works](https://allurereport.org/docs/history-and-retries/#tests-history)
 #### Retries
 Set `SHOW_RETRIES` to true to show retries in the incoming test report.
-This feature combines all the test result files from Cloud Storage before running the new report
-Enable `SHOW_RETRIES` so that all your test result files will be uploaded to Cloud Storage for
-subsequent test report generation.
+This feature combines all the test previous test result files from Cloud Storage before running the new report.
 See how [Allure Retries](https://allurereport.org/docs/history-and-retries/#how-to-keep-retries) work
 
 <h3 id="slack-integration">🛠️ Slack Integration</h2>

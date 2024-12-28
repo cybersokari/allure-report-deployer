@@ -13,7 +13,7 @@
     "esModuleInterop": true,
     "resolveJsonModule": true,
     "types": ["node"],
-    "declaration": true
+    "declaration": false
   },
   "compileOnSave": true,
   "include": ["src/**/*"],
