@@ -2,7 +2,7 @@ import {MutexInterface} from "async-mutex";
 
 export interface ResultsStatus {
     passed: number
-    failed: number
+    broken: number
 }
 
 export interface CounterInterface {

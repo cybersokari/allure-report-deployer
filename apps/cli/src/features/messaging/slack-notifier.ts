@@ -1,43 +1,20 @@
-import {Block, KnownBlock, WebClient} from "@slack/web-api";
 import {Notifier} from "../../interfaces/notifier.interface.js";
 import {NotificationData} from "../../models/notification.model.js";
 import {appLog} from "../../utilities/util.js";
-
-export interface SlackClient {
-    postMessage(blocks: (Block | KnownBlock )[], text: string): Promise<void>;
-}
-
-export class RealSlackClient implements SlackClient {
-    private webClient: WebClient;
-    private readonly channel: string;
-
-    constructor(token: string, channel: string) {
-        this.webClient = new WebClient(token);
-        this.channel = channel;
-    }
-
-    public async postMessage(blocks: (Block | KnownBlock )[], text: string): Promise<void> {
-        const channel = this.channel;
-        await this.webClient.chat.postMessage({
-            channel,
-            blocks,
-            text,
-        });
-    }
-}
-
+import {ArgsInterface} from "../../interfaces/args.interface.js";
+import {SlackInterface} from "../../interfaces/slack.interface.js";
 
 export class SlackNotifier implements Notifier {
-    private readonly slackClient: SlackClient;
+    private readonly slackClient: SlackInterface;
+    args: ArgsInterface;
 
-    constructor(client: SlackClient) {
+    constructor(client: SlackInterface, args: ArgsInterface) {
         this.slackClient = client;
+        this.args = args;
     }
 
     async notify(data: NotificationData): Promise<void> {
-
         // See: https://api.slack.com/methods/chat.postMessage
-
         const blocks = []
         blocks.push({
             "type": "section",
@@ -60,7 +37,7 @@ export class SlackNotifier implements Notifier {
                 "elements": [
                     {
                         "type": "mrkdwn",
-                        "text": `:x:  *Failed:* ${data.resultStatus.failed}`
+                        "text": `:warning:  *Broken:* ${data.resultStatus.broken}`
                     }
                 ]
             },)

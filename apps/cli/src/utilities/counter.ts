@@ -61,7 +61,7 @@ class Counter implements CounterInterface{
             }))
         }
         await Promise.all(promises);
-        return {passed: passed, failed: resultFiles.length - passed}
+        return {passed: passed, broken: resultFiles.length - passed}
     }
 }
 export const counter = new Counter()

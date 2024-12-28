@@ -5,7 +5,7 @@ import {getSavedCredentialDirectory} from "../utilities/file-util.js";
 import {readFile} from "fs/promises";
 import {KEY_BUCKET} from "../utilities/constants.js";
 import {Storage as GCPStorage} from '@google-cloud/storage'
-import {handleStorageError} from "../main";
+import {handleStorageError} from "../main.js";
 
 
 export function addStorageBucketCommand(defaultProgram: Command) {

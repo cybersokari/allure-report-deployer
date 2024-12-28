@@ -13,6 +13,7 @@ runs:
     - show_retries=${{ inputs.show_retries }}
     - show_history=${{ inputs.show_history }}
     - prefix=${{ inputs.prefix}}
+    - update_pr=${{inputs.update_pr}}
 
 inputs:
   storage_bucket:
@@ -38,6 +39,9 @@ inputs:
   prefix:
     description: 'The storage bucket path to back up Allure results and history files'
     required: false
+  update_pr:
+    description: 'Update pull request with test report url and info'
+    default: 'false'
 
 outputs:
   report_url:

@@ -1,12 +1,15 @@
 import {Notifier} from "../../interfaces/notifier.interface.js";
 import {NotificationData} from "../../models/notification.model.js";
-import fs from "node:fs";
+import {ArgsInterface} from "../../interfaces/args.interface.js";
+import {GithubInterface} from "../../interfaces/github.interface.js";
 
 export class GitHubNotifier implements Notifier {
-    private readonly summaryPath: string;
+    args: ArgsInterface;
+    client: GithubInterface;
 
-    constructor(summaryPath: string) {
-        this.summaryPath = summaryPath;
+    constructor(client: GithubInterface, args: ArgsInterface) {
+        this.client = client;
+        this.args = args;
     }
 
     async notify(data: NotificationData): Promise<void> {
@@ -22,22 +25,19 @@ export class GitHubNotifier implements Notifier {
         }
 
         markdown += `
-| ✅ **Passed** | ❌ **Failed** |
+| ✅ **Passed** | ⚠️ **Broken** |
 |------------------------|------------------------|
-| ${data.resultStatus.passed}       | ${data.resultStatus.failed}      |
+| ${data.resultStatus.passed}       | ${data.resultStatus.broken}      |
     `;
 
-        markdown += `\n\n⭐ Like this? [Star us on GitHub](https://github.com/cybersokari/allure-report-deployer)!`;
+        const promises: Promise<void>[] = [];
+        promises.push(this.client.updateSummary(markdown.trim()))
+        promises.push(this.client.updateOutput(`report_url=${data.reportUrl}`))
 
-        try {
-            fs.writeFileSync(this.summaryPath, markdown.trim(), {flag: 'a'}); // Append to the file
-        } catch (err) {
-            console.warn('Failed to write to $GITHUB_STEP_SUMMARY:', err);
+        const githubToken = process.env.GITHUB_TOKEN;
+        if (githubToken) {
+            promises.push(this.client.updatePr({message: markdown, token: githubToken}))
         }
-        try {
-            fs.writeFileSync(process.env.GITHUB_OUTPUT!, `report_url=${data.reportUrl}`, {flag: 'a'}); // Append to the file
-        }catch (e) {
-            console.warn('Failed to write to $GITHUB_OUTPUT:', e);
-        }
+        await Promise.all(promises)
     }
 }

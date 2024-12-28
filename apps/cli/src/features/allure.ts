@@ -6,7 +6,7 @@ import pLimit from "p-limit";
 import * as path from "node:path";
 import {CommandRunner} from "../interfaces/command.interface.js";
 import {ArgsInterface} from "../interfaces/args.interface.js";
-import {AllureService} from "../services/allure-service.js";
+import {AllureService} from "../services/allure.service.js";
 import {ExecutorInterface} from "../interfaces/executor.interface.js";
 
 export class Allure {
@@ -36,6 +36,9 @@ export class Allure {
             this.args.REPORTS_DIR,
             '--clean',
         ]
+        if(this.args.reportName){
+            command.push('--report-name', this.args.reportName)
+        }
         const { exitCode} = await this.allureRunner.runCommand(command);
         if (exitCode !== 0) {
             throw new Error("Failed to generate Allure report");

@@ -10,6 +10,7 @@ export ALLURE_RESULTS_PATH="${4#*=}"
 export SHOW_RETRIES="${5#*=}"
 export SHOW_HISTORY="${6#*=}"
 export PREFIX="${7#*=}"
+export UPDATE_PR="${8#*=}"
 
 
 if [ -z "$GOOGLE_CREDENTIALS_JSON" ]; then
@@ -37,6 +38,7 @@ deploy_command="allure-deployer deploy \"$ALLURE_RESULTS_PATH\""
 [ -n "$SLACK_CHANNEL" ] && deploy_command="$deploy_command --slack-channel $SLACK_CHANNEL"
 [ -n "$SLACK_TOKEN" ] && deploy_command="$deploy_command --slack-token $SLACK_TOKEN"
 [ -n "$PREFIX" ] && deploy_command="$deploy_command --prefix $PREFIX"
+[ "$UPDATE_PR" = "true" ] && deploy_command="$deploy_command --update-pr"
 
 # Execute the constructed command
 eval "$deploy_command"

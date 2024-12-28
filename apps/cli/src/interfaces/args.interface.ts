@@ -17,5 +17,6 @@ export interface ArgsInterface {
     runtimeCredentialDir: string
     slack_channel?: string
     slack_token?: string
-    buildUrl?: string
+    buildUrl?: string;
+    updatePr?: boolean;
 }
