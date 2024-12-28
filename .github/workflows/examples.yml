@@ -57,8 +57,7 @@ jobs:
           -e SHOW_RETRIES=${{ github.event.inputs.show-retries }} \
           -e SHOW_HISTORY=${{ github.event.inputs.show-history }} \
           -e SLACK_TOKEN=${{secrets.SLACK_TOKEN}} \
-          -e SLACK_CHANNEL_ID=${{secrets.SLACK_CHANNEL_ID}} \
-          -v $GITHUB_STEP_SUMMARY:/github/summary.txt \
+          -e SLACK_CHANNEL=${{secrets.SLACK_CHANNEL_ID}} \
           -v ${{ github.workspace }}/assets/allure-results:/allure-results \
           -v ${{ github.workspace }}/gcp-key.json:/credentials/key.json \
           sokari/allure-deployer:latest
@@ -69,7 +68,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4.1.5
       - name: Allure Deployer Action
-        uses: cybersokari/allure-deployer-action@v1.1.8
+        uses: cybersokari/allure-deployer-action@v1.1.9
         env:
           SLACK_TOKEN: ${{secrets.SLACK_TOKEN}}
           GOOGLE_CREDENTIALS_JSON: ${{ secrets.GCP_CREDENTIALS }}
@@ -80,6 +79,7 @@ jobs:
           show_history: ${{github.event.inputs.show-history}}
           show_retries: ${{github.event.inputs.show-retries}}
           prefix: ${{github.event.inputs.prefix}}
+          update_pr: 'summary'
 
   test-action-local:
     if: ${{ github.event.inputs.job == 'test-action-local' }}

@@ -1,0 +1,37 @@
+name: Test
+on: 
+    pull_request:
+jobs:
+    test:
+        runs-on: ubuntu-latest
+        env:
+            DIR: apps/cli
+        steps:
+        - uses: actions/checkout@v4.1.5
+        - name: Setup Node.js
+          uses: actions/setup-node@v4
+          with:
+            node-version: '20'
+
+        - name: Install deps
+          run: cd ${{env.DIR}} && npm i
+
+        - name: Run test
+          run: cd ${{env.DIR}} && npm run test
+        
+        - name: Generate and deploy Allure Report
+          uses: cybersokari/allure-deployer-action@v1.1.9
+          env:
+            SLACK_TOKEN: ${{secrets.SLACK_TOKEN}}
+            GOOGLE_CREDENTIALS_JSON: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
+            GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+#            GITHUB_STEP_SUMMARY: ${{vars.GITHUB_STEP_SUMMARY}}
+#            GITHUB_OUTPUT: ${{vars.GITHUB_OUTPUT}}
+          with:
+            allure_results_path: '${{env.DIR}}/allure-results'
+            storage_bucket: ${{vars.STORAGE_BUCKET}}
+            slack_channel: ${{secrets.SLACK_CHANNEL_ID}}
+            show_history: true
+            show_retries: true
+            prefix: 'pr-test'
+            update_pr: 'comment'

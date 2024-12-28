@@ -2,7 +2,7 @@ import type { Config } from '@jest/types';
 
 const config: Config.InitialOptions = {
     preset: 'ts-jest/presets/default-esm', // Use ESM preset for TypeScript
-    testEnvironment: 'node', // Set the test environment to Node.js
+    testEnvironment: 'allure-jest/node', // Set the test environment to Allure
     collectCoverage: true,
     coverageReporters: ["json"],
     transformIgnorePatterns: [

@@ -25,3 +25,5 @@ allure-firebase.iml
 allure-report
 */allure-report
 */**/allure-report
+allure-results
+*/**/allure-results
