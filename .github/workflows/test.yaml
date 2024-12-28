@@ -20,7 +20,7 @@ jobs:
           run: cd ${{env.DIR}} && npm run test
         
         - name: Generate and deploy Allure Report
-          uses: cybersokari/allure-deployer-action@v1.1.9
+          uses: cybersokari/allure-deployer-action@v1.1.10
           env:
             SLACK_TOKEN: ${{secrets.SLACK_TOKEN}}
             GOOGLE_CREDENTIALS_JSON: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
