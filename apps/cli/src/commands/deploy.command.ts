@@ -6,7 +6,7 @@ import fs from "fs/promises";
 import path from "node:path";
 import {KEY_BUCKET, KEY_PROJECT_ID, KEY_SLACK_CHANNEL, KEY_SLACK_TOKEN} from "../utilities/constants.js";
 import chalk from "chalk";
-import {ArgsInterface} from "../interfaces/args.interface.js";
+import {ArgsInterface, GitHubPRUpdateType} from "../interfaces/args.interface.js";
 
 const ERROR_MESSAGES = {
     EMPTY_RESULTS: "Error: The specified results directory is empty.",
@@ -81,7 +81,16 @@ export function addDeployCommand(defaultProgram: Command, onCommand: (args: Args
         .addOption(new Option("-sc,  --slack-channel <channel>","Slack channel ID"))
         .addOption(new Option("-st,  --slack-token <token>","Slack token"))
         .addOption(new Option("-p, --prefix <prefix>", "The storage bucket path to back up Allure results and history files"))
-        .addOption(new Option("--update-pr", "Update pull request with report url and info").hideHelp())
+        .addOption(new Option("--update-pr <type>", "Update pull request with report url and info")
+            .default(GitHubPRUpdateType.summary.toString(), 'summary/comment').hideHelp()
+            .argParser((value)=> {
+                if(Object.values(GitHubPRUpdateType).includes(value)){
+                    return value
+                }
+                // Fallback to default if value is invalid
+                console.warn(`Invalid value "${value}" for --update-pr. Falling back to "summary".`);
+                return 'summary'
+            }))
         .action(async (resultPath, reportName, options) => {
             try {
                 if(!isJavaInstalled()){
@@ -116,7 +125,7 @@ export function addDeployCommand(defaultProgram: Command, onCommand: (args: Args
                     slack_channel: options.slackChannel || db.get(KEY_SLACK_CHANNEL, undefined),
                     slack_token: options.slackToken || db.get(KEY_SLACK_TOKEN, undefined),
                     buildUrl: getGitHubBuildUrl(),
-                    updatePr: options.updatePr
+                    updatePr: options.updatePr as GitHubPRUpdateType
                 };
 
                 await onCommand(cliArgs);

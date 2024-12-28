@@ -40,8 +40,8 @@ inputs:
     description: 'The storage bucket path to back up Allure results and history files'
     required: false
   update_pr:
-    description: 'Update pull request with test report url and info'
-    default: 'false'
+    description: 'Add report info (url and status) as pull request comment or actions summary'
+    default: 'summary'
 
 outputs:
   report_url:

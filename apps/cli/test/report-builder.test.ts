@@ -4,7 +4,7 @@ import * as fs from "fs/promises";
 import {fakeArgs} from "./mocks/fake-args.js";
 import {jest} from "@jest/globals";
 import {ExecutorInterface} from "../src/interfaces/executor.interface.js";
-import {AllureService} from "../src/services/allure-service.js";
+import {AllureService} from "../src/services/allure.service.js";
 import {Allure} from "../src/features/allure.js";
 
 const REPORTS_DIR = '/app/allure-reports';

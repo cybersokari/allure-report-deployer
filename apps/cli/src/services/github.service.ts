@@ -21,22 +21,21 @@ export class GitHubService implements GithubInterface {
 
     async updatePr({message, token}: { message: string, token: string }): Promise<void> {
         const {owner, repo} = github.context.repo
-        //TODO: remove this
-        console.log(`Repository Owner: ${owner}`);
-        console.log(`Repository Name: ${repo}`);
         try {
             const pr = github.context.payload.pull_request!
             const octokit = github.getOctokit(token)
             // Update the PR body
-            await octokit.rest.pulls.update({
+            await octokit.rest.issues.createComment({
                 owner,
                 repo,
-                pull_number: pr.number,
+                issue_number: pr.number,
                 body: message.trim(),
             });
             console.log(`Pull Request #${pr.number} updated successfully!`);
         } catch (e) {
             console.warn('Failed to update PR:', e);
+            console.log(`Repository Owner: ${owner}`);
+            console.log(`Repository Name: ${repo}`);
         }
     }
 
