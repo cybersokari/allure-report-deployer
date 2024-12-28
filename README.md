@@ -13,30 +13,6 @@ Example report: https://gatedaccessdev.web.app
 
 ![Demo](assets/demo.gif)
 
-## 📚 **Table of Contents**
-
-1. [Quick Start](#quick-start)
-    - [GitHub Action](#github)
-    - [Gitlab](#gitlab)
-    - [Codemagic](#codemagic)
-    - [Bitrise]()
-    - [Local Test Runs](#local-test-runs)
-2. [How it works](#how-it-works)
-    - [Firebase Hosting](#hosting)
-    - [Cloud Storage](#cloud-storage)
-    - [History and Retries](#history-and-retries)
-    - [Slack Integration](#slack-integration)
-3. [Configurations](#configuration)
-    - [GitHub Action](#configuration-github)
-      - [Inputs](#inputs)
-      - [Environment variables](#environment-variables-github)
-    - [Docker](#configuration-docker)
-      - [Environment Variables](#environment-variables-docker)
-      - [Mount Volumes](#mount-volumes)
-4. [Troubleshooting and FAQs](#troubleshooting-and-faqs)
-5. [License](#license)
-6. [Contributing](#contributing)
-
 ## Usage
 
 This package can be used three different ways:
@@ -61,8 +37,7 @@ This package can be used three different ways:
     
 
 ### GitHub
-#### 1.	Add the [Allure Deployer GitHub Action](https://github.com/marketplace/actions/allure-deployer-action) to your workflow and run it.
-     
+#### 1.	Add the [Allure Deployer GitHub Action](https://github.com/marketplace/actions/allure-deployer-action) to your workflow.
 
 ```yaml
 name: Your awesome workflow
@@ -78,7 +53,7 @@ jobs:
           echo ' Nothing here for now, waiting for results'
           
       - name: Allure Deployer Action
-        uses: cybersokari/allure-deployer-action@v1.1.7
+        uses: cybersokari/allure-deployer-action@v1.1.10
         env:
           SLACK_TOKEN: ${{secrets.SLACK_TOKEN}}
           GOOGLE_CREDENTIALS_JSON: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
@@ -90,6 +65,7 @@ jobs:
           show_history: 'true' 
           show_retries: 'true'
 ```
+See configurations for complete options and environment variables
 ___
  
 #### 2.	Check your Pull request or GitHub Actions summary:
@@ -242,27 +218,29 @@ https://github.com/marketplace/actions/allure-deployer-action
 
 #### Inputs
 
-| Input                 | Description                                                             | Required | Default           |
-|-----------------------|-------------------------------------------------------------------------|----------|-------------------|
-| `allure_results_path` | Path to the directory containing Allure results files.                  | ✅ Yes    | `/allure-results` |
-| `report_name`         | The name/title of your report.                                          | ❌ No     | `Allure Report`   |
-| `storage_bucket`      | Name of the Google Cloud Storage bucket for backup and history storage. | ❌ No     | None              |
-| `slack_channel`       | ID of the Slack channel to send notifications about report links.       | ❌ No     | None              |
-| `show_history`        | Display history from previous test runs.                                | ❌ No     | `true`            |
-| `show_retries`        | Include retries from previous test runs.                                | ❌ No     | `true`            |
-| `prefix`              | Path prefix in the Cloud Storage bucket for archiving files.            | ❌ No     | None              |
+| Input                 | Description                                                                 | Required | Default           |
+|-----------------------|-----------------------------------------------------------------------------|----------|-------------------|
+| `allure_results_path` | Path to the directory containing Allure results files.                      | Yes      | `/allure-results` |
+| `report_name`         | The name/title of your report.                                              | No       | `Allure Report`   |
+| `storage_bucket`      | Name of the Google Cloud Storage bucket for backup and history storage.     | No       | None              |
+| `slack_channel`       | ID of the Slack channel to send notifications about report links.           | No       | None              |
+| `show_history`        | Display history from previous test runs.                                    | No       | `true`            |
+| `show_retries`        | Include retries from previous test runs.                                    | No       | `true`            |
+| `prefix`              | Path prefix in the Cloud Storage bucket for archiving files.                | No       | None              |
+| `update_pr`           | Add test report info as pr comment or actions summary (`comment`/`summary`) | No       | `summary`         |
 
 ---
 
 <h4 id="environment-variables-github">Environment Variables</h3>
 
 
-| Variable               | Description                                                   | Example                                      | Required | Default |
-|------------------------|---------------------------------------------------------------|----------------------------------------------|----------|---------|
-| `SLACK_TOKEN`          | Token for Slack App to send notifications with report URLs.   | `xoxb-XXXXXXXXXX-XXXXXXXX`                   | ❌ No     | None    |
-| `GCP_CREDENTIALS_JSON` | Content of the Google Cloud service account credentials file. | `${{ secrets.GCP_APPLICATION_CREDENTIALS }}` | ✅ Yes    | None    |
+| Variable                  | Description                                                                   | Example                                      | Required | Default |
+|---------------------------|-------------------------------------------------------------------------------|----------------------------------------------|----------|---------|
+| `GOOGLE_CREDENTIALS_JSON` | Content of the Google Cloud service account credentials file.                 | `${{ secrets.GCP_APPLICATION_CREDENTIALS }}` | Yes      | None    |
+| `SLACK_TOKEN`             | Token for Slack App to send notifications with report URLs.                   | `xoxb-XXXXXXXXXX-XXXXXXXX`                   | No       | None    |
+| `GITHUB_TOKEN`            | Github auth token for pull request updates if `update_pr` is set to `comment` | `ghp_*****`                                  | No       | None    |
 **Notes**:
-- `GCP_CREDENTIALS_JSON` must be set with a service account that has access to Firebase Hosting and Cloud Storage.
+- `GOOGLE_CREDENTIALS_JSON` must be set with a service account that has access to Firebase Hosting and Cloud Storage.
 - Ensure `SLACK_TOKEN` and `SLACK_CHANNEL` are configured to enable Slack integration.
 
 
@@ -285,7 +263,6 @@ docker pull sokari/allure-deployer:latest
 | `SHOW_RETRIES`   | Show retries in the current report by pulling result files from all archives in Cloud Storage | true                           | true           |
 | `SLACK_TOKEN`    | Your Slack App token                                                                          | xoxb-XXXXXXXXXX-XXXXXXXX       | None           |
 | `SLACK_CHANNEL`  | The Slack channel ID or conversation to notify with Allure report details                     | DC56JYGT8                      | None           |
-
 
 ---
 
