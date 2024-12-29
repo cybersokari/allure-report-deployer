@@ -22,7 +22,7 @@ elif [ -d "/github/workspace" ]; then
   else
     # Create directory for the JSON file
     DIR="/credentials"
-    mkdir -p DIR
+    mkdir -p "$DIR"
     JSON_FILE="$DIR/key.json"
     # Write the $GOOGLE_CREDENTIALS_JSON content to the JSON file
     echo "$GOOGLE_CREDENTIALS_JSON" > "$JSON_FILE" # No cleanup needed, in non mounted Docker path

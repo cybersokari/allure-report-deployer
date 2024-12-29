@@ -1,6 +1,0 @@
-{
-  "inputs": {
-    "job": "cli",
-    "semver": "patch"
-  }
-}
