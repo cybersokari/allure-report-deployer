@@ -3,7 +3,7 @@ description: 'Deploy Allure Reports as a website, with unique Ephemeral URLs per
 author: 'Sokari Gillis-Harry'
 runs:
   using: 'docker'
-  image: 'docker://sokari/act-github-actions-dockeraction:latest'
+  image: 'test.Dockerfile'
 #  image: 'docker://sokari/allure-deployer-action:latest'
   args:
     - storage_bucket=${{ inputs.storage_bucket }}

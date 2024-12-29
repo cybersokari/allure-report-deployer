@@ -25,8 +25,6 @@ services:
       STORAGE_BUCKET: $GCP_BUCKET
       PREFIX: 'project-999'
       REPORT_NAME: 'Demo Report 1'
-      KEEP_HISTORY: true # Default is true when STORAGE_BUCKET is provided
-      KEEP_RESULTS: false # Default is false
       SHOW_HISTORY: false
       SHOW_RETRIES: false
     volumes:

@@ -19,7 +19,7 @@ on:
           - major
         default: patch
       build-docker:
-        description: Release companion Docker and Action Docker images
+        description: Release companion Docker image
         type: boolean
         default: true
 
@@ -70,32 +70,6 @@ jobs:
           add: '${{ env.DIR }}/*.json'
           push: 'origin main --force'
           tag: 'v${{steps.publish.outputs.version}} --force'
-
-  deploy-docker-action:
-    if: ${{ github.event.inputs.job == 'cli' && github.event.inputs.build-docker }}
-    runs-on: ubuntu-latest
-    needs: deploy-cli
-    env:
-      DIR: apps/action
-    steps:
-      - uses: actions/checkout@v4.1.5
-      - name: Docker login
-        uses: docker/login-action@v3
-        with:
-          username: ${{ vars.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      - name: Build and push
-        uses: docker/build-push-action@v6.10.0
-        with:
-          context: ${{env.DIR}}
-          file: ${{env.DIR}}/action.Dockerfile
-          platforms: linux/amd64
-          push: true
-          build-args: CLI_VERSION=${{needs.deploy-cli.outputs.version}}
-          tags: |
-            sokari/allure-deployer-action:${{needs.deploy-cli.outputs.version}}
-            sokari/allure-deployer-action:${{ github.sha }}
 
   deploy-docker:
     if: ${{ github.event.inputs.job == 'cli' && github.event.inputs.build-docker }}

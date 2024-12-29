@@ -6,7 +6,7 @@ FROM deps AS prod
 
 ARG CLI_VERSION
 RUN npm i -g allure-deployer@$CLI_VERSION
-COPY start.sh /start.sh
-RUN chmod +x /start.sh
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 
-ENTRYPOINT ["/start.sh"]
+ENTRYPOINT ["/entrypoint.sh"]
