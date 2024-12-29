@@ -38,7 +38,7 @@ deploy_command="allure-deployer deploy \"$ALLURE_RESULTS_PATH\""
 [ -n "$SLACK_CHANNEL" ] && deploy_command="$deploy_command --slack-channel $SLACK_CHANNEL"
 [ -n "$SLACK_TOKEN" ] && deploy_command="$deploy_command --slack-token $SLACK_TOKEN"
 [ -n "$PREFIX" ] && deploy_command="$deploy_command --prefix $PREFIX"
-[ "$UPDATE_PR" = "true" ] && deploy_command="$deploy_command --update-pr"
+[ -n "$UPDATE_PR" ] && deploy_command="$deploy_command --update-pr $UPDATE_PR"
 
 # Execute the constructed command
 eval "$deploy_command"

@@ -7,7 +7,7 @@ import {
     GoogleStorageService,
     getDashboardUrl, GitHubNotifier,
     NotificationData, Notifier,
-    NotifierService, SlackService, SlackNotifier,
+    SlackService, SlackNotifier,
     Storage, withOra,
 } from "./lib.js";
 import {Command} from "commander";
@@ -132,7 +132,7 @@ async function notify(args: ArgsInterface, reportUrl: string, resultsStatus: Res
         const slackNotifier = new SlackNotifier(slackClient, args)
         notifiers.push(slackNotifier);
     }
-    const notificationService = new NotifierService(notifiers);
+    const notificationService = new NotifyHandler(notifiers);
     const dashboardUrl = () => {
         return args.storageBucket ? getDashboardUrl({
             storageBucket: args.storageBucket,
@@ -159,5 +159,25 @@ export function handleStorageError(error: any) {
         console.error('Invalid bucket name. Please ensure that the bucket name adheres to the naming guidelines.');
     } else {
         console.error('An unexpected error occurred:', error);
+    }
+}
+
+class NotifyHandler {
+    private notifiers: Notifier[];
+
+    constructor(notifiers: Notifier[]) {
+        this.notifiers = notifiers;
+    }
+
+    async sendNotifications(data: NotificationData): Promise<void> {
+        const promises = this.notifiers.map((notifier) => {
+            try {
+                notifier.notify(data)
+            }catch (e) {
+                // @ts-ignore
+                console.warn(`${notifier} failed to send notification.`, e.message);
+            }
+        });
+        await Promise.all(promises);
     }
 }

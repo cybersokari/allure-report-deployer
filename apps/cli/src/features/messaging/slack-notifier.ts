@@ -95,7 +95,7 @@ export class SlackNotifier implements Notifier {
             );
             appLog('Slack message sent');
         } catch (e) {
-            console.log('Slack error: ', e)
+            console.log('Slack message error: ', e)
         }
     }
 

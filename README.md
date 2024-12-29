@@ -2,7 +2,7 @@
 
 ![Deploy](https://github.com/cybersokari/allure-docker-deploy/actions/workflows/deploy.yaml/badge.svg?branch=main)
 ![Deploy](https://github.com/cybersokari/allure-docker-deploy/workflows/Test/badge.svg)
-![](https://img.shields.io/docker/pulls/sokari/allure-deployer-action)
+![docker](https://img.shields.io/docker/pulls/sokari/allure-deployer-action)
 ![npm](https://img.shields.io/npm/dt/allure-deployer?label=npm%20downloads)
 
 **Host your Allure test reports on the web with history, retries, and Slack integration—no server required.**
@@ -65,7 +65,7 @@ jobs:
           show_history: 'true' 
           show_retries: 'true'
 ```
-See configurations for complete options and environment variables
+See [configurations](#configuration-github) for complete options and environment variables
 ___
  
 #### 2.	Check your Pull request or GitHub Actions summary:
@@ -330,12 +330,17 @@ Zipped archives examples in the Firebase Developer console
 
 
 <h3 id="history-and-retries">🕗🔄 History and Retries</h3>
+
 This feature uses history and result files saved in Cloud Storage and requires a `STORAGE_BUCKET`.
+
 #### History
+
 Set `SHOW_HISTORY` to `true` to enable history in your incoming test report. 
 This is enabled by default when `STORAGE_BUCKET` is provided.
 See how [Allure History works](https://allurereport.org/docs/history-and-retries/#tests-history)
+
 #### Retries
+
 Set `SHOW_RETRIES` to true to show retries in the incoming test report.
 This feature combines all the test previous test result files from Cloud Storage before running the new report.
 See how [Allure Retries](https://allurereport.org/docs/history-and-retries/#how-to-keep-retries) work

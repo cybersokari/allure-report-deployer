@@ -1,7 +1,12 @@
-import { Argument, Command, Option } from "commander";
+import {Argument, Command, Option} from "commander";
 import {db} from "../utilities/database.js";
 import process from "node:process";
-import {getRuntimeDirectory, getSavedCredentialDirectory, isJavaInstalled, readJsonFile} from "../utilities/file-util.js";
+import {
+    getRuntimeDirectory,
+    getSavedCredentialDirectory,
+    isJavaInstalled,
+    readJsonFile
+} from "../utilities/file-util.js";
 import fs from "fs/promises";
 import path from "node:path";
 import {KEY_BUCKET, KEY_PROJECT_ID, KEY_SLACK_CHANNEL, KEY_SLACK_TOKEN} from "../utilities/constants.js";
@@ -77,6 +82,45 @@ function validateUpdatePR(value: string): string {
     return 'summary'
 }
 
+async function handleAction(resultPath: any, reportName: any, options: any): Promise<ArgsInterface> {
+    try {
+        await validateResultsPath(resultPath);
+        const firebaseProjectId = await getFirebaseCredentials(options.gcpJson);
+        validateBucket(options);
+        validateSlackCredentials(options.slackChannel, options.slackToken);
+
+        const runtimeDir = await getRuntimeDirectory();
+        // Default true if not set
+        const showRetries = options.showRetries ?? true
+        const showHistory = options.showHistory ?? true
+        return {
+            prefix: options.prefix,
+            runtimeCredentialDir: options.gcpJson || (await getSavedCredentialDirectory()),
+            ARCHIVE_DIR: `${runtimeDir}/archive`,
+            HOME_DIR: runtimeDir,
+            REPORTS_DIR: `${runtimeDir}/allure-report`,
+            RESULTS_PATH: resultPath,
+            RESULTS_STAGING_PATH: `${runtimeDir}/allure-results`,
+            downloadRequired: showHistory || showRetries,
+            fileProcessingConcurrency: 10,
+            firebaseProjectId: firebaseProjectId || db.get(KEY_PROJECT_ID),
+            uploadRequired: showHistory || showRetries,
+            storageBucket: options.bucket || db.get(KEY_BUCKET),
+            showRetries: showRetries,
+            showHistory: showHistory,
+            reportName: reportName,
+            slack_channel: options.slackChannel || db.get(KEY_SLACK_CHANNEL, undefined),
+            slack_token: options.slackToken || db.get(KEY_SLACK_TOKEN, undefined),
+            buildUrl: getGitHubBuildUrl(),
+            updatePr: options.updatePr
+        }
+    } catch (error) {
+        // @ts-ignore
+        console.error(error.message);
+        process.exit(1);
+    }
+}
+
 export function addDeployCommand(defaultProgram: Command, onCommand: (args: ArgsInterface) => Promise<void>): Command {
     return defaultProgram
         .command("deploy")
@@ -92,47 +136,11 @@ export function addDeployCommand(defaultProgram: Command, onCommand: (args: Args
         .addOption(new Option("--update-pr <type>", "Update pull request with report url and info")
             .default('comment', 'summary/comment').hideHelp().argParser(validateUpdatePR))
         .action(async (resultPath, reportName, options) => {
-            try {
-                if(!isJavaInstalled()){
-                    console.warn(ERROR_MESSAGES.NO_JAVA)
-                    process.exit(1)
-                }
-                await validateResultsPath(resultPath);
-                const firebaseProjectId = await getFirebaseCredentials(options.gcpJson);
-                validateBucket(options);
-                validateSlackCredentials(options.slackChannel, options.slackToken);
-
-                const runtimeDir = await getRuntimeDirectory();
-                // Default true if not set
-                const showRetries = options.showRetries ?? true
-                const showHistory = options.showHistory ?? true
-                const cliArgs: ArgsInterface = {
-                    prefix: options.prefix,
-                    runtimeCredentialDir: options.gcpJson || (await getSavedCredentialDirectory()),
-                    ARCHIVE_DIR: `${runtimeDir}/archive`,
-                    HOME_DIR: runtimeDir,
-                    REPORTS_DIR: `${runtimeDir}/allure-report`,
-                    RESULTS_PATH: resultPath,
-                    RESULTS_STAGING_PATH: `${runtimeDir}/allure-results`,
-                    downloadRequired: showHistory || showRetries,
-                    fileProcessingConcurrency: 10,
-                    firebaseProjectId: firebaseProjectId || db.get(KEY_PROJECT_ID),
-                    uploadRequired: showHistory || showRetries,
-                    storageBucket: options.bucket || db.get(KEY_BUCKET),
-                    showRetries: showRetries,
-                    showHistory: showHistory,
-                    reportName: reportName,
-                    slack_channel: options.slackChannel || db.get(KEY_SLACK_CHANNEL, undefined),
-                    slack_token: options.slackToken || db.get(KEY_SLACK_TOKEN, undefined),
-                    buildUrl: getGitHubBuildUrl(),
-                    updatePr: options.updatePr
-                };
-
-                await onCommand(cliArgs);
-            } catch (error) {
-                // @ts-ignore
-                console.error(error.message);
-                process.exit(1);
+            if (!isJavaInstalled()) {
+                console.warn(ERROR_MESSAGES.NO_JAVA)
+                process.exit(1)
             }
+            const cliArgs = await handleAction(resultPath, reportName, options);
+            await onCommand(cliArgs);
         });
 }
