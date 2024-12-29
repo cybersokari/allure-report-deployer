@@ -69,7 +69,7 @@ See [configurations](#configuration-github) for complete options and environment
 ___
  
 #### 2.	Check your Pull request or GitHub Actions summary:
-Pull request comment example: https://github.com/cybersokari/allure-report-deployer/pull/6
+Pull request comment [example](https://github.com/cybersokari/allure-report-deployer/pull/6#issuecomment-2564403881)
 ```markdown
 📊 Your Test Report is ready
 
