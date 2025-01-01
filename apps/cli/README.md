@@ -33,7 +33,7 @@ allure-deployer deploy <allure-results-path> <report-name>
 
 #### Example
 ```bash
-allure-deployer deploy ./allure-results my-report-name --keep-history
+allure-deployer deploy ./allure-results my-report-name --show-history
 ```
 
 #### Arguments
@@ -81,7 +81,7 @@ allure-deployer bucket:set my-bucket.firebasestorage.app
 
 2. **Generate and deploy the Report**:
    ```bash
-   allure-deployer deploy ./allure-result --keep-history --bucket gcp-bucket --gcp-json ./firebase.json
+   allure-deployer deploy path/to/allure-result --show-history --bucket gcp-bucket --gcp-json path/to/credential.json
    ```
 
 3. **Access the Report**:
