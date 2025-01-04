@@ -1,7 +1,7 @@
 {
   "name": "allure-deployer",
   "version": "1.1.14",
-  "description": "Deploy your Allure Reports to Firebase, and notify in Slack, No server required",
+  "description": "Host Allure test reports on the web with history, retries, and Slack integration—no server required",
   "keywords": [
     "allure server",
     "allure test report",
@@ -15,12 +15,12 @@
     "allure serverless"
   ],
   "author": "Sokari Gillis-Harry",
-  "license": "MIT",
+  "license": "BSD-3-Clause",
   "main": "./dist/index.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/cybersokari/allure-report-deployer.git",
-    "directory": "packages/cli"
+    "directory": "apps/cli"
   },
   "bugs": {
     "url": "https://github.com/cybersokari/allure-report-deployer/issues"
