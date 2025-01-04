@@ -6,3 +6,5 @@ jest.config.ts
 tsconfig.test.json
 tsconfig.tsbuildinfo
 coverage
+test
+allure-results
