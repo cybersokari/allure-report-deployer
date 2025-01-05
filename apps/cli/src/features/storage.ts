@@ -52,15 +52,14 @@ export class Storage {
     public async uploadArtifacts() {
         const foldersToBackup: { path: string, destination?: string }[] = []
         const foldersToCount = []
-        if (this.args.showRetries) {
-            foldersToBackup.push({path: this.args.RESULTS_PATH})
-            foldersToCount.push(this.args.RESULTS_PATH)
-        }
-        if (this.args.showHistory) {
-            const historyFolder = `${this.args.REPORTS_DIR}/history`
-            foldersToBackup.push({path: historyFolder, destination: 'history'})
-            foldersToCount.push(historyFolder)
-        }
+
+        foldersToBackup.push({path: this.args.RESULTS_PATH})
+    	foldersToCount.push(this.args.RESULTS_PATH)
+
+        const historyFolder = `${this.args.REPORTS_DIR}/history`
+        foldersToBackup.push({path: historyFolder, destination: 'history'})
+        foldersToCount.push(historyFolder)
+
         const outputFileName = path.join(this.args.ARCHIVE_DIR, Date.now().toString().concat('.zip'))
         await zipFolder(foldersToBackup, outputFileName)
         const cloudStorageFilePath = path.join(this.args.prefix ?? '', path.basename(outputFileName))
