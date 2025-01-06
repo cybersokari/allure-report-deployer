@@ -23,7 +23,6 @@ export class ConsoleNotifier implements Notifier {
     async notify(data: NotificationData): Promise<void> {
         const dashboardUrl = data.storageUrl
         const reportUrl = data.reportUrl
-        chalk.level 
 
         if (dashboardUrl && reportUrl) {
             appLog(`
