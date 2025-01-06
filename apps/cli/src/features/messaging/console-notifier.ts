@@ -11,14 +11,23 @@ export class ConsoleNotifier implements Notifier {
     constructor(args: ArgsInterface) {
         this.args = args;
     }
+    private isHyperlinkSupported(): boolean {
+        // Check for CI environments or non-TTY outputs
+        return process.stdout.isTTY && !process.env.CI;
+    }
+    
+    private link(text: string, url: string): string {
+        // Use `ansiEscapes.link` if hyperlinks are supported; otherwise, return plain text
+        return this.isHyperlinkSupported() ? ansiEscapes.link(text, url) : `${text} (${url})`;
+    }
     async notify(data: NotificationData): Promise<void> {
         const dashboardUrl = data.storageUrl
         const reportUrl = data.reportUrl
 
         if (dashboardUrl && reportUrl) {
             appLog(`
-${Icon.CHART} Test report URL   : ${ansiEscapes.link(chalk.blue(reportUrl), reportUrl)}
-${Icon.FILE_UPLOAD} Storage URL       : ${ansiEscapes.link(chalk.blue(dashboardUrl), dashboardUrl)}
+${Icon.CHART} Test report URL   : ${this.link(chalk.blue(reportUrl), reportUrl)}
+${Icon.FILE_UPLOAD} Storage URL       : ${this.link(chalk.blue(dashboardUrl), dashboardUrl)}
 ${Icon.SUCCESS} Passed            : ${chalk.yellow(data.resultStatus.passed)}
 ${Icon.WARNING} Broken            : ${chalk.yellow(data.resultStatus.broken)}
 `)
@@ -26,7 +35,7 @@ ${Icon.WARNING} Broken            : ${chalk.yellow(data.resultStatus.broken)}
 
         if (dashboardUrl && !reportUrl) {
             appLog(`
-${Icon.FILE_UPLOAD} Storage URL       : ${ansiEscapes.link(chalk.blue(dashboardUrl), dashboardUrl)}
+${Icon.FILE_UPLOAD} Storage URL       : ${this.link(chalk.blue(dashboardUrl), dashboardUrl)}
 ${Icon.SUCCESS} Passed            : ${chalk.yellow(data.resultStatus.passed)}
 ${Icon.WARNING} Broken            : ${chalk.yellow(data.resultStatus.broken)}
 `)
@@ -34,7 +43,7 @@ ${Icon.WARNING} Broken            : ${chalk.yellow(data.resultStatus.broken)}
 
         if (!dashboardUrl && reportUrl) {
             appLog(`
-${Icon.CHART} Test report URL   : ${ansiEscapes.link(chalk.blue(reportUrl), reportUrl)}
+${Icon.CHART} Test report URL   : ${this.link(chalk.blue(reportUrl), reportUrl)}
 ${Icon.SUCCESS} Passed            : ${chalk.yellow(data.resultStatus.passed)}
 ${Icon.WARNING} Broken            : ${chalk.yellow(data.resultStatus.broken)}
 `)
