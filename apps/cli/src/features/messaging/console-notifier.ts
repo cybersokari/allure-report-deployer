@@ -10,7 +10,6 @@ export class ConsoleNotifier implements Notifier {
     args: ArgsInterface;
     constructor(args: ArgsInterface) {
         this.args = args;
-        chalk.level = process.env.CI ? 0 : 2
     }
     private isHyperlinkSupported(): boolean {
         // Check for CI environments or non-TTY outputs
