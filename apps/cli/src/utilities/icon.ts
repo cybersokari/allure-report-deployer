@@ -6,7 +6,9 @@ export abstract class Icon {
     public static GLOBE = '🌐'
     public static SUCCESS = `✅`
     public static FAILURE = `❌`
-    public static WARNING = `⚠️`
+    public static WARNING = `\x1b[33m⚠️\x1b[0m`
+    public static SKIPPED = `⏭️`
+    public static QUESTION_MARK = `❓`
 
     public static FILE_UPLOAD = `📤`
     public static CHART = '📊'

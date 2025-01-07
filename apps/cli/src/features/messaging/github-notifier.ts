@@ -23,11 +23,16 @@ export class GitHubNotifier implements Notifier {
         if (data.storageUrl) {
             markdown += `- **File Storage**: [${data.storageUrl}](${data.storageUrl})\n`;
         }
+        const passed = data.resultStatus.passed;
+        const broken = data.resultStatus.broken;
+        const skipped = data.resultStatus.skipped;
+        const failed = data.resultStatus.failed;
+        const unknown = data.resultStatus.unknown;
 
         markdown += `
-| ✅ **Passed** | ⚠️ **Broken** |
-|------------------------|------------------------|
-| ${data.resultStatus.passed}       | ${data.resultStatus.broken}      |
+| ✅ **Passed** | ⚠️ **Broken** | ⏭️ **Skipped** | ❌ **Failed** | ❓ **Unknown**|
+|-----------|------------------|---------------|---------------|---------------|
+| ${passed} | ${broken}        | ${skipped}    | ${failed}     | ${unknown}|
     `;
         const promises: Promise<void>[] = [];
         promises.push(this.client.updateOutput(`report_url=${data.reportUrl}`))

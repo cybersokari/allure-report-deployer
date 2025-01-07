@@ -23,7 +23,8 @@ export class SlackNotifier implements Notifier {
                 "text": "*Your Allure report is ready* 📊"
             }
         })
-        blocks.push({
+        if(data.resultStatus.passed){
+            blocks.push({
                 "type": "context",
                 "elements": [
                     {
@@ -31,8 +32,10 @@ export class SlackNotifier implements Notifier {
                         "text": `:white_check_mark:  *Passed:* ${data.resultStatus.passed}`,
                     }
                 ]
-            },
-            {
+            })
+        }
+        if(data.resultStatus.broken){
+            blocks.push({
                 "type": "context",
                 "elements": [
                     {
@@ -40,7 +43,41 @@ export class SlackNotifier implements Notifier {
                         "text": `:warning:  *Broken:* ${data.resultStatus.broken}`
                     }
                 ]
-            },)
+            })
+        }
+        if(data.resultStatus.skipped){
+            blocks.push({
+                "type": "context",
+                "elements": [
+                    {
+                        "type": "mrkdwn",
+                        "text": `:next_track_button:  *Skipped:* ${data.resultStatus.skipped}`
+                    }
+                ]
+            })
+        }
+        if(data.resultStatus.failed){
+            blocks.push({
+                "type": "context",
+                "elements": [
+                    {
+                        "type": "mrkdwn",
+                        "text": `:x:  *Failed:* ${data.resultStatus.failed}`
+                    }
+                ]
+            })
+        }
+        if(data.resultStatus.unknown){
+            blocks.push({
+                "type": "context",
+                "elements": [
+                    {
+                        "type": "mrkdwn",
+                        "text": `:question:  *Unknown:* ${data.resultStatus.unknown}`
+                    }
+                ]
+            })
+        }
         if (data.reportUrl) {
             blocks.push({
                 "type": "actions",
