@@ -75,7 +75,7 @@ jobs:
         with:
           allure_results_path: 'assets/allure-results'
           storage_bucket: ${{github.event.inputs.storage-bucket}}
-          slack_channel: ${{secrets.SLACK_CHANNEL}}
+          slack_channel: ${{secrets.SLACK_CHANNEL_ID}}
           show_history: ${{github.event.inputs.show-history}}
           show_retries: ${{github.event.inputs.show-retries}}
           prefix: ${{github.event.inputs.prefix}}
