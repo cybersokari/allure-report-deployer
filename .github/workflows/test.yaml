@@ -23,13 +23,11 @@ jobs:
           run: cd ${{env.DIR}} && npm run test
         
         - name: Generate and deploy Allure Report
-          uses: cybersokari/allure-deployer-action@v1.1.10
+          uses: cybersokari/allure-deployer-action@v1.1.15
           env:
             SLACK_TOKEN: ${{secrets.SLACK_TOKEN}}
             GOOGLE_CREDENTIALS_JSON: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
             GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
-#            GITHUB_STEP_SUMMARY: ${{vars.GITHUB_STEP_SUMMARY}}
-#            GITHUB_OUTPUT: ${{vars.GITHUB_OUTPUT}}
           with:
             allure_results_path: '${{env.DIR}}/allure-results'
             storage_bucket: ${{vars.STORAGE_BUCKET}}
