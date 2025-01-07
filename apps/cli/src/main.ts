@@ -72,7 +72,7 @@ async function initializeCloudStorage(args: ArgsInterface): Promise<Storage | un
         const bucket = new GCPStorage({credentials}).bucket(args.storageBucket);
         const [exists] = await bucket.exists();
         if (!exists) {
-            console.log('Storage Bucket does not exist. History and Retries will be disabled');
+            console.log(`Storage Bucket '${args.storageBucket}' does not exist. History and Retries will be disabled`);
             return undefined;
         }
         return new Storage(new GoogleStorageService(bucket), args);
@@ -174,8 +174,7 @@ class NotifyHandler {
             try {
                 notifier.notify(data)
             }catch (e) {
-                // @ts-ignore
-                console.warn(`${notifier} failed to send notification.`, e.message);
+                console.warn(`${notifier.constructor.name} failed to send notification.`, e);
             }
         });
         await Promise.all(promises);
