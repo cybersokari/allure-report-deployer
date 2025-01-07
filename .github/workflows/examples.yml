@@ -3,20 +3,23 @@ on:
   workflow_dispatch:
     inputs:
       job:
-        description: 'Select the job to run: test-docker or test-action'
-        required: true
-        default: 'test-action'
+        description: 'Select the job to run'
+        type: choice
+        options:
+          - test-docker
+          - test-action
+        default: test-action
       storage-bucket:
         description: 'Your Firebase (GCP) storage bucket'
         required: true
       show-retries:
         description: 'Show keep retries in report'
-        required: false
-        default: 'true'
+        type: boolean
+        default: true
       show-history:
         description: 'Show keep history in report'
-        required: false
-        default: 'true'
+        type: boolean
+        default: true
       report-name:
         description: 'Title of the report'
         required: false
