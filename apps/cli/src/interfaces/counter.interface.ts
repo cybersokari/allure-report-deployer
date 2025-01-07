@@ -1,8 +1,11 @@
 import {MutexInterface} from "async-mutex";
 
-export interface ResultsStatus {
+export type ResultsStatus = {
     passed: number
     broken: number
+    skipped: number
+    failed: number
+    unknown: number
 }
 
 export interface CounterInterface {

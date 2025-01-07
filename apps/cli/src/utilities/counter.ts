@@ -1,7 +1,7 @@
-import {Mutex, MutexInterface} from 'async-mutex';
-import {CounterInterface, ResultsStatus} from "../interfaces/counter.interface.js";
+import { Mutex, MutexInterface } from 'async-mutex';
+import { CounterInterface, ResultsStatus } from "../interfaces/counter.interface.js";
 import fs from "fs/promises";
-import {readJsonFile} from "./file-util.js";
+import { readJsonFile } from "./file-util.js";
 import path from "node:path";
 import pLimit from "p-limit";
 /**
@@ -11,13 +11,13 @@ import pLimit from "p-limit";
  * and uploaded, as well as timing functionalities to measure elapsed time.
  * Utilizes a mutex for safe concurrent updates to shared counters.
  */
-class Counter implements CounterInterface{
+class Counter implements CounterInterface {
     public startTime: number | undefined = undefined;
     public processed = 0
     public uploaded = 0
     public mutex: MutexInterface;
 
-    constructor(){
+    constructor() {
         this.mutex = new Mutex()
     }
 
@@ -33,7 +33,7 @@ class Counter implements CounterInterface{
     }
 
     startTimer(): void {
-        if(!this.startTime){
+        if (!this.startTime) {
             this.startTime = Date.now();
         }
     }
@@ -47,7 +47,11 @@ class Counter implements CounterInterface{
 
     async countResults(resultDir: string): Promise<ResultsStatus> {
         let passed = 0
-        const entries = await fs.readdir(resultDir, {withFileTypes: true});
+        let failed = 0
+        let broken = 0
+        let skipped = 0
+        let unknown = 0
+        const entries = await fs.readdir(resultDir, { withFileTypes: true });
         const resultFiles = entries.filter((entry) => entry.isFile() && entry.name.endsWith('result.json'));
 
         const promises = [];
@@ -56,12 +60,28 @@ class Counter implements CounterInterface{
             promises.push(limit(async () => {
                 try {
                     const result = await readJsonFile(path.join(resultDir, path.basename(file.name)));
-                    if (result.status === 'passed') passed++
-                }catch (e) {}
+                    switch (result.status) {
+                        case 'passed':
+                            passed++;
+                            break;
+                        case 'broken':
+                            broken++;
+                            break;
+                        case 'skipped':
+                            skipped++;
+                            break;
+                        case 'failed':
+                            failed++;
+                            break;
+                        default:
+                            unknown++;
+                            break;
+                    }
+                } catch (e) { }
             }))
         }
         await Promise.all(promises);
-        return {passed: passed, broken: resultFiles.length - passed}
+        return { passed, broken, skipped, failed, unknown}
     }
 }
 export const counter = new Counter()
