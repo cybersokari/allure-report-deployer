@@ -36,7 +36,9 @@ describe("Storage", () => {
             }
             return files;
         }),
-        deleteFiles : jest.fn<any>()
+        deleteFiles : jest.fn<any>(),
+        deleteFile: jest.fn<any>(),
+        getFiles: jest.fn<any>().mockResolvedValue([]),
     };
     // Use jest.mocked to get the type-safe mocks
 
@@ -75,7 +77,7 @@ describe("Storage", () => {
         // Check if download and unzip methods were called
         expect(storageProviderMock.download).toHaveBeenCalledWith({
             destination: fakeArgs.ARCHIVE_DIR,
-            matchGlob: ""
+            files:[]
         });
         expect(storageInstance.unzipToStaging).toHaveBeenCalledTimes(2);
         expect(storageInstance.unzipToStaging).toHaveBeenCalledWith(file1, fakeArgs.RESULTS_STAGING_PATH);

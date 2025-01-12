@@ -2,7 +2,6 @@ export interface ArgsInterface {
     storageBucket?: string;
     prefix?: string;
     reportName?: string;
-    websiteExpires?: string;
     showHistory?: boolean;
     retries?: number;
     HOME_DIR: string;

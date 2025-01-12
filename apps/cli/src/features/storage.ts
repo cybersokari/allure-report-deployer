@@ -1,17 +1,18 @@
 import * as path from "node:path";
-import { countFiles, isFileTypeAllure, zipFolder } from "../utilities/util.js";
-import { counter } from "../utilities/counter.js";
+import {countFiles, isFileTypeAllure, zipFolder} from "../utilities/util.js";
+import {counter} from "../utilities/counter.js";
 import pLimit from "p-limit";
-import { Order, StorageProvider } from "../interfaces/storage-provider.interface.js";
+import {Order, StorageProvider} from "../interfaces/storage-provider.interface.js";
 import fs from "fs/promises";
 import fsSync from "fs";
-import unzipper, { Entry } from "unzipper";
-import { ArgsInterface } from "../interfaces/args.interface.js";
-import { UnzipperProvider } from "../interfaces/unzipper.interface.js";
-import { GoogleStorageService } from "../services/google-storage.service.js";
+import unzipper, {Entry} from "unzipper";
+import {ArgsInterface} from "../interfaces/args.interface.js";
+import {UnzipperProvider} from "../interfaces/unzipper.interface.js";
+import {GoogleStorageService} from "../services/google-storage.service.js";
 
 const HISTORY_ARCHIVE_NAME = "last-history.zip";
 const RESULTS_ARCHIVE_GLOB_MATCH = '[0-9]*.zip';
+
 /**
  * The Storage class manages the staging, uploading, and unzipping of files
  * from a remote Google Cloud Storage bucket.
@@ -40,7 +41,7 @@ export class Storage {
             await this.cleanUpRemoteFiles();
         }
 
-        await this.createArchiveDirectory();
+        await this.createStagingDirectories();
 
         const tasks: Promise<void>[] = [];
 
@@ -115,11 +116,14 @@ export class Storage {
     }
 
     /**
-     * Ensures the local archive directory exists.
+     * Ensures the local directories exist.
      */
-    private async createArchiveDirectory(): Promise<void> {
+    private async createStagingDirectories(): Promise<void> {
         try {
-            await fs.mkdir(this.args.ARCHIVE_DIR, { recursive: true });
+            await Promise.allSettled([
+                fs.mkdir(this.args.ARCHIVE_DIR, {recursive: true}),
+                fs.mkdir(this.args.RESULTS_STAGING_PATH, {recursive: true})
+            ])
         } catch (error) {
             console.error("Error creating archive directory:", error);
             throw error;
@@ -146,7 +150,7 @@ export class Storage {
         });
 
         const stagingDir = path.join(this.args.RESULTS_STAGING_PATH, "history");
-        await fs.mkdir(stagingDir, { recursive: true });
+        await fs.mkdir(stagingDir, {recursive: true});
         await this.unzipToStaging(downloadedPath, stagingDir);
     }
 
@@ -216,7 +220,7 @@ export class Storage {
      */
     private async uploadNewResults(resultsArchivePath: string): Promise<void> {
         const resultsPath = await zipFolder(
-            [{ path: this.args.RESULTS_PATH }],
+            [{path: this.args.RESULTS_PATH}],
             resultsArchivePath
         );
         await this.provider.upload(resultsPath, path.basename(resultsPath));
@@ -228,7 +232,7 @@ export class Storage {
      */
     private async uploadHistory(historyArchivePath: string): Promise<void> {
         const historyPath = await zipFolder(
-            [{ path: this.getHistoryFolder() }],
+            [{path: this.getHistoryFolder()}],
             historyArchivePath
         );
         await this.provider.upload(historyPath, path.basename(historyPath));

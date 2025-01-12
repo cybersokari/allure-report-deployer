@@ -5,7 +5,6 @@ export const fakeArgs : ArgsInterface = {
     firebaseProjectId: 'credentials.projectId',
     storageBucket: 'bucket',
     reportName: 'dd-site',
-    websiteExpires: "9d",
     ARCHIVE_DIR: '/app/archive',
     HOME_DIR: "/app",
     RESULTS_PATH: '/allure-results',
