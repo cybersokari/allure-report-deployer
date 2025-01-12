@@ -4,7 +4,7 @@ RUN apk add openjdk17-jre
 
 FROM node:20-alpine AS build
 WORKDIR /app
-ENV CLI_DIR=/apps/cli
+ENV CLI_DIR=cli
 COPY $CLI_DIR/src src
 COPY $CLI_DIR/package*.json /app/
 COPY $CLI_DIR/tsconfig.json .
@@ -23,7 +23,7 @@ RUN npm i -g allure-deployer.tgz
 
 RUN allure-deployer -V
 
-COPY apps/docker/entrypoint.sh /entrypoint.sh
+COPY docker/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
 ENTRYPOINT ["/entrypoint.sh"]

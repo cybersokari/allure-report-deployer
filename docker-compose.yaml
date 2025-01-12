@@ -16,8 +16,8 @@ services:
       timeout: 5s
   test-docker:
     build:
-      dockerfile: Dockerfile
-      context: apps/docker
+      dockerfile: test-docker.Dockerfile
+      context: apps
     container_name: allure-docker
 #    env_file: .env.slack
     environment:
@@ -26,7 +26,7 @@ services:
       PREFIX: 'project-999'
       REPORT_NAME: 'Demo Report 1'
       SHOW_HISTORY: false
-      RETRIES: 5
+      RETRIES: 6
     volumes:
       - ./key.json:/credentials/key.json:ro
       - ./assets/allure-results:/allure-results
@@ -38,13 +38,13 @@ services:
         condition: service_healthy
   test-cli:
     build:
-      context: apps/cli
-      dockerfile: test.Dockerfile
+      context: apps
+      dockerfile: test-cli.Dockerfile
     container_name: allure-cli
     environment:
       CI: 'true'
     tty: false
-    command: ['sh', '-c', 'allure-deployer deploy /allure-results --gcp-json /key.json --bucket $GCP_BUCKET']
+    command: ['sh', '-c', 'allure-deployer deploy /allure-results -h -r 5 --gcp-json /key.json --bucket $GCP_BUCKET']
     volumes:
       - ./assets/allure-results:/allure-results
       - ./key.json:/key.json:ro

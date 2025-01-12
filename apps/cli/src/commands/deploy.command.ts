@@ -115,19 +115,16 @@ async function handleDeployAction(resultPath: any, reportName: any, options: any
         validateSlackCredentials(options.slackChannel, options.slackToken);
 
         const runtimeDir = await getRuntimeDirectory();
-        // Default true if not set
         const retries = options.retries
         const showHistory = options.showHistory
-        console.log(`Show history: ${options.showHistory}`);
-        console.log(`Show retries: ${options.retries}`);
         return {
             prefix: options.prefix,
             runtimeCredentialDir: options.gcpJson || (await new GoogleCredentialsHelper().directory()),
-            ARCHIVE_DIR: `${runtimeDir}/archive`,
+            ARCHIVE_DIR: path.join(runtimeDir,'archive'),
             HOME_DIR: runtimeDir,
-            REPORTS_DIR: `${runtimeDir}/allure-report`,
+            REPORTS_DIR: path.join(runtimeDir, 'allure-report'),
             RESULTS_PATH: resultPath,
-            RESULTS_STAGING_PATH: `${runtimeDir}/allure-results`,
+            RESULTS_STAGING_PATH: path.join(runtimeDir,'allure-results'),
             downloadRequired: showHistory || retries,
             fileProcessingConcurrency: 10,
             firebaseProjectId: firebaseProjectId || db.get(KEY_PROJECT_ID),
