@@ -1,18 +1,18 @@
 import {Command} from "commander";
 import {db} from "../utilities/database.js";
 import chalk from "chalk";
-import {getSavedCredentialDirectory} from "../utilities/file-util.js";
 import {readFile} from "fs/promises";
 import {KEY_BUCKET} from "../utilities/constants.js";
 import {Storage as GCPStorage} from '@google-cloud/storage'
 import {handleStorageError} from "../main.js";
+import {GoogleCredentialsHelper} from "../utilities/google-credentials-helper.js";
 
 
 export function addStorageBucketCommand(defaultProgram: Command) {
     defaultProgram.command('bucket:set <bucket-name>')
         .description("Set Firebase/GCP storage bucket for future use")
         .action(async (bucketName: string) => {
-            const creds = await getSavedCredentialDirectory()
+            const creds = await new GoogleCredentialsHelper().directory()
             if(!creds){
                 console.error("You must set your Firebase/GCP credential JSON first: Use the 'gcp-json:set' command")
                 process.exit(1)

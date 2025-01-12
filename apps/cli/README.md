@@ -33,7 +33,10 @@ allure-deployer deploy <allure-results-path> <report-name>
 
 #### Example
 ```bash
-allure-deployer deploy ./allure-results my-report-name --show-history
+allure-deployer deploy ./allure-results my-report-name \
+  --bucket my-project-id.firebasestorage.app \
+  --show-history \
+  --retries 10 
 ```
 
 #### Arguments
@@ -41,8 +44,8 @@ allure-deployer deploy ./allure-results my-report-name --show-history
 - `<report-name>`: The name/title of your report (Default: `Allure Report`).
 
 #### Options
-- `-h, --show-history`: Show history in the upcoming report. Requires `--bucket` option
-- `-r, --show-retries`: Show retries in the upcoming report. Requires `--bucket` option
+- `-h, --show-history`: Show history in the upcoming report when Storage `bucket` is provided.
+- `-r, --retries <limit>`: Number of previous test runs to show as retries in the upcoming report when Storage `bucket` is provided.
 - `--bucket <bucket-name>`: Directly provide a Firebase/GCP bucket name for History and Retries.
 - `--gcp-json <json-path>`: Directly provide a Firebase/GCP JSON credential file for deployment.
 - `-p, --prefix <prefix>`: The storage bucket path to back up Allure results and history files
@@ -72,6 +75,8 @@ allure-deployer bucket:set <bucket-name>
 ```bash
 allure-deployer bucket:set my-bucket.firebasestorage.app
 ```
+
+
 
 ## Workflow Example
 

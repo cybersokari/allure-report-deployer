@@ -1,6 +1,6 @@
 import {MutexInterface} from "async-mutex";
 
-export type ResultsStatus = {
+export type ReportStatistic = {
     passed: number
     broken: number
     skipped: number
@@ -14,7 +14,6 @@ export interface CounterInterface {
     uploaded: number
     mutex: MutexInterface
 
-    countResults(resultDir: string): Promise<ResultsStatus>
     addFilesProcessed(count: number): Promise<void>
     addFilesUploaded(count: number): Promise<void>
     startTimer(): void

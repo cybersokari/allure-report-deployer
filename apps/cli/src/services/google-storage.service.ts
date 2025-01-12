@@ -4,29 +4,35 @@ import {Order, StorageProvider} from "../interfaces/storage-provider.interface.j
 import path from "node:path";
 
 export class GoogleStorageService implements StorageProvider {
-    private bucket: Bucket;
+    public bucket: Bucket;
+    public readonly prefix: string | undefined;
 
-    constructor(storageBucket: Bucket) {
+    constructor(storageBucket: Bucket, prefix: string | undefined) {
         this.bucket = storageBucket;
+        this.prefix = prefix;
     }
 
     public async upload(filePath: string, destination: string) {
         await this.bucket.upload(filePath, {validation: true, destination: destination})
     }
 
-    async download({prefix, destination, matchGlob = '**.zip', concurrency = 10, order = Order.byOldestToNewest}: {
-        prefix?: string | undefined;
+    async getFiles({matchGlob, order = Order.byNewestToOldest, maxResults, endOffset}: {
+        matchGlob?: string;
+        order?: Order;
+        maxResults?: number;
+        endOffset?: string
+    }): Promise<File[]> {
+        let [files] = await this.bucket.getFiles({endOffset, maxResults, matchGlob, prefix: this.prefix});
+        return this.sortFiles(files, order);
+    }
+
+    async download({destination, concurrency = 10, files}: {
         destination: string;
-        matchGlob?: string | undefined;
-        concurrency?: number | undefined;
-        order?: Order | undefined;
+        concurrency?: number;
+        files: File[];
     }): Promise<string[]> {
-
-        let [files] = await this.bucket.getFiles({prefix: prefix, matchGlob});
-        files = this.sortFiles(files, order);
-
         const limit = pLimit(concurrency);
-        const downloadPromises = [];
+        const downloadPromises: PromiseLike<any>[] = [];
         for (const file of files) {
             downloadPromises.push(limit(async () => {
                 // Remove the preceding storageHomeDir path from the downloaded file
@@ -49,6 +55,14 @@ export class GoogleStorageService implements StorageProvider {
             const bTime = new Date(b.metadata.timeCreated!).getTime();
             return order === Order.byOldestToNewest ? aTime - bTime : bTime - aTime;
         });
+    }
+
+    async deleteFile(fileName: string) : Promise<void> {
+        await this.bucket.file(fileName).delete();
+    }
+
+    async deleteFiles(matchGlob = '**.zip') : Promise<void> {
+        await this.bucket.deleteFiles({prefix: this.prefix, matchGlob});
     }
 
 }

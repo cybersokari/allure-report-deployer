@@ -4,7 +4,7 @@ export interface ArgsInterface {
     reportName?: string;
     websiteExpires?: string;
     showHistory?: boolean;
-    showRetries?: boolean;
+    retries?: number;
     HOME_DIR: string;
     RESULTS_STAGING_PATH: string;
     ARCHIVE_DIR: string;
@@ -19,4 +19,5 @@ export interface ArgsInterface {
     slack_token?: string
     buildUrl?: string;
     updatePr?: string;
+    clean?: boolean;
 }

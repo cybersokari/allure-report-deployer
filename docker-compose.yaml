@@ -26,7 +26,7 @@ services:
       PREFIX: 'project-999'
       REPORT_NAME: 'Demo Report 1'
       SHOW_HISTORY: false
-      SHOW_RETRIES: false
+      RETRIES: 5
     volumes:
       - ./key.json:/credentials/key.json:ro
       - ./assets/allure-results:/allure-results

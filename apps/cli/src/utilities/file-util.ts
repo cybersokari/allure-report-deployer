@@ -21,41 +21,21 @@ export async function readJsonFile(filePath: string): Promise<any> {
 }
 
 export async function getRuntimeDirectory(): Promise<string> {
-    // Get the system temporary directory
-    const baseDir = os.tmpdir();
     // Create a subdirectory specific to your CLI
-    const appDir = path.join(baseDir, 'allure-report-deployer');
-    // Ensure the directory exists
-    if (!fsSync.existsSync(appDir)) {
-        await fs.mkdir(appDir, {recursive: true});
-    }
-    process.on('exit', async () => {
-        try {
-            await fs.rm(appDir, { recursive: true , force: true });
-        } catch (err) {
-            // @ts-ignore
-            console.error(`Error cleaning up temp directory: ${err.message}`);
-        }
-    });
-    return appDir;
+    const runtimeDir = path.join(os.tmpdir(), 'allure-report-deployer');
+    // Delete if already exist
+    await fs.rm(runtimeDir, { recursive: true , force: true });
+    await fs.mkdir(runtimeDir, {recursive: true});
+    return runtimeDir;
 }
 
 export async function getUserAppDirectory(): Promise<string> {
-    const homeDir = os.homedir();
-    const appDir = path.join(homeDir, '.allure-report-deployer');
+    const appDir = path.join(os.homedir(), '.allure-report-deployer');
 
     if (!fsSync.existsSync(appDir)) {
         await fs.mkdir(appDir, {recursive: true});
     }
     return appDir;
-}
-
-export async function getSavedCredentialDirectory(): Promise<string|null> {
-    const keyDir = (await getUserAppDirectory()).concat('/key.json');
-    if (fsSync.existsSync(keyDir)) {
-        return keyDir;
-    }
-    return null
 }
 
 export function isJavaInstalled() {

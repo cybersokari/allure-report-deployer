@@ -1,108 +1,236 @@
 import * as path from "node:path";
-import {countFiles, isFileTypeAllure, zipFolder} from "../utilities/util.js";
-import {counter} from "../utilities/counter.js";
+import { countFiles, isFileTypeAllure, zipFolder } from "../utilities/util.js";
+import { counter } from "../utilities/counter.js";
 import pLimit from "p-limit";
-import {StorageProvider} from "../interfaces/storage-provider.interface.js";
+import { Order, StorageProvider } from "../interfaces/storage-provider.interface.js";
 import fs from "fs/promises";
 import fsSync from "fs";
-import unzipper, {Entry} from "unzipper";
-import {ArgsInterface} from "../interfaces/args.interface.js";
-import {UnzipperProvider} from "../interfaces/unzipper.interface.js";
+import unzipper, { Entry } from "unzipper";
+import { ArgsInterface } from "../interfaces/args.interface.js";
+import { UnzipperProvider } from "../interfaces/unzipper.interface.js";
+import { GoogleStorageService } from "../services/google-storage.service.js";
 
-
+const HISTORY_ARCHIVE_NAME = "last-history.zip";
+const RESULTS_ARCHIVE_GLOB_MATCH = '[0-9]*.zip';
+/**
+ * The Storage class manages the staging, uploading, and unzipping of files
+ * from a remote Google Cloud Storage bucket.
+ */
 export class Storage {
-    private provider: StorageProvider;
+    private provider: GoogleStorageService;
     private args: ArgsInterface;
-    private unzipper: UnzipperProvider; // Injected UnzipperProvider
+    private unzipper: UnzipperProvider;
 
+    /**
+     * Constructs a Storage instance.
+     * @param provider - The storage provider to interact with cloud storage.
+     * @param args - Arguments for file handling and configuration.
+     */
     constructor(provider: StorageProvider, args: ArgsInterface) {
         this.provider = provider;
         this.args = args;
         this.unzipper = unzipper;
     }
 
-    // Download remote files to staging area
-    public async stageFilesFromStorage(): Promise<any> {
-        // Create directories for staging
-        await Promise.all([
-            await fs.mkdir(`${this.args.RESULTS_STAGING_PATH}/history`, {recursive: true}),
-            await fs.mkdir(this.args.ARCHIVE_DIR, {recursive: true})
-        ])
-        const localFilePaths = await this.provider.download({
-            prefix: this.args.prefix ?? '',
-            destination: this.args.ARCHIVE_DIR
-        })
-        const limit = pLimit(this.args.fileProcessingConcurrency);
-        const unzipPromises = [];
-        for (const filePath of localFilePaths) {
-            unzipPromises.push(limit(async () => {
-                try {
-                    await this.unzipAllureResult(filePath, this.args.RESULTS_STAGING_PATH);
-                } catch (e) {
-                    console.warn('Unzip from remote error:', e);
-                }
-            }))
+    /**
+     * Orchestrates downloading files from the remote storage to a local staging area.
+     */
+    public async stageFilesFromStorage(): Promise<void> {
+        if (this.args.clean) {
+            await this.cleanUpRemoteFiles();
         }
-        await Promise.all(unzipPromises);
+
+        await this.createArchiveDirectory();
+
+        const tasks: Promise<void>[] = [];
+
+        if (this.args.showHistory) {
+            tasks.push(this.stageHistoryFiles());
+        }
+
+        if (this.args.retries) {
+            tasks.push(this.stageResultFiles(this.args.retries!));
+        }
+
+        await Promise.all(tasks);
     }
 
     /**
-     * Zip and upload mounted results and generated report history (if enabled)
+     * Zips and uploads results and report history (if enabled) to the remote storage.
      */
-    public async uploadArtifacts() {
-        const foldersToBackup: { path: string, destination?: string }[] = []
-        const foldersToCount = []
+    public async uploadArtifacts(): Promise<void> {
+        try {
+            const resultsArchivePath = this.getResultsArchivePath();
+            const historyArchivePath = this.getHistoryArchivePath();
 
-        foldersToBackup.push({path: this.args.RESULTS_PATH})
-    	foldersToCount.push(this.args.RESULTS_PATH)
-
-        const historyFolder = `${this.args.REPORTS_DIR}/history`
-        foldersToBackup.push({path: historyFolder, destination: 'history'})
-        foldersToCount.push(historyFolder)
-
-        const outputFileName = path.join(this.args.ARCHIVE_DIR, Date.now().toString().concat('.zip'))
-        await zipFolder(foldersToBackup, outputFileName)
-        const cloudStorageFilePath = path.join(this.args.prefix ?? '', path.basename(outputFileName))
-        // Count while uploading
-        await Promise.all([
-            counter.addFilesUploaded(await countFiles(foldersToCount)),
-            this.provider.upload(outputFileName, cloudStorageFilePath)
-        ])
+            await Promise.all([
+                this.uploadNewResults(resultsArchivePath),
+                this.uploadHistory(historyArchivePath),
+                counter.addFilesUploaded(
+                    await countFiles([this.getHistoryFolder(), this.args.RESULTS_PATH])
+                ),
+            ]);
+        } catch (error) {
+            console.warn("Error uploading artifacts:", error);
+        }
     }
 
-    public async unzipAllureResult(zipFilePath: string, outputDir: string): Promise<boolean> {
-        return await new Promise((resolve, reject) => {
+    /**
+     * Extracts the contents of a ZIP file into the specified directory.
+     * @param zipFilePath - Path to the ZIP file.
+     * @param outputDir - Directory to extract the contents into.
+     * @returns A promise that resolves when extraction is complete.
+     */
+    public async unzipToStaging(zipFilePath: string, outputDir: string): Promise<boolean> {
+        return new Promise((resolve, reject) => {
             fsSync.createReadStream(zipFilePath)
                 .pipe(this.unzipper.Parse())
-                .on('entry', async (entry: Entry) => {
+                .on("entry", async (entry: Entry) => {
                     const fullPath = path.join(outputDir, entry.path);
-                    if (!this.args.showHistory) {
-                        // Ignore the history subdirectory
-                        if (entry.path.includes('history/')) {
-                            entry.autodrain();
-                            return;
-                        }
-                    }
-                    if (!this.args.showRetries) {
-                        if (!entry.path.includes('history/')) {
-                            entry.autodrain();
-                            return;
-                        }
-                    }
                     if (isFileTypeAllure(entry.path)) {
                         entry.pipe(fsSync.createWriteStream(fullPath));
                     } else {
                         entry.autodrain();
                     }
                 })
-                .on('close', () => {
-                    resolve(true);
-                })
-                .on('error', (err) => {
-                    console.warn('Unzip file error');
-                    reject(err)
+                .on("close", () => resolve(true))
+                .on("error", (err) => {
+                    console.warn("Unzip file error");
+                    reject(err);
                 });
         });
     }
 
+    // ============= Private Helper Methods =============
+
+    /**
+     * Deletes all files in the remote storage if the `clean` option is enabled.
+     */
+    private async cleanUpRemoteFiles(): Promise<void> {
+        try {
+            await this.provider.deleteFiles();
+        } catch (error) {
+            console.error("Error deleting files:", error);
+        }
+    }
+
+    /**
+     * Ensures the local archive directory exists.
+     */
+    private async createArchiveDirectory(): Promise<void> {
+        try {
+            await fs.mkdir(this.args.ARCHIVE_DIR, { recursive: true });
+        } catch (error) {
+            console.error("Error creating archive directory:", error);
+            throw error;
+        }
+    }
+
+    /**
+     * Downloads and stages the history archive.
+     */
+    private async stageHistoryFiles(): Promise<void> {
+        const files = await this.provider.getFiles({
+            maxResults: 1,
+            matchGlob: HISTORY_ARCHIVE_NAME,
+        });
+
+        if (files.length === 0) {
+            console.warn("No history files found to stage.");
+            return;
+        }
+
+        const [downloadedPath] = await this.provider.download({
+            files,
+            destination: this.args.ARCHIVE_DIR,
+        });
+
+        const stagingDir = path.join(this.args.RESULTS_STAGING_PATH, "history");
+        await fs.mkdir(stagingDir, { recursive: true });
+        await this.unzipToStaging(downloadedPath, stagingDir);
+    }
+
+    /**
+     * Stages the result files and deletes older files exceeding the retry limit.
+     * @param retries - Maximum number of files to keep.
+     */
+    private async stageResultFiles(retries: number): Promise<void> {
+        let files = await this.provider.getFiles({
+            order: Order.byOldestToNewest,
+            matchGlob: RESULTS_ARCHIVE_GLOB_MATCH,
+        });
+
+        const limit = pLimit(this.args.fileProcessingConcurrency);
+        const tasks: Promise<void>[] = [];
+        if (files.length > retries) {
+            const filesToDelete = files.slice(0, files.length - retries);
+            files = files.slice(files.length - retries);
+            for (const file of filesToDelete) {
+                tasks.push(limit(async () => {
+                    try {
+                        await this.provider.deleteFile(file.name);
+                    } catch (error) {
+                        console.warn("Delete file error:", error);
+                    }
+                }))
+            }
+        }
+
+        const downloadedPaths = await this.provider.download({
+            files,
+            destination: this.args.ARCHIVE_DIR,
+        });
+
+        for (const filePath of downloadedPaths) {
+            tasks.push(limit(async () => {
+                await this.unzipToStaging(filePath, this.args.RESULTS_STAGING_PATH);
+            }))
+        }
+        await Promise.allSettled(tasks);
+    }
+
+    /**
+     * Returns the path for the results archive.
+     */
+    private getResultsArchivePath(): string {
+        return path.join(this.args.ARCHIVE_DIR, `${Date.now()}.zip`);
+    }
+
+    /**
+     * Returns the path for the history archive.
+     */
+    private getHistoryArchivePath(): string {
+        return path.join(this.args.ARCHIVE_DIR, HISTORY_ARCHIVE_NAME);
+    }
+
+    /**
+     * Returns the path for the history folder.
+     */
+    private getHistoryFolder(): string {
+        return path.join(this.args.REPORTS_DIR, "history");
+    }
+
+    /**
+     * Zips and uploads new results to the remote storage.
+     * @param resultsArchivePath - Path to the results archive.
+     */
+    private async uploadNewResults(resultsArchivePath: string): Promise<void> {
+        const resultsPath = await zipFolder(
+            [{ path: this.args.RESULTS_PATH }],
+            resultsArchivePath
+        );
+        await this.provider.upload(resultsPath, path.basename(resultsPath));
+    }
+
+    /**
+     * Zips and uploads the history archive to the remote storage.
+     * @param historyArchivePath - Path to the history archive.
+     */
+    private async uploadHistory(historyArchivePath: string): Promise<void> {
+        const historyPath = await zipFolder(
+            [{ path: this.getHistoryFolder() }],
+            historyArchivePath
+        );
+        await this.provider.upload(historyPath, path.basename(historyPath));
+    }
 }

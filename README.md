@@ -63,7 +63,7 @@ jobs:
           storage_bucket: ${{vars.storage-bucket}}
           slack_channel: ${{vars.SLACK_CHANNEL}}
           show_history: 'true' 
-          show_retries: 'true'
+          retries: 5
 ```
 See [configurations](#configuration-github) for complete options and environment variables
 ___
@@ -126,7 +126,7 @@ deploy:
       -e PREFIX=$PREFIX \
       -e REPORT_NAME=$REPORT_NAME \
       -e SHOW_HISTORY=true \
-      -e SHOW_RETRIES=true \
+      -e RETRIES=5 \
       -v ${CI_PROJECT_DIR}/allure-results:/allure-results \
       -v ${GCP_CREDENTIALS_FILE_PATH}:/credentials/key.json \
       sokari/allure-deployer:latest
@@ -171,7 +171,7 @@ workflows:
           allure-deployer deploy path/to/allure-results my-report-name \
           --gcp-json /credentials/key.json \
           --show-history \
-          --show-retries \
+          --retries \
           --slack-token $SLACK_TOKEN \
           --slack-channel $SLACK_CHANNEL
     artifacts:
@@ -206,7 +206,7 @@ allure-deployer slack:set <channel> <token>
 ```shell
 allure-deployer deploy path/to/allure-results my-report-name \
           --show-history \
-          --show-retries
+          --retries
 ```
 
 
@@ -218,16 +218,16 @@ https://github.com/marketplace/actions/allure-deployer-action
 
 #### Inputs
 
-| Input                 | Description                                                                 | Required | Default           |
-|-----------------------|-----------------------------------------------------------------------------|----------|-------------------|
-| `allure_results_path` | Path to the directory containing Allure results files.                      | Yes      | `/allure-results` |
-| `report_name`         | The name/title of your report.                                              | No       | `Allure Report`   |
-| `storage_bucket`      | Name of the Google Cloud Storage bucket for backup and history storage.     | No       | None              |
-| `slack_channel`       | ID of the Slack channel to send notifications about report links.           | No       | None              |
-| `show_history`        | Display history from previous test runs.                                    | No       | `true`            |
-| `show_retries`        | Include retries from previous test runs.                                    | No       | `true`            |
-| `prefix`              | Path prefix in the Cloud Storage bucket for archiving files.                | No       | None              |
-| `update_pr`           | Add test report info as pr comment or actions summary (`comment`/`summary`) | No       | `summary`         |
+| Input                 | Description                                                                                                      | Required | Default           |
+|-----------------------|------------------------------------------------------------------------------------------------------------------|----------|-------------------|
+| `allure_results_path` | Path to the directory containing Allure results files.                                                           | Yes      | `/allure-results` |
+| `report_name`         | The name/title of your report.                                                                                   | No       | `Allure Report`   |
+| `storage_bucket`      | Name of the Google Cloud Storage bucket for backup and history storage.                                          | No       | None              |
+| `slack_channel`       | ID of the Slack channel to send notifications about report links.                                                | No       | None              |
+| `show_history`        | Display history from previous test runs.                                                                         | No       | `true`            |
+| `retries`             | Number of previous test runs to show as retries in the upcoming report when Storage `storage_bucket` is provided | No       | 0                 |
+| `prefix`              | Path prefix in the Cloud Storage bucket for archiving files.                                                     | No       | None              |
+| `update_pr`           | Add test report info as pr comment or actions summary (`comment`/`summary`)                                      | No       | `summary`         |
 
 ---
 
@@ -254,15 +254,15 @@ docker pull sokari/allure-deployer:latest
 <h4 id="environment-variables-docker">Environment Variables</h3>
 
 
-| Variable         | Description                                                                                   | Example                        | Default        |
-|------------------|-----------------------------------------------------------------------------------------------|--------------------------------|----------------|
-| `STORAGE_BUCKET` | Google Cloud Storage bucket name                                                              | project-id.firebasestorage.app | None           |
-| `PREFIX`         | A path in your Storage bucket. Optional.                                                      | project-123                    | None           |
-| `REPORT_NAME`    | The name/title of your report                                                                 | Space ship report              | `Alure Report` |
-| `SHOW_HISTORY`   | Show history in the current report by pulling the history from the last Cloud Storage backup  | true                           | true           |
-| `SHOW_RETRIES`   | Show retries in the current report by pulling result files from all archives in Cloud Storage | true                           | true           |
-| `SLACK_TOKEN`    | Your Slack App token                                                                          | xoxb-XXXXXXXXXX-XXXXXXXX       | None           |
-| `SLACK_CHANNEL`  | The Slack channel ID or conversation to notify with Allure report details                     | DC56JYGT8                      | None           |
+| Variable         | Description                                                                                                      | Example                        | Default        |
+|------------------|------------------------------------------------------------------------------------------------------------------|--------------------------------|----------------|
+| `STORAGE_BUCKET` | Google Cloud Storage bucket name                                                                                 | project-id.firebasestorage.app | None           |
+| `PREFIX`         | A path in your Storage bucket. Optional.                                                                         | project-123                    | None           |
+| `REPORT_NAME`    | The name/title of your report                                                                                    | Space ship report              | `Alure Report` |
+| `SHOW_HISTORY`   | Show history in the current report by pulling the history from the last Cloud Storage backup                     | true                           | true           |
+| `RETRIES`        | Number of previous test runs to show as retries in the upcoming report when Storage `STORAGE_BUCKET` is provided | 5                              | 0              |
+| `SLACK_TOKEN`    | Your Slack App token                                                                                             | xoxb-XXXXXXXXXX-XXXXXXXX       | None           |
+| `SLACK_CHANNEL`  | The Slack channel ID or conversation to notify with Allure report details                                        | DC56JYGT8                      | None           |
 
 ---
 
@@ -291,20 +291,20 @@ For more information, check the [Configuration](#configuration) section.
 
 <h3 id="cloud-storage">☁️ Cloud Storage</h3>
 
-Your files are backed up as a `.zip` archive when you set `SHOW_HISTORY` or `SHOW_RETRIES`.
-*  `SHOW_RETRIES` adds all the files in your `/allure-results` mount directory to the archive
-*  `SHOW_HISTORY` adds the `history` [subdirectory of your latest report](https://allurereport.org/docs/how-it-works-history-files/#history-files) to the archive
+Your files are backed up as `.zip` archives when you set `SHOW_HISTORY` or `RETRIES`.
+*  `RETRIES` adds all the files in your `/allure-results` directory tp an archive
+*  `SHOW_HISTORY` adds the `history` [subdirectory of your latest report](https://allurereport.org/docs/how-it-works-history-files/#history-files) to an archive named `last-history.zip`
 
 
-Example of an archive when both `SHOW_RETRIES` and `SHOW_RETRIES` are enabled
+Example of an archive when both `RETRIES` and `RETRIES` are set
 ```text
+last-history.zip/
+            ├── categories-trend.json
+            ├── duration-trend.json
+            ├── history-trend.json
+            ├── history.json
+            └── retry-trend.json
 1784839939391.zip/
-            ├── history/
-            │   ├── categories-trend.json
-            │   ├── duration-trend.json
-            │   ├── history-trend.json
-            │   ├── history.json
-            │   └── retry-trend.json
             ├── 01f49176-82b1-462d-aa15-bd0369600617-result.json
             ├── 2f10bad1-2f73-46ab-b2ef-28fc010f4473-container.json
             ├── 3abc8f5d-8292-45fa-9c0c-d0e1bfc8d173-container.json
@@ -341,8 +341,8 @@ See how [Allure History works](https://allurereport.org/docs/history-and-retries
 
 #### Retries
 
-Set `SHOW_RETRIES` to true to show retries in the incoming test report.
-This feature combines all the test previous test result files from Cloud Storage before running the new report.
+Set `RETRIES` to the number to previous test runs you want to show as retries in the new test report.
+This feature combines all the result files from previous test run saved in Cloud Storage before generating the new report.
 See how [Allure Retries](https://allurereport.org/docs/history-and-retries/#how-to-keep-retries) work
 
 <h3 id="slack-integration">🛠️ Slack Integration</h2>

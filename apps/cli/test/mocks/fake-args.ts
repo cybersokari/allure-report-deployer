@@ -13,7 +13,7 @@ export const fakeArgs : ArgsInterface = {
     RESULTS_STAGING_PATH: "/app/allure-results",
     fileProcessingConcurrency: 10,
     showHistory: true,
-    showRetries: true,
+    retries: 10,
     downloadRequired: true,
     uploadRequired: true
 }

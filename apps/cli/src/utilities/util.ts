@@ -4,9 +4,10 @@ import * as path from "node:path";
 import archiver from 'archiver';
 
 import {StringBuilder} from "./string-builder.js";
-import {ArgsInterface} from "../interfaces/args.interface.js";
 import process from "node:process";
 import {oraPromise} from "ora";
+import {ReportStatistic} from "../interfaces/counter.interface.js";
+import {readJsonFile} from "./file-util.js";
 export function appLog(data: string) {
     console.log(data)
 }
@@ -33,8 +34,8 @@ export async function changePermissionsRecursively(dirPath: string, mode: fsSync
 }
 
 
-export async function zipFolder(sourceFolder: { path: string, destination?: string }[], outputZipFile: string) {
-    return await new Promise((resolve: (value: boolean) => void, reject) => {
+export async function zipFolder(sourceFolder: { path: string, destination?: string }[], outputZipFile: string): Promise<string> {
+    return await new Promise((resolve: (value: string) => void, reject) => {
 
         // Ensure the output directory exists
         const outputDir = path.dirname(outputZipFile);
@@ -44,11 +45,11 @@ export async function zipFolder(sourceFolder: { path: string, destination?: stri
         const archive = archiver('zip', {zlib: {level: 9}}); // Set the compression level
 
         output.on('close', () => {
-            resolve(true);
+            resolve(outputZipFile);
         });
         archive.on('error', (err) => {
             appLog(`Zip file archive error: ${err}`);
-            resolve(false);
+            reject(undefined);
         });
         // Pipe archive data to the file stream
         archive.pipe(output);
@@ -76,7 +77,12 @@ export async function countFiles(directory: string[]) {
 }
 
 export function isFileTypeAllure(filePath: string) {
-    return !!filePath.match(/^.*\.(json|png|jpeg|jpg|gif|properties|log|webm)$/i)
+    return !!filePath.match(/^.*\.(json|png|jpeg|jpg|gif|properties|log|webm|html|mp4)$/i)
+}
+
+export async function getReportStats(summaryJsonDir: string): Promise<ReportStatistic> {
+    const summaryJson = await readJsonFile(summaryJsonDir)
+    return summaryJson.statistic as ReportStatistic;
 }
 
 export function getDashboardUrl({projectId, storageBucket}:{projectId?: string, storageBucket: string}): string {
@@ -88,24 +94,6 @@ export function getDashboardUrl({projectId, storageBucket}:{projectId?: string, 
         .append(`/${(projectId)}`)
         .append(`/storage/${storageBucket}/files`)
         .toString()
-}
-
-/**
- * Prints stats about the report generation process, including
- * history retention and retries.
- */
-export function printStats(args: ArgsInterface) {
-    if (args.storageBucket) {
-        if (args.showHistory && args.showRetries) {
-            appLog(`History and Retries enabled`)
-        } else if (args.showHistory) {
-            appLog(`History enabled`)
-        } else if (args.showRetries) {
-            appLog(`Retries enabled`)
-        }
-    } else {
-        appLog('Storage bucket is not provided, History and Retries disabled')
-    }
 }
 
 export interface WithOraParams<T> {

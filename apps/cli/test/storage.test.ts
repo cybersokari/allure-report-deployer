@@ -22,9 +22,11 @@ import {Storage} from '../src/features/storage.js'
 describe("Storage", () => {
     let storageInstance: Storage;
     const storageProviderMock: jest.Mocked<StorageProvider> = {
+        bucket: undefined,
+        prefix : 'string',
         upload: jest.fn<any>(), // Mock upload to resolve with no value
         download: jest.fn<any>().mockResolvedValue([]), // Mock download to resolve with an empty array
-        sortFiles: jest.fn<any>().mockImplementation((files: any[], order: Order) => {
+        sortFiles: jest.fn<any>().mockImplementation((files: string[], order: Order) => {
             // Example: Mock sorting logic based on Order
             if (order === Order.byOldestToNewest) {
                 return files.sort((a: any, b: any) => a.timestamp - b.timestamp);
@@ -34,6 +36,7 @@ describe("Storage", () => {
             }
             return files;
         }),
+        deleteFiles : jest.fn<any>()
     };
     // Use jest.mocked to get the type-safe mocks
 
@@ -57,11 +60,11 @@ describe("Storage", () => {
 
     it("should create staging directories and unzip downloaded files", async () => {
 
-        const file1 = `${fakeArgs.ARCHIVE_DIR}/file1.zp`
-        const file2 = `${fakeArgs.ARCHIVE_DIR}/file2.zp`
+        const file1 = `${fakeArgs.ARCHIVE_DIR}/file1.zip`
+        const file2 = `${fakeArgs.ARCHIVE_DIR}/file2.zip`
 
         storageProviderMock.download.mockResolvedValue([file1, file2]);
-        jest.spyOn(storageInstance, "unzipAllureResult").mockResolvedValue(true);
+        jest.spyOn(storageInstance, "unzipToStaging").mockResolvedValue(true);
 
         await storageInstance.stageFilesFromStorage();
 
@@ -71,12 +74,12 @@ describe("Storage", () => {
 
         // Check if download and unzip methods were called
         expect(storageProviderMock.download).toHaveBeenCalledWith({
-            prefix: "",
             destination: fakeArgs.ARCHIVE_DIR,
+            matchGlob: ""
         });
-        expect(storageInstance.unzipAllureResult).toHaveBeenCalledTimes(2);
-        expect(storageInstance.unzipAllureResult).toHaveBeenCalledWith(file1, fakeArgs.RESULTS_STAGING_PATH);
-        expect(storageInstance.unzipAllureResult).toHaveBeenCalledWith(file2, fakeArgs.RESULTS_STAGING_PATH);
+        expect(storageInstance.unzipToStaging).toHaveBeenCalledTimes(2);
+        expect(storageInstance.unzipToStaging).toHaveBeenCalledWith(file1, fakeArgs.RESULTS_STAGING_PATH);
+        expect(storageInstance.unzipToStaging).toHaveBeenCalledWith(file2, fakeArgs.RESULTS_STAGING_PATH);
     });
 
 });

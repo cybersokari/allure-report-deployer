@@ -1,9 +1,5 @@
 import { Mutex, MutexInterface } from 'async-mutex';
-import { CounterInterface, ResultsStatus } from "../interfaces/counter.interface.js";
-import fs from "fs/promises";
-import { readJsonFile } from "./file-util.js";
-import path from "node:path";
-import pLimit from "p-limit";
+import { CounterInterface } from "../interfaces/counter.interface.js";
 /**
  * Counter Class
  *
@@ -43,45 +39,6 @@ class Counter implements CounterInterface {
         }
         const elapsed = Date.now() - this.startTime;
         return (elapsed / 1000).toFixed()
-    }
-
-    async countResults(resultDir: string): Promise<ResultsStatus> {
-        let passed = 0
-        let failed = 0
-        let broken = 0
-        let skipped = 0
-        let unknown = 0
-        const entries = await fs.readdir(resultDir, { withFileTypes: true });
-        const resultFiles = entries.filter((entry) => entry.isFile() && entry.name.endsWith('result.json'));
-
-        const promises = [];
-        const limit = pLimit(10);
-        for (const file of resultFiles) {
-            promises.push(limit(async () => {
-                try {
-                    const result = await readJsonFile(path.join(resultDir, path.basename(file.name)));
-                    switch (result.status) {
-                        case 'passed':
-                            passed++;
-                            break;
-                        case 'broken':
-                            broken++;
-                            break;
-                        case 'skipped':
-                            skipped++;
-                            break;
-                        case 'failed':
-                            failed++;
-                            break;
-                        default:
-                            unknown++;
-                            break;
-                    }
-                } catch (e) { }
-            }))
-        }
-        await Promise.all(promises);
-        return { passed, broken, skipped, failed, unknown}
     }
 }
 export const counter = new Counter()

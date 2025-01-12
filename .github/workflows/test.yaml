@@ -23,7 +23,7 @@ jobs:
           run: cd ${{env.DIR}} && npm run test
         
         - name: Generate and deploy Allure Report
-          uses: cybersokari/allure-deployer-action@v1.1.15
+          uses: cybersokari/allure-deployer-action@v1.2
           env:
             SLACK_TOKEN: ${{secrets.SLACK_TOKEN}}
             GOOGLE_CREDENTIALS_JSON: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
@@ -33,6 +33,6 @@ jobs:
             storage_bucket: ${{vars.STORAGE_BUCKET}}
             slack_channel: ${{secrets.SLACK_CHANNEL_ID}}
             show_history: true
-            show_retries: true
+            retries: 10
             prefix: 'pr-test'
             update_pr: 'comment'

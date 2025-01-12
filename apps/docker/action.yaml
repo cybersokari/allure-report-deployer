@@ -10,7 +10,7 @@ runs:
     - report_name=${{ inputs.report_name }}
     - slack_channel=${{ inputs.slack_channel }}
     - allure_results_path=${{ inputs.allure_results_path }}
-    - show_retries=${{ inputs.show_retries }}
+    - retries=${{ inputs.retries }}
     - show_history=${{ inputs.show_history }}
     - prefix=${{ inputs.prefix}}
     - update_pr=${{inputs.update_pr}}
@@ -29,10 +29,10 @@ inputs:
   allure_results_path:
     description: 'Path to the directory containing Allure results'
     required: true
-  show_retries:
-    description: 'Show retries in the test report (true/false)'
+  retries:
+    description: 'Number of previous test runs to show as retries in new test report (Default 0)'
     required: false
-    default: 'true'
+    default: 0
   show_history:
     description: 'Show history in the test report (true/false)'
     default: 'true'

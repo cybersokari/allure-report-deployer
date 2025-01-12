@@ -5,7 +5,7 @@ import {appLog} from "../../utilities/util.js";
 import ansiEscapes from "ansi-escapes";
 import chalk from "chalk";
 import {ArgsInterface} from "../../interfaces/args.interface.js";
-import { ResultsStatus } from "../../interfaces/counter.interface.js";
+import { ReportStatistic } from "../../interfaces/counter.interface.js";
 import { StringBuilder } from "../../lib.js";
 
 export class ConsoleNotifier implements Notifier {
@@ -23,7 +23,7 @@ export class ConsoleNotifier implements Notifier {
         return this.isHyperlinkSupported() ? ansiEscapes.link(text, url) : url;
     }
 
-    private writeStatuses(status: ResultsStatus): string{
+    private writeStatuses(status: ReportStatistic): string{
         const builder = new StringBuilder()
         if(status.passed){
             builder.append(`${Icon.SUCCESS} Passed            : ${chalk.yellow(status.passed)}`).append(`\n`)

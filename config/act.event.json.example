@@ -2,7 +2,7 @@
   "inputs": {
     "job": "test-action-local",
     "storage-bucket": "",
-    "show-retries": "true",
+    "retries": "10",
     "show-history": "true"
   }
 }

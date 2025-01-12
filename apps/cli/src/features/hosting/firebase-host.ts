@@ -1,54 +1,32 @@
 // Imports necessary modules and interfaces for the FirebaseHost class
 import {HostingProvider} from "../../interfaces/hosting-provider.interface.js";
-import * as fs from "fs/promises";
 import {changePermissionsRecursively} from "../../utilities/util.js";
-import {ArgsInterface} from "../../interfaces/args.interface.js";
 // @ts-ignore
 import path from "node:path";
-import {generate} from "random-words";
-import {StringBuilder} from "../../utilities/string-builder.js";
 import {FirebaseInterface} from "../../interfaces/firebase.interface.js";
 
 // Max allowed Firebase sites to prevent exceeding quota
 // https://firebase.google.com/docs/hosting/multisites
-const maxFirebaseAllowedSites = 35;
+const maxFirebaseAllowedSites = 36;
 
 // Implements Firebase-specific hosting provider functionality
 export class FirebaseHost implements HostingProvider {
     public command: string | undefined;
-    private readonly reportDir: string;
     private hostedSiteUrl: string | undefined;
-    private configPath?: string;
-    private readonly newSiteId: string;
     private readonly service: FirebaseInterface;
 
     // Initialize class properties from input arguments
-    constructor(readonly args: ArgsInterface, service: FirebaseInterface) {
-        this.reportDir = this.args.REPORTS_DIR;
-        this.newSiteId = this.getSiteId();
+    constructor(service: FirebaseInterface) {
         this.service = service
-    }
-
-    // Generates a unique site ID using random words and timestamps
-    private getSiteId(): string {
-        const builder = new StringBuilder()
-            .append(`${generate({maxLength: 6, minLength: 4})}`)
-            .append(Date.now().toString())
-            .append(`${generate({maxLength: 6, minLength: 4})}`)
-            .append(`${generate({maxLength: 6, minLength: 4})}`);
-        return builder.values().join('-');
     }
 
     // Deploys the Firebase hosting site
     async deploy(): Promise<undefined | string> {
-        if (!this.configPath) {
-            throw new Error('FirebaseHost not initialized. Call init() first');
-        }
-        await this.createConfigJson();
+        const configPath = await this.service.createConfigJson();
         // Make Allure report files executable
-        await changePermissionsRecursively(this.reportDir, 0o755, 10);
+        await changePermissionsRecursively(this.service.rootDir, 0o755, 10);
         try {
-            await this.service.deployHosting(this.configPath)
+            await this.service.deployHosting(configPath)
             return this.hostedSiteUrl;
         } catch (err) {
             console.warn('Failed to deploy report to Firebase hosting', err);
@@ -57,9 +35,15 @@ export class FirebaseHost implements HostingProvider {
     }
 
     // Initializes the Firebase hosting setup and creates a new site
-    async init(): Promise<string> {
+    async init(clean = false): Promise<string> {
         try {
-            this.configPath = path.join(this.args.REPORTS_DIR, "firebase.json");
+            if(clean){
+                try {
+                    await this.deleteAllSites()
+                    console.log('All sites have been deleted.')
+                }catch (e) {}
+            }
+
             const data = await this.createFirebaseSite();
             this.hostedSiteUrl = data.defaultUrl as string;
             return this.hostedSiteUrl;
@@ -69,35 +53,35 @@ export class FirebaseHost implements HostingProvider {
         }
     }
 
-    // Creates the required Firebase hosting configuration file
-    private async createConfigJson(): Promise<void> {
-        const config = {
-            "hosting": {
-                "site": this.newSiteId,
-                "public": ".",
-                "ignore": [
-                    "firebase.json",
-                    "**/.*"
-                ]
-            }
-        };
-        await fs.mkdir(this.reportDir, {recursive: true});
-        await fs.writeFile(this.configPath!, JSON.stringify(config), {mode: 0o755, encoding: 'utf-8'});
-    }
-
     // Creates a new Firebase hosting site, deleting the oldest if the limit is reached
     private async createFirebaseSite(): Promise<any> {
         const sites = await this.getExistingFirebaseSiteIds();
         if (sites.length >= maxFirebaseAllowedSites) {
-            await this.deleteFirebaseSite(sites[0], this.configPath!);
+            const configPath = await this.service.createConfigJson();
+            await this.deleteFirebaseSite(sites[0], configPath);
             console.log(`Oldest report deleted to create new report. Max. ${maxFirebaseAllowedSites}`);
         }
         try {
-            return await this.service.createSite(this.newSiteId);
+            return await this.service.createSite();
         } catch (e) {
             console.error('Failed to create site:', e);
             throw e;
         }
+    }
+
+    async deleteAllSites(): Promise<any> {
+        const sites = await this.getExistingFirebaseSiteIds();
+        const configPath = await this.service.createConfigJson();
+        let numberOfDeletedSites = 0;
+        for (const site of sites) {
+            try {
+                await this.deleteFirebaseSite(site, configPath);
+                numberOfDeletedSites++
+            }catch (e) {
+                console.warn('Failed to delete site:', e);
+            }
+        }
+        console.log(`${numberOfDeletedSites} sites have been deleted.`);
     }
 
     // Retrieves existing Firebase site IDs
@@ -136,7 +120,6 @@ export class FirebaseHost implements HostingProvider {
 
     // Deletes an existing Firebase hosting site to free up space
     private async deleteFirebaseSite(siteId: string, configPath: string): Promise<void> {
-        await this.createConfigJson(); // Site deletion requires firebase.json
         return await this.service.deleteSite({siteId, configPath});
     }
 }

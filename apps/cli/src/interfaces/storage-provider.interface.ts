@@ -3,15 +3,25 @@ export enum Order{
     byNewestToOldest,
 }
 export interface StorageProvider {
+    bucket: any
+    prefix : string | undefined
     upload(filePath: string, destination: string): Promise<void>;
 
-    download({prefix, destination, matchGlob, concurrency, order}: {
-        prefix?: string | undefined,
-        destination: string,
-        matchGlob?: string | null,
-        order?: Order | undefined,
-        concurrency?: number | undefined
+    getFiles({matchGlob, order, maxResults, endOffset}: {
+        matchGlob?: string,
+        order?: Order,
+        maxResults?: number,
+        endOffset?: string
     }): Promise<any[]>;
+
+    download({destination, concurrency, files}: {
+        destination: string,
+        concurrency?: number,
+        files: any[],
+    }): Promise<string[]>;
+
+    deleteFiles(matchGlob?: string) : Promise<void>;
+    deleteFile(fileName: string) : Promise<void>;
 
     sortFiles(files: any[], order: Order): any[];
 }

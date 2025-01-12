@@ -27,7 +27,7 @@ export class Allure {
     }
 
     async generate(data: ExecutorInterface): Promise<string> {
-        const executorPath = path.normalize(`${this.args.RESULTS_STAGING_PATH}/executor.json`)
+        const executorPath = path.join(this.args.RESULTS_STAGING_PATH,'executor.json')
         await fs.writeFile(executorPath, JSON.stringify(data, null, 2), {mode: 0o755, encoding: 'utf8'});
         const command = [
             'generate',

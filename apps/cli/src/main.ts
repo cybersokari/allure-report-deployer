@@ -8,7 +8,7 @@ import {
     getDashboardUrl, GitHubNotifier,
     NotificationData, Notifier,
     SlackService, SlackNotifier,
-    Storage, withOra,
+    Storage, withOra, getReportStats,
 } from "./lib.js";
 import {Command} from "commander";
 import {addDeployCommand} from "./commands/deploy.command.js";
@@ -18,9 +18,11 @@ import {addVersionCommand} from "./commands/version.command.js";
 import {addSlackTokenCommand} from "./commands/slack-setup.command.js";
 import {Storage as GCPStorage} from '@google-cloud/storage'
 import {readJsonFile} from "./utilities/file-util.js";
-import {ResultsStatus} from "./interfaces/counter.interface.js";
+import {ReportStatistic} from "./interfaces/counter.interface.js";
 import {GitHubService} from "./services/github.service.js";
 import {FirebaseService} from "./services/firebase.service.js";
+import {addCleanCommand} from "./commands/clean.command.js";
+import path from "node:path";
 
 // Entry point for the application
 export function main() {
@@ -38,6 +40,7 @@ function setupCommands(program: Command) {
     addCredentialsCommand(program); // Adds credentials management command
     addStorageBucketCommand(program); // Adds storage bucket management command
     addSlackTokenCommand(program); // Adds Slack setup command
+    addCleanCommand(program);
     const deployCommand = addDeployCommand(program, runDeploy); // Adds deploy command
     program.action(() => {
         program.outputHelp({error: false}); // Displays help if no command is provided
@@ -50,14 +53,13 @@ function setupCommands(program: Command) {
 // Executes the deployment process
 async function runDeploy(args: ArgsInterface) {
     const allure = new Allure({args});
-    const firebaseService = new FirebaseService(args.firebaseProjectId);
-    const firebaseHost = new FirebaseHost(args, firebaseService);
+    const firebaseHost = new FirebaseHost(new FirebaseService(args.firebaseProjectId, args.REPORTS_DIR));
     try {
         const cloudStorage = await initializeCloudStorage(args); // Initialize storage bucket
-        const [reportUrl, resultsStatus] = await setupStaging(firebaseHost, cloudStorage, allure, args);
+        const [reportUrl] = await setupStaging(firebaseHost, cloudStorage, allure, args);
         await generateReport({allure, reportUrl, args}); // Generate Allure report
-        await deploy(firebaseHost, cloudStorage); // Deploy report and artifacts
-        await notify(args, reportUrl, resultsStatus); // Send deployment notifications
+        const [resultsStats] = await deploy(firebaseHost, cloudStorage, args); // Deploy report and artifacts
+        await notify(args, reportUrl, resultsStats); // Send deployment notifications
     } catch (error) {
         console.error("Deployment failed:", error);
         process.exit(1); // Exit with error code
@@ -75,7 +77,7 @@ async function initializeCloudStorage(args: ArgsInterface): Promise<Storage | un
             console.log(`Storage Bucket '${args.storageBucket}' does not exist. History and Retries will be disabled`);
             return undefined;
         }
-        return new Storage(new GoogleStorageService(bucket), args);
+        return new Storage(new GoogleStorageService(bucket, args.prefix), args);
     } catch (error) {
         handleStorageError(error);
         throw error;
@@ -86,10 +88,9 @@ async function initializeCloudStorage(args: ArgsInterface): Promise<Storage | un
 async function setupStaging(host: FirebaseHost, storage: Storage | undefined, allure: Allure, args: ArgsInterface) {
     return await withOra({
         work: () => Promise.all([
-            host.init(), // Initialize Firebase hosting site
-            counter.countResults(args.RESULTS_PATH), // Count test results
+            host.init(args.clean), // Initialize Firebase hosting site
             allure.stageFilesFromMount(), // Prepare Allure files
-            storage?.stageFilesFromStorage(), // Prepare cloud storage files
+            args.downloadRequired ? storage?.stageFilesFromStorage() : null, // Prepare cloud storage files
         ]),
         start: 'Staging files...',
         success: 'Files staged successfully.',
@@ -113,9 +114,10 @@ async function generateReport({allure, reportUrl, args}: { allure: Allure, repor
 }
 
 // Deploys the report and associated artifacts
-async function deploy(host: FirebaseHost, storage: Storage | undefined) {
+async function deploy(host: FirebaseHost, storage: Storage | undefined, args: ArgsInterface) {
     return await withOra({
         work: () => Promise.all([
+            getReportStats(path.join(args.REPORTS_DIR, 'widgets/summary.json')),
             host.deploy(), // Deploy to Firebase hosting
             storage?.uploadArtifacts(), // Upload artifacts to storage bucket
         ]),
@@ -125,7 +127,7 @@ async function deploy(host: FirebaseHost, storage: Storage | undefined) {
 }
 
 // Sends notifications about deployment status
-async function notify(args: ArgsInterface, reportUrl: string, resultsStatus: ResultsStatus) {
+async function notify(args: ArgsInterface, reportUrl: string, resultsStatus: ReportStatistic) {
     const notifiers: Notifier[] = [new ConsoleNotifier(args)];
     if (args.slack_token && args.slack_channel) {
         const slackClient = new SlackService(args.slack_token, args.slack_channel)

@@ -12,10 +12,9 @@ on:
       storage-bucket:
         description: 'Your Firebase (GCP) storage bucket'
         required: true
-      show-retries:
-        description: 'Show keep retries in report'
-        type: boolean
-        default: true
+      retries:
+        description: 'Number of test runs to show as retries in report'
+        default: '10'
       show-history:
         description: 'Show keep history in report'
         type: boolean
@@ -54,7 +53,7 @@ jobs:
         run: |
           docker run --rm \
           -e STORAGE_BUCKET=${{github.event.inputs.storage-bucket}} \
-          -e SHOW_RETRIES=${{ github.event.inputs.show-retries }} \
+          -e RETRIES=${{ github.event.inputs.retries }} \
           -e SHOW_HISTORY=${{ github.event.inputs.show-history }} \
           -e SLACK_TOKEN=${{secrets.SLACK_TOKEN}} \
           -e SLACK_CHANNEL=${{secrets.SLACK_CHANNEL_ID}} \
@@ -77,7 +76,7 @@ jobs:
           storage_bucket: ${{github.event.inputs.storage-bucket}}
           slack_channel: ${{secrets.SLACK_CHANNEL_ID}}
           show_history: ${{github.event.inputs.show-history}}
-          show_retries: ${{github.event.inputs.show-retries}}
+          retries: ${{github.event.inputs.retries}}
           prefix: ${{github.event.inputs.prefix}}
           update_pr: 'summary'
 
@@ -97,7 +96,7 @@ jobs:
           storage_bucket: ${{github.event.inputs.storage-bucket}}
           report_name: ${{ github.event.inputs.report-name }}
           slack_channel: ${{secrets.SLACK_CHANNEL}}
-          show_retries: ${{github.event.inputs.show-retries}}
+          retries: ${{github.event.inputs.retries}}
           show_history: ${{github.event.inputs.show-history}}
           prefix: ${{github.event.inputs.prefix}}
           update_pr: 'comment'
