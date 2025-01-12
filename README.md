@@ -171,7 +171,7 @@ workflows:
           allure-deployer deploy path/to/allure-results my-report-name \
           --gcp-json /credentials/key.json \
           --show-history \
-          --retries \
+          --retries 6 \
           --slack-token $SLACK_TOKEN \
           --slack-channel $SLACK_CHANNEL
     artifacts:
