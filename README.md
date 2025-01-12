@@ -206,7 +206,7 @@ allure-deployer slack:set <channel> <token>
 ```shell
 allure-deployer deploy path/to/allure-results my-report-name \
           --show-history \
-          --retries
+          --retries 10
 ```
 
 
