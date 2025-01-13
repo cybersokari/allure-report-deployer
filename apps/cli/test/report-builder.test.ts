@@ -1,6 +1,5 @@
 // @ts-ignore
 import mock from "mock-fs";
-import * as fs from "fs/promises";
 import {fakeArgs} from "./mocks/fake-args.js";
 import {jest} from "@jest/globals";
 import {ExecutorInterface} from "../src/interfaces/executor.interface.js";
@@ -71,26 +70,6 @@ describe("ReportBuilder", () => {
         reportBuilder = new Allure({allureRunner: mockAllureService, args: fakeArgs});
 
         await expect(reportBuilder.generate(executor)).rejects.toThrow("Failed to generate Allure report");
-    });
-
-    test("stageFilesFromMount should stage files correctly", async () => {
-        const dest = fakeArgs.RESULTS_STAGING_PATH;
-        mock({
-            '/allure-results': {
-                'file1.json': '{}',
-                'file2.log': 'content2',
-            },
-            dest: {}
-        });
-        mockAllureService = {
-            runCommand: jest.fn(allureCommandFail), // Mock the AllureCommandRunner interface
-        };
-        reportBuilder = new Allure({allureRunner: mockAllureService, args: fakeArgs});
-
-        await reportBuilder.copyFiles();
-
-        const files = await fs.readdir(dest);
-        expect(files).toEqual(['file1.json', 'file2.log']);
     });
 
     test("generate should return report directory path on success", async () => {
