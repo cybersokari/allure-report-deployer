@@ -40,23 +40,36 @@ elif [ -d "/github/workspace" ]; then
     SHOW_HISTORY="${6#*=}"
     PREFIX="${7#*=}"
     UPDATE_PR="${8#*=}"
+    OUTPUT="${9#*=}"
+    [ -n "$OUTPUT" ] && OUTPUT="/github/workspace/$OUTPUT"
 else
   echo "Error: No credential file exists at $GOOGLE_APPLICATION_CREDENTIALS. Please mount a Firebase Google JSON file"
   exit 1
 fi
 
 # Construct the command with all optional variables
-deploy_command="allure-deployer deploy \"$ALLURE_RESULTS_PATH\""
-
-[ -n "$REPORT_NAME" ] && deploy_command="$deploy_command $REPORT_NAME"
-[ -n "$GOOGLE_APPLICATION_CREDENTIALS" ] && deploy_command="$deploy_command --gcp-json $GOOGLE_APPLICATION_CREDENTIALS"
-[ -n "$STORAGE_BUCKET" ] && deploy_command="$deploy_command --bucket $STORAGE_BUCKET"
-[ "$RETRIES" ] && deploy_command="$deploy_command --retries $RETRIES"
-[ "$SHOW_HISTORY" = "true" ] && deploy_command="$deploy_command --show-history"
-[ -n "$SLACK_CHANNEL" ] && deploy_command="$deploy_command --slack-channel $SLACK_CHANNEL"
-[ -n "$SLACK_TOKEN" ] && deploy_command="$deploy_command --slack-token $SLACK_TOKEN"
-[ -n "$PREFIX" ] && deploy_command="$deploy_command --prefix $PREFIX"
-[ -n "$UPDATE_PR" ] && deploy_command="$deploy_command --update-pr $UPDATE_PR"
+if [ -n "$OUTPUT" ]; then
+  deploy_command="allure-deployer generate \"$ALLURE_RESULTS_PATH\""
+  [ -n "$REPORT_NAME" ] && deploy_command="$deploy_command $REPORT_NAME"
+  [ -n "$GOOGLE_APPLICATION_CREDENTIALS" ] && deploy_command="$deploy_command --gcp-json $GOOGLE_APPLICATION_CREDENTIALS"
+  [ -n "$STORAGE_BUCKET" ] && deploy_command="$deploy_command --bucket $STORAGE_BUCKET"
+  [ "$RETRIES" ] && deploy_command="$deploy_command --retries $RETRIES"
+  [ "$SHOW_HISTORY" = "true" ] && deploy_command="$deploy_command --show-history"
+  [ -n "$PREFIX" ] && deploy_command="$deploy_command --prefix $PREFIX"
+  [ -n "$UPDATE_PR" ] && deploy_command="$deploy_command --update-pr $UPDATE_PR"
+  [ -n "$OUTPUT" ] && deploy_command="$deploy_command --output $OUTPUT"
+else
+  deploy_command="allure-deployer deploy \"$ALLURE_RESULTS_PATH\""
+  [ -n "$REPORT_NAME" ] && deploy_command="$deploy_command $REPORT_NAME"
+  [ -n "$GOOGLE_APPLICATION_CREDENTIALS" ] && deploy_command="$deploy_command --gcp-json $GOOGLE_APPLICATION_CREDENTIALS"
+  [ -n "$STORAGE_BUCKET" ] && deploy_command="$deploy_command --bucket $STORAGE_BUCKET"
+  [ "$RETRIES" ] && deploy_command="$deploy_command --retries $RETRIES"
+  [ "$SHOW_HISTORY" = "true" ] && deploy_command="$deploy_command --show-history"
+  [ -n "$SLACK_CHANNEL" ] && deploy_command="$deploy_command --slack-channel $SLACK_CHANNEL"
+  [ -n "$SLACK_TOKEN" ] && deploy_command="$deploy_command --slack-token $SLACK_TOKEN"
+  [ -n "$PREFIX" ] && deploy_command="$deploy_command --prefix $PREFIX"
+  [ -n "$UPDATE_PR" ] && deploy_command="$deploy_command --update-pr $UPDATE_PR"
+fi
 
 # Execute the constructed command
 eval "$deploy_command"

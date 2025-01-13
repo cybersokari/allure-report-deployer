@@ -1,7 +1,7 @@
 export interface ExecutorInterface {
     reportName?: string
     buildOrder?: number
-    reportUrl: string
+    reportUrl?: string
     name?: string
     type?: string
     buildName?: string

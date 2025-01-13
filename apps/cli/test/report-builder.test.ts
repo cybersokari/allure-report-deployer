@@ -87,7 +87,7 @@ describe("ReportBuilder", () => {
         };
         reportBuilder = new Allure({allureRunner: mockAllureService, args: fakeArgs});
 
-        await reportBuilder.stageFilesFromMount();
+        await reportBuilder.copyFiles();
 
         const files = await fs.readdir(dest);
         expect(files).toEqual(['file1.json', 'file2.log']);

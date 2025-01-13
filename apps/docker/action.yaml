@@ -14,6 +14,7 @@ runs:
     - show_history=${{ inputs.show_history }}
     - prefix=${{ inputs.prefix}}
     - update_pr=${{inputs.update_pr}}
+    - output=${{inputs.output}}
 
 inputs:
   storage_bucket:
@@ -21,7 +22,6 @@ inputs:
     required: true
   report_name:
     description: 'Name/Title of your report'
-    required: false
     default: 'Allure Report'
   slack_channel:
     description: 'Slack channel ID for notifications (optional)'
@@ -31,7 +31,6 @@ inputs:
     required: true
   retries:
     description: 'Number of previous test runs to show as retries in new test report (Default 0)'
-    required: false
     default: 0
   show_history:
     description: 'Show history in the test report (true/false)'
@@ -42,6 +41,9 @@ inputs:
   update_pr:
     description: 'Add report info (url and status) as pull request comment or actions summary'
     default: 'summary'
+  output:
+    description: 'A directory to generate Allure report into. Setting this value disables report hosting and Slack notification'
+    required: false
 
 outputs:
   report_url:

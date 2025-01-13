@@ -48,7 +48,6 @@ export function addCleanCommand(defaultProgram: Command) {
                 console.error('Error deleting files:',e);
                 process.exit(1);
             }
-
         })
     defaultProgram.command('clean:reports')
         .description('Delete all hosted reports')

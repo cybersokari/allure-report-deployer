@@ -1,3 +1,6 @@
+import {SlackConfig} from "./slack.interface.js";
+import {GithubConfig} from "./github.interface.js";
+
 export interface ArgsInterface {
     storageBucket?: string;
     prefix?: string;
@@ -14,9 +17,10 @@ export interface ArgsInterface {
     uploadRequired: boolean;
     downloadRequired: boolean;
     runtimeCredentialDir: string
-    slack_channel?: string
-    slack_token?: string
-    buildUrl?: string;
+    slackConfig?: SlackConfig;
+    githubConfig?: GithubConfig
     updatePr?: string;
     clean?: boolean;
+    deployReport: boolean
 }
+

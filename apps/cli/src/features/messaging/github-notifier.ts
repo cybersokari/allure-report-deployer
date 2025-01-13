@@ -35,9 +35,11 @@ export class GitHubNotifier implements Notifier {
 | ${passed} | ${broken}        | ${skipped}    | ${failed}     | ${unknown}|
     `;
         const promises: Promise<void>[] = [];
-        promises.push(this.client.updateOutput(`report_url=${data.reportUrl}`))
+        if(data.reportUrl){
+            promises.push(this.client.updateOutput(`report_url=${data.reportUrl}`))
+        }
 
-        const githubToken = process.env.GITHUB_TOKEN;
+        const githubToken = this.args.githubConfig?.TOKEN;
         if(githubToken && this.args.updatePr === 'comment'){
             promises.push(this.client.updatePr({message: markdown, token: githubToken}))
         } else {

@@ -1,13 +1,13 @@
-import {SlackInterface} from "../interfaces/slack.interface.js";
+import {SlackConfig, SlackInterface} from "../interfaces/slack.interface.js";
 import {Block, KnownBlock, WebClient} from "@slack/web-api";
 
 export class SlackService implements SlackInterface {
-    private webClient: WebClient;
-    private readonly channel: string;
+    webClient: WebClient;
+    channel: string;
 
-    constructor(token: string, channel: string) {
-        this.webClient = new WebClient(token);
-        this.channel = channel;
+    constructor(config: SlackConfig) {
+        this.webClient = new WebClient(config.token);
+        this.channel = config.channel;
     }
 
     public async postMessage(blocks: (Block | KnownBlock )[], text: string): Promise<void> {

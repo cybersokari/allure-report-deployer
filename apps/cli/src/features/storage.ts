@@ -1,5 +1,5 @@
 import * as path from "node:path";
-import {countFiles, isFileTypeAllure, zipFolder} from "../utilities/util.js";
+import {countFiles, isFileTypeAllure, archiveDirectoryFiles} from "../utilities/util.js";
 import {counter} from "../utilities/counter.js";
 import pLimit from "p-limit";
 import {Order, StorageProvider} from "../interfaces/storage-provider.interface.js";
@@ -219,10 +219,8 @@ export class Storage {
      * @param resultsArchivePath - Path to the results archive.
      */
     private async uploadNewResults(resultsArchivePath: string): Promise<void> {
-        const resultsPath = await zipFolder(
-            [{path: this.args.RESULTS_PATH}],
-            resultsArchivePath
-        );
+        const source = [{path: this.args.RESULTS_PATH}]
+        const resultsPath = await archiveDirectoryFiles({source, outputFilePath: resultsArchivePath, exclude: ['executor.json']});
         await this.provider.upload(resultsPath, path.basename(resultsPath));
     }
 
@@ -231,10 +229,8 @@ export class Storage {
      * @param historyArchivePath - Path to the history archive.
      */
     private async uploadHistory(historyArchivePath: string): Promise<void> {
-        const historyPath = await zipFolder(
-            [{path: this.getHistoryFolder()}],
-            historyArchivePath
-        );
+        const source = [{path: this.getHistoryFolder()}]
+        const historyPath = await archiveDirectoryFiles({source, outputFilePath: historyArchivePath});
         await this.provider.upload(historyPath, path.basename(historyPath));
     }
 }

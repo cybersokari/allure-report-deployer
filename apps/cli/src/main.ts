@@ -8,7 +8,7 @@ import {
     getDashboardUrl, GitHubNotifier,
     NotificationData, Notifier,
     SlackService, SlackNotifier,
-    Storage, withOra, getReportStats,
+    Storage, withOra, getReportStats, ExecutorInterface,
 } from "./lib.js";
 import {Command} from "commander";
 import {addDeployCommand} from "./commands/deploy.command.js";
@@ -17,12 +17,14 @@ import {addStorageBucketCommand} from "./commands/storage.command.js";
 import {addVersionCommand} from "./commands/version.command.js";
 import {addSlackTokenCommand} from "./commands/slack-setup.command.js";
 import {Storage as GCPStorage} from '@google-cloud/storage'
-import {readJsonFile} from "./utilities/file-util.js";
+import {copyFiles, readJsonFile} from "./utilities/file-util.js";
 import {ReportStatistic} from "./interfaces/counter.interface.js";
 import {GitHubService} from "./services/github.service.js";
 import {FirebaseService} from "./services/firebase.service.js";
 import {addCleanCommand} from "./commands/clean.command.js";
 import path from "node:path";
+import {GithubConfig} from "./interfaces/github.interface.js";
+import {addGenerateCommand} from "./commands/generate.command.js";
 
 // Entry point for the application
 export function main() {
@@ -36,30 +38,56 @@ export function main() {
 
 // Configures available CLI commands
 function setupCommands(program: Command) {
+    const deployCommand = addDeployCommand(program, runDeploy); // Adds deploy command
+    const generateCommand = addGenerateCommand(program, runGenerate);
     addVersionCommand(program); // Adds version command
     addCredentialsCommand(program); // Adds credentials management command
     addStorageBucketCommand(program); // Adds storage bucket management command
     addSlackTokenCommand(program); // Adds Slack setup command
     addCleanCommand(program);
-    const deployCommand = addDeployCommand(program, runDeploy); // Adds deploy command
     program.action(() => {
         program.outputHelp({error: false}); // Displays help if no command is provided
-        console.log("\nCommand: deploy");
-        console.log("Generate and deploy report on the web\n");
-        deployCommand.help({error: false});
+        printCommandHelp("\n Command: deploy", deployCommand);
+        printCommandHelp("\n Command: generate", generateCommand);
     });
+}
+
+function printCommandHelp(title: string, command: Command) {
+    console.log(`\n ${title}`);
+    // Capture the help output of deployCommand
+    const helpOutput = command.helpInformation();
+    // Add indentation to each line of the help output
+    const indentedHelpOutput = helpOutput
+        .split("\n") // Split into lines
+        .map(line => `  ${line}`) // Add two spaces to each line
+        .join("\n"); // Join the lines back together
+    console.log(indentedHelpOutput); // Print the indented help output
+}
+
+async function runGenerate(args: ArgsInterface): Promise<void> {
+    try {
+        const storage = await initializeCloudStorage(args); // Initialize storage bucket
+        await setupStaging(args, storage);
+        const allure = new Allure({args});
+        await generateReport({allure, args}); // Generate Allure report
+        const [resultsStats] = await finalize({storage, args}); // Deploy report and artifacts
+        await notify(args, resultsStats); // Send deployment notifications
+    } catch (error) {
+        console.error("Deployment failed:", error);
+        process.exit(1); // Exit with error code
+    }
 }
 
 // Executes the deployment process
 async function runDeploy(args: ArgsInterface) {
-    const allure = new Allure({args});
-    const firebaseHost = new FirebaseHost(new FirebaseService(args.firebaseProjectId, args.REPORTS_DIR));
+    const host = new FirebaseHost(new FirebaseService(args.firebaseProjectId, args.REPORTS_DIR));
     try {
-        const cloudStorage = await initializeCloudStorage(args); // Initialize storage bucket
-        const [reportUrl] = await setupStaging(firebaseHost, cloudStorage, allure, args);
+        const storage = await initializeCloudStorage(args); // Initialize storage bucket
+        const [reportUrl] = await setupStaging(args, storage, host);
+        const allure = new Allure({args});
         await generateReport({allure, reportUrl, args}); // Generate Allure report
-        const [resultsStats] = await deploy(firebaseHost, cloudStorage, args); // Deploy report and artifacts
-        await notify(args, reportUrl, resultsStats); // Send deployment notifications
+        const [resultsStats] = await finalize({args, storage, host}); // Deploy report and artifacts
+        await notify(args, resultsStats, reportUrl); // Send deployment notifications
     } catch (error) {
         console.error("Deployment failed:", error);
         process.exit(1); // Exit with error code
@@ -85,12 +113,19 @@ async function initializeCloudStorage(args: ArgsInterface): Promise<Storage | un
 }
 
 // Prepares files and configurations for deployment
-async function setupStaging(host: FirebaseHost, storage: Storage | undefined, allure: Allure, args: ArgsInterface) {
+async function setupStaging(args: ArgsInterface, storage?: Storage, host?: FirebaseHost) {
+    const copyResultsFiles = (async (): Promise<number> => {
+        return await copyFiles({
+            from: args.RESULTS_PATH,
+            to: args.RESULTS_STAGING_PATH,
+            concurrency: args.fileProcessingConcurrency
+        })
+    })
     return await withOra({
         work: () => Promise.all([
-            host.init(args.clean), // Initialize Firebase hosting site
-            allure.stageFilesFromMount(), // Prepare Allure files
-            args.downloadRequired ? storage?.stageFilesFromStorage() : null, // Prepare cloud storage files
+            host?.init(args.clean), // Initialize Firebase hosting site
+            copyResultsFiles(),
+            args.downloadRequired ? storage?.stageFilesFromStorage() : undefined, // Prepare cloud storage files
         ]),
         start: 'Staging files...',
         success: 'Files staged successfully.',
@@ -98,41 +133,66 @@ async function setupStaging(host: FirebaseHost, storage: Storage | undefined, al
 }
 
 // Generates the Allure report with metadata
-async function generateReport({allure, reportUrl, args}: { allure: Allure, reportUrl: string, args: ArgsInterface }): Promise<string> {
-    const githubRunID = process.env.GITHUB_RUN_ID;
+async function generateReport({allure, reportUrl, args}: {
+    allure: Allure,
+    reportUrl?: string,
+    args: ArgsInterface
+}): Promise<string> {
+    const executor = args.deployReport ? createExecutor({reportUrl, githubConfig: args.githubConfig}) : undefined
     return await withOra({
-        work: () => allure.generate({
-            name: 'Allure Report Deployer',
-            reportUrl: reportUrl,
-            buildUrl: args.buildUrl,
-            buildName: args.reportName || githubRunID,
-            type: githubRunID ? 'github' : undefined,
-        }),
+        work: () => allure.generate(executor),
         start: 'Generating Allure report...',
-        success: 'Report generated successfully.',
+        success: 'Report generated successfully!',
     });
 }
 
+function createExecutor({githubConfig, reportUrl}: {
+    githubConfig?: GithubConfig, reportUrl?: string,
+}): ExecutorInterface {
+    const buildName = githubConfig ? `GitHub Run ID: ${githubConfig.RUN_ID}` : new Date().toDateString()
+    return {
+        name: 'Allure Report Deployer',
+        reportUrl: reportUrl,
+        buildUrl: githubConfig ? createGitHubBuildUrl(githubConfig) : undefined,
+        buildName: buildName,
+        type: githubConfig ? 'github' : undefined,
+    }
+}
+function createGitHubBuildUrl(config: GithubConfig): string {
+    return `https://github.com/${config.OWNER}/${config.REPO}/actions/runs/${config.RUN_ID}`
+}
+
 // Deploys the report and associated artifacts
-async function deploy(host: FirebaseHost, storage: Storage | undefined, args: ArgsInterface) {
+async function finalize({args, host, storage}: {
+    args: ArgsInterface, host?: FirebaseHost, storage?: Storage
+}) {
+    const start = (): string => {
+        if(host)  return 'Deploying report...'
+        if(storage)  return 'Uploading results and history...'
+        return 'Reading report statistic...'
+    }
+    const success = (): string => {
+        if(host)  return 'Report deployed successfully!'
+        if(storage)  return 'Results and history uploaded!'
+        return 'Statistics read completed!'
+    }
     return await withOra({
         work: () => Promise.all([
             getReportStats(path.join(args.REPORTS_DIR, 'widgets/summary.json')),
-            host.deploy(), // Deploy to Firebase hosting
+            host?.deploy(), // Deploy to Firebase hosting
             storage?.uploadArtifacts(), // Upload artifacts to storage bucket
         ]),
-        start: 'Deploying...',
-        success: 'Deployment successfully.',
+        start: start(),
+        success: success(),
     });
 }
 
 // Sends notifications about deployment status
-async function notify(args: ArgsInterface, reportUrl: string, resultsStatus: ReportStatistic) {
+async function notify(args: ArgsInterface, resultsStatus: ReportStatistic, reportUrl?: string) {
     const notifiers: Notifier[] = [new ConsoleNotifier(args)];
-    if (args.slack_token && args.slack_channel) {
-        const slackClient = new SlackService(args.slack_token, args.slack_channel)
-        const slackNotifier = new SlackNotifier(slackClient, args)
-        notifiers.push(slackNotifier);
+    if (args.slackConfig) {
+        const slackClient = new SlackService(args.slackConfig)
+        notifiers.push(new SlackNotifier(slackClient, args));
     }
     const notificationService = new NotifyHandler(notifiers);
     const dashboardUrl = () => {
@@ -141,10 +201,10 @@ async function notify(args: ArgsInterface, reportUrl: string, resultsStatus: Rep
             projectId: args.firebaseProjectId,
         }) : undefined;
     };
-    const summaryPath = process.env.GITHUB_STEP_SUMMARY;
-    const outputPath = process.env.GITHUB_OUTPUT;
-    if (summaryPath && outputPath) {
-        const githubService = new GitHubService({summaryPath, outputPath});
+
+    const githubConfig = args.githubConfig;
+    if (githubConfig) {
+        const githubService = new GitHubService(githubConfig);
         notifiers.push(new GitHubNotifier(githubService, args));
     }
     const notificationData = new NotificationData(resultsStatus, reportUrl, dashboardUrl());
@@ -175,7 +235,7 @@ class NotifyHandler {
         const promises = this.notifiers.map((notifier) => {
             try {
                 notifier.notify(data)
-            }catch (e) {
+            } catch (e) {
                 console.warn(`${notifier.constructor.name} failed to send notification.`, e);
             }
         });

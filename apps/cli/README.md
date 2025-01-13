@@ -25,7 +25,6 @@ npm install -g allure-deployer
 ### `deploy`
 Host your Allure test report on Firebase.
 
-
 #### Syntax
 ```bash
 allure-deployer deploy <allure-results-path> <report-name>
@@ -49,6 +48,36 @@ allure-deployer deploy ./allure-results my-report-name \
 - `--bucket <bucket-name>`: Directly provide a Firebase/GCP bucket name for History and Retries.
 - `--gcp-json <json-path>`: Directly provide a Firebase/GCP JSON credential file for deployment.
 - `-p, --prefix <prefix>`: The storage bucket path to back up Allure results and history files
+
+
+### `generate`
+Prepare an Allure test report locally without deploying it to Firebase.
+
+#### Syntax
+```bash
+allure-deployer generate <allure-results-path> <report-name>
+```
+
+#### Example
+```bash
+allure-deployer generate ./allure-results my-local-report --show-history --retries 5 --output ./allure-report
+```
+
+#### Arguments
+- `<allure-results-path>`: Path to the directory containing Allure results (Default: `./allure-results`).
+- `<report-name>`: The name/title of your report (Default: `Allure Report`).
+
+#### Options
+- `-h, --show-history`: Include history in the generated report.
+- `-r, --retries <limit>`: Specify the number of previous test runs to include as retries.
+- `--bucket <bucket-name>`: Firebase/GCP bucket name for History and Retries.
+- `--gcp-json <json-path>`: Firebase/GCP JSON credential file for additional configurations.
+- `-p, --prefix <prefix>`: Storage bucket path to back up Allure results and history files.
+- `-o, --output <output-dir>` A directory to generate the Allure report into (default: "allure-report")
+
+#### Description
+The `generate` command is useful for creating an Allure test report locally without deploying it to the cloud.
+This allows for testing, reviewing reports and hosting with other tools.
 
 ### `gcp-json:set`
 Set Firebase/GCP credentials for reuse.
@@ -103,6 +132,10 @@ The CLI provides a set of commands to help you generate and deploy your Allure R
 ```shell
 allure-deployer --help
 ```
+
+## License
+
+This project is licensed under the BSD-3 License. See the [LICENSE](LICENSE) file for details.
 
 ## Contributing
 

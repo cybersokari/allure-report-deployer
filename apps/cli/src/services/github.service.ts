@@ -1,35 +1,27 @@
-import {GithubInterface} from "../interfaces/github.interface.js";
+import {GithubConfig, GithubInterface} from "../interfaces/github.interface.js";
 import fs from "fs/promises";
 import github from "@actions/github";
-import process from "node:process";
-
 export class GitHubService implements GithubInterface {
-    outputPath: string;
-    summaryPath: string;
 
-    constructor({outputPath, summaryPath}: { readonly outputPath: string, readonly summaryPath: string }) {
-        this.outputPath = outputPath;
-        this.summaryPath = summaryPath;
-    }
+    constructor(readonly config: GithubConfig) {}
 
     async updateOutput(message: string): Promise<void> {
         try {
-            await fs.writeFile(this.outputPath, message, {flag: 'a'}); // Append to the file
+            await fs.writeFile(this.config.OUTPUT_PATH, message, {flag: 'a'}); // Append to the file
         } catch (e) {
-            console.warn(`Failed to write to ${this.outputPath}`, e);
+            console.warn(`Failed to write to ${this.config.OUTPUT_PATH}`, e);
         }
     }
 
     async updatePr({message, token}: { message: string, token: string }): Promise<void> {
 
         try {
-            const [owner, repo]  = process.env.GITHUB_REPOSITORY!.split('/')
             const pr = github.context.payload.pull_request!
             const octokit = github.getOctokit(token)
             // Update the PR body
             await octokit.rest.issues.createComment({
-                owner,
-                repo,
+                owner: this.config.OWNER,
+                repo: this.config.REPO,
                 issue_number: pr.number,
                 body: message.trim(),
             });
@@ -41,9 +33,9 @@ export class GitHubService implements GithubInterface {
 
     async updateSummary(message: string): Promise<void> {
         try {
-            await fs.writeFile(this.summaryPath, message.trim(), {flag: 'a'}); // Append to the file
+            await fs.writeFile(this.config.STEP_SUMMARY_PATH, message.trim(), {flag: 'a'}); // Append to the file
         } catch (err) {
-            console.warn(`Failed to write to ${this.summaryPath}`, err);
+            console.warn(`Failed to write to ${this.config.STEP_SUMMARY_PATH}`, err);
         }
     }
 }

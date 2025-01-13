@@ -1,8 +1,5 @@
 import * as fs from 'fs/promises'
-import {Dirent} from 'fs'
 import {appLog} from "../utilities/util.js";
-import {counter} from "../utilities/counter.js";
-import pLimit from "p-limit";
 import * as path from "node:path";
 import {CommandRunner} from "../interfaces/command.interface.js";
 import {ArgsInterface} from "../interfaces/args.interface.js";
@@ -26,9 +23,11 @@ export class Allure {
         }
     }
 
-    async generate(data: ExecutorInterface): Promise<string> {
-        const executorPath = path.join(this.args.RESULTS_STAGING_PATH,'executor.json')
-        await fs.writeFile(executorPath, JSON.stringify(data, null, 2), {mode: 0o755, encoding: 'utf8'});
+    async generate(data?: ExecutorInterface): Promise<string> {
+        if(data){
+            const executorPath = path.join(this.args.RESULTS_STAGING_PATH,'executor.json')
+            await fs.writeFile(executorPath, JSON.stringify(data, null, 2), {mode: 0o755, encoding: 'utf8'});
+        }
         const command = [
             'generate',
             this.args.RESULTS_STAGING_PATH,
@@ -44,43 +43,5 @@ export class Allure {
             throw new Error("Failed to generate Allure report");
         }
         return this.args.REPORTS_DIR;
-    }
-
-
-    async stageFilesFromMount(): Promise<void> {
-        // Ensure staging directory exists and fetch list
-        const [files] = await Promise.all([
-            fs.readdir(this.args.RESULTS_PATH, { withFileTypes: true }), // Get files info
-            fs.mkdir(this.args.RESULTS_STAGING_PATH, { recursive: true }) // Create staging if it doesn't exist
-        ]);
-
-        const limit = pLimit(this.args.fileProcessingConcurrency); // Limit concurrency
-        const copyPromises = [];
-
-        let successCount = 0;
-        for (const file of files) {
-            // Skip directories, process files only
-            if (!file.isFile()) continue;
-
-            copyPromises.push(limit(async () => {
-                try {
-                    await this.copyFile(file);
-                    successCount++;
-                } catch (error) {
-                    console.log(`Error copying file ${file.name}:`, error);
-                }
-            }));
-
-        }
-
-        // Wait for all file operations to finish
-        await Promise.all(copyPromises);
-        await counter.addFilesProcessed(successCount);
-    }
-
-    private async copyFile(file: Dirent): Promise<void> {
-        const fileToCopy = path.join(this.args.RESULTS_PATH, file.name);
-        const destination = path.join(this.args.RESULTS_STAGING_PATH, file.name);
-        await fs.cp(fileToCopy, destination, { force: false, errorOnExist: false });
     }
 }

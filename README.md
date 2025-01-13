@@ -228,6 +228,7 @@ https://github.com/marketplace/actions/allure-deployer-action
 | `retries`             | Number of previous test runs to show as retries in the upcoming report when Storage `storage_bucket` is provided | No       | 0                 |
 | `prefix`              | Path prefix in the Cloud Storage bucket for archiving files.                                                     | No       | None              |
 | `update_pr`           | Add test report info as pr comment or actions summary (`comment`/`summary`)                                      | No       | `summary`         |
+| `output`              | A directory to generate Allure report into. Setting this value disables report hosting and Slack notification    | No       | None              |
 
 ---
 
