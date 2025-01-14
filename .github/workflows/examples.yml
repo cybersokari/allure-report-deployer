@@ -83,13 +83,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4.1.5
       - name: Generate Allure Report with History and Retries
-        uses: cybersokari/allure-deployer-action@v1.4
+        uses: cybersokari/allure-deployer-action@v1.4.1
         with:
+          google_credentials_json: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
           allure_results_path: 'assets/allure-results'
           storage_bucket: ${{vars.STORAGE_BUCKET}}
+          target: 'github'
+          github_pages_branch: 'gh-pages'
+          github_token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
           show_history: ${{github.event.inputs.show-history}}
           retries: ${{github.event.inputs.retries}}
           prefix: 'test-action-gh-pages'
-          github_pages_branch: 'gh-pages'
-          github_token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
-          google_credentials_json: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
