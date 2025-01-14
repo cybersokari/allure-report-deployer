@@ -24,6 +24,7 @@ export const ERROR_MESSAGES = {
     INVALID_SLACK_CRED: `Invalid Slack credential. ${chalk.blue('slack_channel')} and ${chalk.blue('slack_token')} must be provided together`,
     NO_JAVA: 'Error: JAVA_HOME not found. Allure 2.32 requires JAVA runtime installed'
 };
+
 export function appLog(data: string) {
     console.log(data)
 }
@@ -114,15 +115,22 @@ export async function getReportStats(summaryJsonDir: string): Promise<ReportStat
     return summaryJson.statistic as ReportStatistic;
 }
 
-export function getDashboardUrl({projectId, storageBucket}: { projectId?: string, storageBucket: string }): string {
+export function getDashboardUrl({projectId, storageBucket, prefix}: {
+    prefix?: string,
+    projectId?: string,
+    storageBucket: string
+}): string {
     if (!projectId) {
         return `http://127.0.0.1:4000/storage/${storageBucket}`
     }
-    return new StringBuilder()
+    const builder = new StringBuilder()
         .append("https://console.firebase.google.com/project")
         .append(`/${(projectId)}`)
         .append(`/storage/${storageBucket}/files`)
-        .toString()
+    if (prefix) {
+        builder.append(`/~2F${prefix}`)
+    }
+    return builder.toString();
 }
 
 export interface WithOraParams<T> {
@@ -167,7 +175,7 @@ export async function validateCredentials(gcpJsonPath: string | undefined): Prom
             const serviceAccount = await readJsonFile(gcpJsonPath) as ServiceAccountJson;
             process.env.GOOGLE_APPLICATION_CREDENTIALS = gcpJsonPath;
             return serviceAccount.project_id;
-        }catch (e) {
+        } catch (e) {
             console.error(e);
             process.exit(1)
         }
@@ -209,7 +217,7 @@ export function validateSlackConfig(channel?: string, token?: string): SlackConf
         return undefined;
     }
     // Return valid SlackConfig
-    return { channel, token };
+    return {channel, token};
 }
 
 export function parseRetries(value: string): any {

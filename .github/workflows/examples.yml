@@ -83,41 +83,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4.1.5
       - name: Generate Allure Report with History and Retries
-        uses: cybersokari/allure-deployer-action@v1.3
-        env:
-          GOOGLE_CREDENTIALS_JSON: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
+        uses: cybersokari/allure-deployer-action@v1.4
         with:
           allure_results_path: 'assets/allure-results'
           storage_bucket: ${{vars.STORAGE_BUCKET}}
           show_history: ${{github.event.inputs.show-history}}
           retries: ${{github.event.inputs.retries}}
           prefix: 'test-action-gh-pages'
-          update_pr: 'summary'
-          output: 'allure-report'
-      - name: Deploy report to Github Pages
-        if: always()
-        uses: peaceiris/actions-gh-pages@v4.0.0
-        with:
-          personal_token: ${{secrets.PERSONAL_ACCESS_TOKEN}}
-          publish_dir: 'allure-report'
-
-  test-action-local:
-    if: ${{ github.event.inputs.job == 'test-action-local' }}
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4.1.5
-      - name: Allure Deployer Action
-        uses: ./apps/docker
-        env:
-          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
-          SLACK_TOKEN: ${{secrets.SLACK_TOKEN}}
-          GOOGLE_CREDENTIALS_JSON: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS}}
-        with:
-          allure_results_path: 'assets/allure-results'
-          storage_bucket: ${{vars.STORAGE_BUCKET}}
-          report_name: ${{ github.event.inputs.report-name }}
-          slack_channel: ${{secrets.SLACK_CHANNEL_ID}}
-          retries: ${{github.event.inputs.retries}}
-          show_history: ${{github.event.inputs.show-history}}
-          prefix: 'test-action-local'
-          update_pr: 'comment'
+          github_pages_branch: 'gh-pages'
+          github_token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          google_credentials_json: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
