@@ -10,7 +10,7 @@ import {ArgsInterface} from "../interfaces/args.interface.js";
 import {UnzipperProvider} from "../interfaces/unzipper.interface.js";
 import {GoogleStorageService} from "../services/google-storage.service.js";
 
-const HISTORY_ARCHIVE_NAME = "**last-history.zip";
+const HISTORY_ARCHIVE_NAME = "last-history.zip";
 const RESULTS_ARCHIVE_GLOB_MATCH = '[0-9]*.zip';
 
 /**
@@ -136,7 +136,7 @@ export class Storage {
     private async stageHistoryFiles(): Promise<void> {
         const files = await this.provider.getFiles({
             maxResults: 1,
-            matchGlob: HISTORY_ARCHIVE_NAME,
+            matchGlob: `**${HISTORY_ARCHIVE_NAME}`,
         });
 
         if (files.length === 0) {
