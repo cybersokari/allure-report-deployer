@@ -13,7 +13,7 @@ export class GoogleStorageService implements StorageProvider {
     }
 
     public async upload(filePath: string, destination: string) {
-        await this.bucket.upload(filePath, {validation: true, destination: destination})
+        await this.bucket.upload(filePath, {validation: true, destination: path.join(this.prefix ?? '', destination)})
     }
 
     async getFiles({matchGlob, order = Order.byNewestToOldest, maxResults, endOffset}: {
@@ -57,11 +57,11 @@ export class GoogleStorageService implements StorageProvider {
         });
     }
 
-    async deleteFile(fileName: string) : Promise<void> {
+    async deleteFile(fileName: string): Promise<void> {
         await this.bucket.file(fileName).delete();
     }
 
-    async deleteFiles(matchGlob = '**.zip') : Promise<void> {
+    async deleteFiles(matchGlob = '**.zip'): Promise<void> {
         await this.bucket.deleteFiles({prefix: this.prefix, matchGlob});
     }
 
