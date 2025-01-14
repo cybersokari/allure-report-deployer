@@ -7,9 +7,11 @@ export interface GithubInterface {
 
 export type GithubConfig = {
     RUN_ID: string;
+    RUN_NUM: string;
     TOKEN?: string;
     OWNER: string;
     REPO: string;
     STEP_SUMMARY_PATH: string;
     OUTPUT_PATH: string;
+    PR_COMMENT: boolean;
 }

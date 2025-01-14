@@ -40,7 +40,7 @@ export class GitHubNotifier implements Notifier {
         }
 
         const githubToken = this.args.githubConfig?.TOKEN;
-        if(githubToken && this.args.updatePr === 'comment'){
+        if(githubToken && this.args.githubConfig?.PR_COMMENT){
             promises.push(this.client.updatePr({message: markdown, token: githubToken}))
         } else {
             promises.push(this.client.updateSummary(markdown.trim()))

@@ -15,5 +15,4 @@ export const fakeArgs : ArgsInterface = {
     retries: 10,
     downloadRequired: true,
     uploadRequired: true,
-    deployReport: true,
 }

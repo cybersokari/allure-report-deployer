@@ -4,7 +4,7 @@ import {Bucket, Storage as GCPStorage} from "@google-cloud/storage";
 import {GoogleStorageService} from "../services/google-storage.service.js";
 import {db} from "../utilities/database.js";
 import {KEY_BUCKET} from "../utilities/constants.js";
-import {FirebaseHost} from "../features/hosting/firebase-host.js";
+import {FirebaseHost} from "../features/hosting/firebase.host.js";
 import {FirebaseService} from "../services/firebase.service.js";
 import path from "node:path";
 import {GoogleCredentialsHelper, ServiceAccountJson} from "../utilities/google-credentials-helper.js";

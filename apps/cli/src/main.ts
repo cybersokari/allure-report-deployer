@@ -3,7 +3,6 @@ import * as process from "node:process";
 import {
     Allure, ArgsInterface,
     ConsoleNotifier, counter,
-    FirebaseHost,
     GoogleStorageService,
     getDashboardUrl, GitHubNotifier,
     NotificationData, Notifier,
@@ -20,7 +19,6 @@ import {Storage as GCPStorage} from '@google-cloud/storage'
 import {copyFiles, readJsonFile} from "./utilities/file-util.js";
 import {ReportStatistic} from "./interfaces/counter.interface.js";
 import {GitHubService} from "./services/github.service.js";
-import {FirebaseService} from "./services/firebase.service.js";
 import {addCleanCommand} from "./commands/clean.command.js";
 import path from "node:path";
 import {GithubConfig} from "./interfaces/github.interface.js";
@@ -80,13 +78,12 @@ async function runGenerate(args: ArgsInterface): Promise<void> {
 
 // Executes the deployment process
 async function runDeploy(args: ArgsInterface) {
-    const host = new FirebaseHost(new FirebaseService(args.firebaseProjectId, args.REPORTS_DIR));
     try {
         const storage = await initializeCloudStorage(args); // Initialize storage bucket
-        const [reportUrl] = await setupStaging(args, storage, host);
+        const [reportUrl] = await setupStaging(args, storage);
         const allure = new Allure({args});
         await generateReport({allure, reportUrl, args}); // Generate Allure report
-        const [resultsStats] = await finalize({args, storage, host}); // Deploy report and artifacts
+        const [resultsStats] = await finalize({args, storage}); // Deploy report and artifacts
         await notify(args, resultsStats, reportUrl); // Send deployment notifications
     } catch (error) {
         console.error("Deployment failed:", error);
@@ -113,7 +110,7 @@ async function initializeCloudStorage(args: ArgsInterface): Promise<Storage | un
 }
 
 // Prepares files and configurations for deployment
-async function setupStaging(args: ArgsInterface, storage?: Storage, host?: FirebaseHost) {
+async function setupStaging(args: ArgsInterface, storage?: Storage) {
     const copyResultsFiles = (async (): Promise<number> => {
         return await copyFiles({
             from: args.RESULTS_PATH,
@@ -123,7 +120,7 @@ async function setupStaging(args: ArgsInterface, storage?: Storage, host?: Fireb
     })
     return await withOra({
         work: () => Promise.all([
-            host?.init(args.clean), // Initialize Firebase hosting site
+            args.host?.init(args.clean), // Initialize Firebase hosting site
             copyResultsFiles(),
             args.downloadRequired ? storage?.stageFilesFromStorage() : undefined, // Prepare cloud storage files
         ]),
@@ -138,7 +135,7 @@ async function generateReport({allure, reportUrl, args}: {
     reportUrl?: string,
     args: ArgsInterface
 }): Promise<string> {
-    const executor = args.deployReport ? createExecutor({reportUrl, githubConfig: args.githubConfig}) : undefined
+    const executor = args.host ? createExecutor({reportUrl, githubConfig: args.githubConfig}) : undefined
     return await withOra({
         work: () => allure.generate(executor),
         start: 'Generating Allure report...',
@@ -163,23 +160,23 @@ function createGitHubBuildUrl(config: GithubConfig): string {
 }
 
 // Deploys the report and associated artifacts
-async function finalize({args, host, storage}: {
-    args: ArgsInterface, host?: FirebaseHost, storage?: Storage
+async function finalize({args, storage}: {
+    args: ArgsInterface, storage?: Storage
 }) {
     const start = (): string => {
-        if(host)  return 'Deploying report...'
+        if(args.host)  return 'Deploying report...'
         if(storage)  return 'Uploading results and history...'
         return 'Reading report statistic...'
     }
     const success = (): string => {
-        if(host)  return 'Report deployed successfully!'
+        if(args.host)  return 'Report deployed successfully!'
         if(storage)  return 'Results and history uploaded!'
         return 'Statistics read completed!'
     }
     return await withOra({
         work: () => Promise.all([
             getReportStats(path.join(args.REPORTS_DIR, 'widgets/summary.json')),
-            host?.deploy(), // Deploy to Firebase hosting
+            args.host?.deploy(), // Deploy to Firebase hosting
             storage?.uploadArtifacts(), // Upload artifacts to storage bucket
         ]),
         start: start(),

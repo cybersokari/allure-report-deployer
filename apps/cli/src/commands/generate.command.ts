@@ -19,7 +19,7 @@ import {
     gcpJsonOption, prefixOption,
     reportNameArg,
     retriesOption,
-    showHistoryOption, updatePrOption
+    showHistoryOption
 } from "./deploy.command.js";
 
 async function handleGenerateAction(resultPath: any, reportName: any, options: any): Promise<ArgsInterface> {
@@ -36,7 +36,6 @@ async function handleGenerateAction(resultPath: any, reportName: any, options: a
             ARCHIVE_DIR: path.join(runtimeDir, 'archive'),
             HOME_DIR: runtimeDir,
             REPORTS_DIR: path.normalize(options.output),
-            deployReport: false, //
             RESULTS_PATH: resultPath,
             RESULTS_STAGING_PATH: path.join(runtimeDir, 'allure-results'),
             downloadRequired: showHistory || retries,
@@ -47,7 +46,6 @@ async function handleGenerateAction(resultPath: any, reportName: any, options: a
             retries: retries,
             showHistory: showHistory,
             reportName: reportName,
-            updatePr: options.updatePr,
             clean: options.clean,
             githubConfig: process.env.GITHUB_OUTPUT ? getGithubConfig() : undefined
         }
@@ -61,7 +59,6 @@ async function handleGenerateAction(resultPath: any, reportName: any, options: a
 export function addGenerateCommand(defaultProgram: Command, onCommand: (args: ArgsInterface) => Promise<void>): Command {
     const outputDirOption = new Option("-o, --output <output-dir>", "The directory to generate Allure report into")
         .default('allure-report')
-    // const executorDirOption = new Option("-e, --executor <executor-dir>", "Path to your custom executor.json")
     return defaultProgram.command('generate')
         .description("Generate report to output directory")
         .addArgument(allureResultsPathArg)
@@ -71,7 +68,6 @@ export function addGenerateCommand(defaultProgram: Command, onCommand: (args: Ar
         .addOption(gcpJsonOption)
         .addOption(bucketOption)
         .addOption(prefixOption)
-        .addOption(updatePrOption)
         .addOption(outputDirOption)
         .action(async (resultPath, reportName, options) => {
             if (!isJavaInstalled()) {

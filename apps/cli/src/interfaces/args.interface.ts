@@ -1,5 +1,6 @@
 import {SlackConfig} from "./slack.interface.js";
 import {GithubConfig} from "./github.interface.js";
+import {HostingProvider} from "./hosting-provider.interface";
 
 export interface ArgsInterface {
     storageBucket?: string;
@@ -19,8 +20,7 @@ export interface ArgsInterface {
     runtimeCredentialDir: string
     slackConfig?: SlackConfig;
     githubConfig?: GithubConfig
-    updatePr?: string;
     clean?: boolean;
-    deployReport: boolean
+    host?: HostingProvider;
 }
 

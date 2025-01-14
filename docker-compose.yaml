@@ -48,10 +48,5 @@ services:
     volumes:
       - ./assets/allure-results:/allure-results
       - ./key.json:/key.json:ro
-  test-action:
-    image: act-github-actions-dockeraction:latest
-    build:
-      context: apps/action
-      dockerfile: action.Dockerfile
 
 

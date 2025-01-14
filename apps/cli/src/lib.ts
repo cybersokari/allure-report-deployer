@@ -1,4 +1,4 @@
-export * from "./features/hosting/firebase-host.js"
+export * from "./features/hosting/firebase.host.js"
 export * from "./features/messaging/console-notifier.js"
 export * from "./features/messaging/github-notifier.js"
 export * from "./features/messaging/slack-notifier.js"

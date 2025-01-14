@@ -1,4 +1,4 @@
 export interface HostingProvider {
-    init(): Promise<any>
+    init(clean?: boolean): Promise<string>
     deploy(): Promise<any>
 }

@@ -204,10 +204,9 @@ export function validateSlackConfig(channel?: string, token?: string): SlackConf
     if (!token) {
         token = db.get(KEY_SLACK_TOKEN);
     }
-    // Validate presence of both channel and token after fallback
+    // Return undefined if any is still missing
     if (!channel || !token) {
-        console.error(ERROR_MESSAGES.INVALID_SLACK_CRED);
-        process.exit(1); // Exit if both are still missing
+        return undefined;
     }
     // Return valid SlackConfig
     return { channel, token };
@@ -235,9 +234,11 @@ export function getGithubConfig(): GithubConfig {
     const [OWNER, REPO] = process.env.GITHUB_REPOSITORY!.split('/')
     const STEP_SUMMARY_PATH = process.env.GITHUB_STEP_SUMMARY!;
     const OUTPUT_PATH = process.env.GITHUB_OUTPUT!;
-    const TOKEN = process.env.GITHUB_TOKEN;
+    const TOKEN = process.env.INPUT_GITHUB_TOKEN;
     const RUN_ID = process.env.GITHUB_RUN_ID!;
-    return {REPO, OWNER, STEP_SUMMARY_PATH, OUTPUT_PATH, RUN_ID, TOKEN}
+    const RUN_NUM = process.env.GITHUB_RUN_NUMBER!
+    const PR_COMMENT = process.env.INPUT_PR_COMMENT?.toLowerCase() === 'true'
+    return {REPO, OWNER, STEP_SUMMARY_PATH, OUTPUT_PATH, RUN_ID, TOKEN, RUN_NUM, PR_COMMENT};
 }
 
 
