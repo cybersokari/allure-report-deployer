@@ -17,7 +17,7 @@ Example report: https://gatedaccessdev.web.app
 
 This package can be used three different ways:
 
-- 🤖 A [**GitHub Action**](https://github.com/marketplace/actions/allure-deployer-action) to deploy reports to GitHub pages and Firebase
+- 🤖 A [**GitHub Action**](https://github.com/marketplace/actions/allure-deployer-action) to deploy reports to GitHub pages or Firebase
 
 - 🐳 A [**Docker image**](https://hub.docker.com/r/sokari/allure-deployer) to deploy reports to Firebase
 
