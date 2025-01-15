@@ -2,7 +2,7 @@
 
 ![Deploy](https://github.com/cybersokari/allure-docker-deploy/actions/workflows/deploy.yaml/badge.svg?branch=main)
 ![Deploy](https://github.com/cybersokari/allure-docker-deploy/workflows/Test/badge.svg)
-![docker](https://img.shields.io/docker/pulls/sokari/allure-deployer)
+![docker](https://img.shields.io/docker/pulls/sokari/allure-deployer-action)
 ![npm](https://img.shields.io/npm/dt/allure-deployer?label=npm%20downloads)
 
 **Host your Allure test reports on the web with history, retries, and Slack integration—no server required.**
