@@ -17,11 +17,11 @@ Example report: https://gatedaccessdev.web.app
 
 This package can be used three different ways:
 
-- 🤖 A [**GitHub Action**](https://github.com/marketplace/actions/allure-deployer-action) as part of your CI/CD process
+- 🤖 A [**GitHub Action**](https://github.com/marketplace/actions/allure-deployer-action) to deploy reports to GitHub pages and Firebase
 
-- 🐳 A [**Docker image**](https://hub.docker.com/r/sokari/allure-deployer) that you can run anywhere
+- 🐳 A [**Docker image**](https://hub.docker.com/r/sokari/allure-deployer) to deploy reports to Firebase
 
-- 🖥 A [**CLI**](https://www.npmjs.com/package/allure-deployer) that you run in your terminal and CI
+- 🖥 A [**CLI**](https://www.npmjs.com/package/allure-deployer) to deploy reports to Firebase
 
 
 <h2 id="quick-start">🚀 Quick Start</h2>
