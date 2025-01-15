@@ -7,7 +7,7 @@ export const fakeArgs : ArgsInterface = {
     reportName: 'dd-site',
     ARCHIVE_DIR: '/app/archive',
     HOME_DIR: "/app",
-    RESULTS_PATH: '/allure-results',
+    RESULTS_PATHS: ['/allure-results'],
     REPORTS_DIR: "/app/allure-reports",
     RESULTS_STAGING_PATH: "/app/allure-results",
     fileProcessingConcurrency: 10,

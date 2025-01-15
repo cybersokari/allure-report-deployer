@@ -13,8 +13,7 @@ import {
     getGithubConfig,
     parseRetries,
     validateBucket,
-    validateCredentials,
-    validateResultsPath,
+    validateCredentials, validateResultsPaths,
     validateSlackConfig
 } from "../utilities/util.js";
 import {GithubHost} from "../features/hosting/github.host.js";
@@ -33,8 +32,8 @@ const COMMAND_DESCRIPTIONS = {
 }
 
 // Initialize arguments and options as variables
-export const allureResultsPathArg = new Argument("<allure-results-path>", "Path to results, Default 'allure-results'")
-    .default("./allure-results")
+export const allureResultsPathArg = new Argument("<allure-results-path>", "Single or comma separated paths to results files, Default 'allure-results'")
+    .default("allure-results")
     .argOptional();
 export const reportNameArg = new Argument("<report-name>", "Name of your report. Default is 'Allure Report'")
     .argOptional();
@@ -54,7 +53,6 @@ export const targetOption = new Option("-t, --target", "Your preferred host for 
 
 async function handleDeployAction(resultPath: any, reportName: any, options: any): Promise<ArgsInterface> {
     try {
-        await validateResultsPath(resultPath);
         const firebaseProjectId = (await validateCredentials(options.gcpJson)) || db.get(KEY_PROJECT_ID);
         validateBucket(options);
         const slackConfig = validateSlackConfig(options.slackChannel, options.slackToken);
@@ -82,7 +80,7 @@ async function handleDeployAction(resultPath: any, reportName: any, options: any
             HOME_DIR: runtimeDir,
             REPORTS_DIR: reportsDirectory,
             host: host(),
-            RESULTS_PATH: resultPath,
+            RESULTS_PATHS: await validateResultsPaths(resultPath),
             RESULTS_STAGING_PATH: path.join(runtimeDir, 'allure-results'),
             downloadRequired: showHistory || retries,
             fileProcessingConcurrency: 10,

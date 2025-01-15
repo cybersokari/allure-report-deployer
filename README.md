@@ -39,33 +39,54 @@ This package can be used three different ways:
 ### GitHub
 #### 1.	Add the [Allure Deployer GitHub Action](https://github.com/marketplace/actions/allure-deployer-action) to your workflow.
 
+**Deploy report to GitHub Pages**
 ```yaml
-name: Your awesome workflow
-on:
-  push:
 jobs:
-  test-action:
+  gh-pages:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4.1.5
+      - name: Run test
+        run: #Run test and create allure results
+      - name: Deploy Reports to GitHub pages with History and Retries
+        uses: cybersokari/allure-deployer-action@v1.4.2
+        with:
+          target: 'github'
+          github_token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          github_pages_branch: 'gh-pages'
+          allure_results_path: 'allure-results'
+          google_credentials_json: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }} # Required for History and Retries
+          storage_bucket: ${{vars.STORAGE_BUCKET}}
+          prefix: 'test-gh-pages'
+          show_history: 'true'
+          retries: 5
+```
+**Deploy report to Firebase Hosting**
+```yaml
+jobs:
+  firebase:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4.1.5
-      - name: Run your tests and create Allure results
-        run: |
-          echo ' Nothing here for now, waiting for results'
-          
-      - name: Allure Deployer Action
-        uses: cybersokari/allure-deployer-action@v1.1.10
-        env:
-          SLACK_TOKEN: ${{secrets.SLACK_TOKEN}}
-          GOOGLE_CREDENTIALS_JSON: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
+      - name: Run test
+        run: #Run test and create allure results
+      - name: Deploy Reports to Firebase with History and Retries
+        uses: cybersokari/allure-deployer-action@v1.4.2
         with:
-          allure_results_path: 'path/to/allure-results'
-          report_name: 'Notification module Q2'
-          storage_bucket: ${{vars.storage-bucket}}
-          slack_channel: ${{vars.SLACK_CHANNEL}}
-          show_history: 'true' 
+          target: 'firebase'
+          allure_results_path: 'allure-results'
+          google_credentials_json: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
+          storage_bucket: ${{vars.STORAGE_BUCKET}}
+          show_history: 'true'
           retries: 5
+          prefix: 'test-firebase'
+          slack_channel: ${{secrets.SLACK_CHANNEL_ID}}
+          slack_token: ${{secrets.SLACK_TOKEN}}
 ```
-See [configurations](#configuration-github) for complete options and environment variables
+
+See [configurations](#configuration-github) for the complete inputs.
 ___
  
 #### 2.	Check your Pull request or GitHub Actions summary:

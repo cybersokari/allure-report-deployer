@@ -113,7 +113,7 @@ async function initializeCloudStorage(args: ArgsInterface): Promise<Storage | un
 async function setupStaging(args: ArgsInterface, storage?: Storage) {
     const copyResultsFiles = (async (): Promise<number> => {
         return await copyFiles({
-            from: args.RESULTS_PATH,
+            from: args.RESULTS_PATHS,
             to: args.RESULTS_STAGING_PATH,
             concurrency: args.fileProcessingConcurrency
         })
@@ -191,7 +191,6 @@ async function notify(args: ArgsInterface, resultsStatus: ReportStatistic, repor
         const slackClient = new SlackService(args.slackConfig)
         notifiers.push(new SlackNotifier(slackClient, args));
     }
-    const notificationService = new NotifyHandler(notifiers);
     const dashboardUrl = () => {
         return args.storageBucket ? getDashboardUrl({
             storageBucket: args.storageBucket,
@@ -205,7 +204,7 @@ async function notify(args: ArgsInterface, resultsStatus: ReportStatistic, repor
         notifiers.push(new GitHubNotifier(githubService, args));
     }
     const notificationData = new NotificationData(resultsStatus, reportUrl, dashboardUrl());
-    await notificationService.sendNotifications(notificationData); // Send notifications via all configured notifiers
+    await new NotifyHandler(notifiers).sendNotifications(notificationData); // Send notifications via all configured notifiers
 }
 
 // Handles errors related to cloud storage

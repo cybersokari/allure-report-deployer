@@ -50,38 +50,52 @@ export function isJavaInstalled() {
     }
 }
 
-export async function copyFiles({from, to, concurrency = 10, overwrite = false}: {
-    from: string,
-    to: string,
-    concurrency?: number,
-    overwrite?: boolean,
+export async function copyFiles({
+                                    from,
+                                    to,
+                                    concurrency = 10,
+                                    overwrite = false,
+                                }: {
+    from: string[]; // Updated to accept an array of directories
+    to: string;
+    concurrency?: number;
+    overwrite?: boolean;
 }): Promise<number> {
-    // Ensure staging directory exists and fetch list
-    const [files] = await Promise.all([
-        fs.readdir(from, {withFileTypes: true}), // Get files info
-        fs.mkdir(to, {recursive: true}) // Create staging if it doesn't exist
-    ]);
-
     const limit = pLimit(concurrency); // Limit concurrency
     const copyPromises = [];
-
     let successCount = 0;
-    for (const file of files) {
-        // Skip directories, process files only
-        if (!file.isFile()) continue;
 
-        copyPromises.push(limit(async () => {
-            try {
-                const fileToCopy = path.join(from, file.name);
-                const destination = path.join(to, file.name);
-                await fs.cp(fileToCopy, destination, {force: overwrite, errorOnExist: false});
-                successCount++;
-            } catch (error) {
-                console.log(`Error copying file ${file.name}:`, error);
+    // Ensure the destination directory exists
+    await fs.mkdir(to, {recursive: true});
+
+    // Iterate over each directory in the `from` array
+    for (const dir of from) {
+        try {
+            // Get the list of files from the current directory
+            const files = await fs.readdir(dir, {withFileTypes: true});
+
+            for (const file of files) {
+                // Skip directories, process files only
+                if (!file.isFile()) continue;
+
+                copyPromises.push(
+                    limit(async () => {
+                        try {
+                            const fileToCopy = path.join(dir, file.name);
+                            const destination = path.join(to, file.name);
+                            await fs.cp(fileToCopy, destination, {force: overwrite, errorOnExist: false});
+                            successCount++;
+                        } catch (error) {
+                            console.log(`Error copying file ${file.name} from ${dir}:`, error);
+                        }
+                    })
+                );
             }
-        }));
-
+        } catch (error) {
+            console.log(`Error reading directory ${dir}:`, error);
+        }
     }
-    await Promise.all(copyPromises);
-    return successCount
+
+    await Promise.all(copyPromises); // Wait for all copy operations to complete
+    return successCount;
 }

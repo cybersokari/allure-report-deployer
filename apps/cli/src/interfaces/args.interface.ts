@@ -12,7 +12,7 @@ export interface ArgsInterface {
     RESULTS_STAGING_PATH: string;
     ARCHIVE_DIR: string;
     REPORTS_DIR: string;
-    RESULTS_PATH: string;
+    RESULTS_PATHS: string[];
     fileProcessingConcurrency: number;
     firebaseProjectId: string;
     uploadRequired: boolean;

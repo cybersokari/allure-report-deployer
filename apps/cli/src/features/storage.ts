@@ -1,5 +1,5 @@
 import * as path from "node:path";
-import {countFiles, isFileTypeAllure, archiveDirectoryFiles} from "../utilities/util.js";
+import {countFiles, isFileTypeAllure, archiveFilesInDirectories} from "../utilities/util.js";
 import {counter} from "../utilities/counter.js";
 import pLimit from "p-limit";
 import {Order, StorageProvider} from "../interfaces/storage-provider.interface.js";
@@ -50,7 +50,7 @@ export class Storage {
         }
 
         if (this.args.retries) {
-            tasks.push(this.stageResultFiles(this.args.retries!));
+            tasks.push(this.stageResultFiles(this.args.retries));
         }
 
         await Promise.all(tasks);
@@ -61,14 +61,11 @@ export class Storage {
      */
     public async uploadArtifacts(): Promise<void> {
         try {
-            const resultsArchivePath = this.getResultsArchivePath();
-            const historyArchivePath = this.getHistoryArchivePath();
-
             await Promise.all([
-                this.uploadNewResults(resultsArchivePath),
-                this.uploadHistory(historyArchivePath),
+                this.uploadNewResults(this.getResultsArchivePath()),
+                this.uploadHistory(this.getHistoryArchivePath()),
                 counter.addFilesUploaded(
-                    await countFiles([this.getHistoryFolder(), this.args.RESULTS_PATH])
+                    await countFiles([this.getHistoryFolder(), ...this.args.RESULTS_PATHS])
                 ),
             ]);
         } catch (error) {
@@ -219,8 +216,11 @@ export class Storage {
      * @param resultsArchivePath - Path to the results archive.
      */
     private async uploadNewResults(resultsArchivePath: string): Promise<void> {
-        const source = [{path: this.args.RESULTS_PATH}]
-        const resultsPath = await archiveDirectoryFiles({source, outputFilePath: resultsArchivePath, exclude: ['executor.json']});
+        const source = []
+        for (const filePath of this.args.RESULTS_PATHS) {
+            source.push({path: filePath})
+        }
+        const resultsPath = await archiveFilesInDirectories({source, outputFilePath: resultsArchivePath, exclude: ['executor.json']});
         await this.provider.upload(resultsPath, path.basename(resultsPath));
     }
 
@@ -230,7 +230,7 @@ export class Storage {
      */
     private async uploadHistory(historyArchivePath: string): Promise<void> {
         const source = [{path: this.getHistoryFolder()}]
-        const historyPath = await archiveDirectoryFiles({source, outputFilePath: historyArchivePath});
+        const historyPath = await archiveFilesInDirectories({source, outputFilePath: historyArchivePath});
         await this.provider.upload(historyPath, path.basename(historyPath));
     }
 }

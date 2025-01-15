@@ -6,8 +6,7 @@ import {
     ERROR_MESSAGES,
     getGithubConfig,
     validateBucket,
-    validateCredentials,
-    validateResultsPath
+    validateCredentials, validateResultsPaths
 } from "../utilities/util.js";
 import {GoogleCredentialsHelper} from "../utilities/google-credentials-helper.js";
 import path from "node:path";
@@ -24,7 +23,6 @@ import {
 
 async function handleGenerateAction(resultPath: any, reportName: any, options: any): Promise<ArgsInterface> {
     try {
-        await validateResultsPath(resultPath);
         const firebaseProjectId = await validateCredentials(options.gcpJson);
         validateBucket(options);
         const runtimeDir = await getRuntimeDirectory();
@@ -36,7 +34,7 @@ async function handleGenerateAction(resultPath: any, reportName: any, options: a
             ARCHIVE_DIR: path.join(runtimeDir, 'archive'),
             HOME_DIR: runtimeDir,
             REPORTS_DIR: path.normalize(options.output),
-            RESULTS_PATH: resultPath,
+            RESULTS_PATHS: await validateResultsPaths(resultPath),
             RESULTS_STAGING_PATH: path.join(runtimeDir, 'allure-results'),
             downloadRequired: showHistory || retries,
             fileProcessingConcurrency: 10,

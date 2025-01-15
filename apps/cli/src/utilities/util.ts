@@ -51,7 +51,7 @@ export async function changePermissionsRecursively(dirPath: string, mode: fsSync
 }
 
 
-export async function archiveDirectoryFiles(
+export async function archiveFilesInDirectories(
     {source, outputFilePath, exclude = []}: {
         source: { path: string; destination?: string }[],
         outputFilePath: string,
@@ -110,6 +110,35 @@ export function isFileTypeAllure(filePath: string) {
     return !!filePath.match(/^.*\.(json|png|jpeg|jpg|gif|properties|log|webm|html|mp4)$/i)
 }
 
+/**
+ * Validates and filters the file paths from a comma-separated string.
+ *
+ * @param commaSeparatedResultPaths - A string containing file paths separated by commas.
+ * @returns A Promise resolving to an array of valid file paths that exist on the filesystem.
+ */
+export async function validateResultsPaths(commaSeparatedResultPaths: string): Promise<string[]> {
+    // If the input does not contain commas, return it as a single-element array
+    if (!commaSeparatedResultPaths.includes(',')) {
+        const exists = await fs.access(commaSeparatedResultPaths)
+            .then(() => true)
+            .catch(() => false);
+        return exists ? [commaSeparatedResultPaths] : [];
+    }
+    // Split the string into an array of paths and filter only existing paths
+    const paths = commaSeparatedResultPaths.split(',');
+    const validPaths: string[] = [];
+    for (const path of paths) {
+        const trimmedPath = path.trim(); // Remove any extra spaces
+        const exists = await fs.access(trimmedPath)
+            .then(() => true)
+            .catch(() => false);
+        if (exists) {
+            validPaths.push(trimmedPath);
+        }
+    }
+    return validPaths;
+}
+
 export async function getReportStats(summaryJsonDir: string): Promise<ReportStatistic> {
     const summaryJson = await readJsonFile(summaryJsonDir)
     return summaryJson.statistic as ReportStatistic;
@@ -123,14 +152,10 @@ export function getDashboardUrl({projectId, storageBucket, prefix}: {
     if (!projectId) {
         return `http://127.0.0.1:4000/storage/${storageBucket}`
     }
-    const builder = new StringBuilder()
+    return new StringBuilder()
         .append("https://console.firebase.google.com/project")
         .append(`/${(projectId)}`)
-        .append(`/storage/${storageBucket}/files`)
-    if (prefix) {
-        builder.append(`/~2F${prefix}`)
-    }
-    return builder.toString();
+        .append(`/storage/${storageBucket}/files`).toString()
 }
 
 export interface WithOraParams<T> {
@@ -155,19 +180,6 @@ export async function withOra<T>({start, success, work}: WithOraParams<T>): Prom
     }
 }
 
-export async function validateResultsPath(resultPath: string): Promise<void> {
-    let files = []
-    try {
-        files = await fs.readdir(path.normalize(resultPath));
-    } catch {
-        console.error(ERROR_MESSAGES.NO_RESULTS_DIR)
-        process.exit(1)
-    }
-    if (!files.length) {
-        console.error(ERROR_MESSAGES.EMPTY_RESULTS)
-        process.exit(1)
-    }
-}
 
 export async function validateCredentials(gcpJsonPath: string | undefined): Promise<string> {
     if (gcpJsonPath) {
