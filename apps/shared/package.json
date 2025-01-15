@@ -1,27 +1,22 @@
 {
-  "name": "allure-deployer",
-  "version": "1.4.3",
-  "description": "Host Allure test reports on the web with history, retries, and Slack integration—no server required",
-  "keywords": [
-    "allure server",
-    "allure test report",
-    "allure report",
-    "allure github",
-    "allure docker",
-    "allure hosting",
-    "allure github action",
-    "allure results",
-    "allure cli",
-    "allure serverless"
-  ],
+  "name": "allure-deployer-shared",
+  "version": "1.1.2",
+  "description": "Shared package for Allure Deployer project",
   "author": "Sokari Gillis-Harry",
   "license": "BSD-3-Clause",
-  "main": "./dist/index.js",
+  "types": "dist/lib.d.ts",
+  "main": "dist/lib.js",
+  "exports": {
+    ".": "./dist/lib.js"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/cybersokari/allure-report-deployer.git",
-    "directory": "apps/cli"
+    "directory": "apps/shared"
   },
+  "files": [
+    "dist"
+  ],
   "bugs": {
     "url": "https://github.com/cybersokari/allure-report-deployer/issues"
   },
@@ -31,20 +26,29 @@
     "build:watch": "tsc --watch",
     "test": "NODE_OPTIONS=--experimental-vm-modules jest",
     "coverage": "NODE_OPTIONS=--experimental-vm-modules jest --coverage",
-    "prepublishOnly": "npm run build && node version-update.cjs"
+    "prepublishOnly": "npm run build"
   },
   "type": "module",
   "dependencies": {
-    "allure-deployer-shared": "file:../shared",
     "@google-cloud/storage": "^7.14.0",
-    "commander": "^12.1.0",
+    "@slack/web-api": "^7.8.0",
+    "allure-commandline": "^2.32.0",
+    "ansi-escapes": "^7.0.0",
+    "archiver": "^7.0.1",
+    "async-mutex": "^0.5.0",
+    "chalk": "^5.4.0",
     "conf": "^13.1.0",
-    "ora": "^8.1.1"
+    "firebase-tools": "^13.29.1",
+    "p-limit": "^6.1.0",
+    "random-words": "^2.0.1",
+    "unzipper": "^0.12.3"
   },
   "devDependencies": {
+    "@types/archiver": "^6.0.3",
     "@types/chai": "^5.0.1",
     "@types/jest": "^29.5.14",
     "@types/mock-fs": "^4.13.4",
+    "@types/unzipper": "^0.10.10",
     "@typescript-eslint/eslint-plugin": "^8.17.0",
     "@typescript-eslint/parser": "^8.17.0",
     "allure-jest": "^3.0.7",
@@ -59,9 +63,6 @@
     "ts-jest": "^29.2.5",
     "ts-node": "^10.9.2",
     "typescript": "^4.9.0"
-  },
-  "bin": {
-    "allure-deployer": "dist/index.js"
   },
   "overrides": {
     "whatwg-url": "^14.0.0"

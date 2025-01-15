@@ -1,13 +1,16 @@
 import {Argument, Command, Option} from "commander";
-import {getRuntimeDirectory, readJsonFile} from "../utilities/file-util.js";
 import {Bucket, Storage as GCPStorage} from "@google-cloud/storage";
-import {GoogleStorageService} from "../services/google-storage.service.js";
 import {db} from "../utilities/database.js";
 import {KEY_BUCKET} from "../utilities/constants.js";
-import {FirebaseHost} from "../features/hosting/firebase.host.js";
-import {FirebaseService} from "../services/firebase.service.js";
 import path from "node:path";
 import {GoogleCredentialsHelper, ServiceAccountJson} from "../utilities/google-credentials-helper.js";
+import {
+    FirebaseHost,
+    FirebaseService,
+    getRuntimeDirectory,
+    GoogleStorageService,
+    readJsonFile
+} from "allure-deployer-shared";
 
 const ERROR_MESSAGES = {
     MISSING_BUCKET: "Storage bucket not provided. History and Retries will not be available in report.",

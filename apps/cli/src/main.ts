@@ -4,11 +4,11 @@ import {
     Allure, ArgsInterface,
     ConsoleNotifier, counter,
     GoogleStorageService,
-    getDashboardUrl, GitHubNotifier,
+    getDashboardUrl,
     NotificationData, Notifier,
     SlackService, SlackNotifier,
-    Storage, withOra, getReportStats, ExecutorInterface,
-} from "./lib.js";
+    Storage, getReportStats, ExecutorInterface, NotifyHandler, ReportStatistic, readJsonFile, copyFiles
+} from "allure-deployer-shared";
 import {Command} from "commander";
 import {addDeployCommand} from "./commands/deploy.command.js";
 import {addCredentialsCommand} from "./commands/credentials.command.js";
@@ -16,13 +16,10 @@ import {addStorageBucketCommand} from "./commands/storage.command.js";
 import {addVersionCommand} from "./commands/version.command.js";
 import {addSlackTokenCommand} from "./commands/slack-setup.command.js";
 import {Storage as GCPStorage} from '@google-cloud/storage'
-import {copyFiles, readJsonFile} from "./utilities/file-util.js";
-import {ReportStatistic} from "./interfaces/counter.interface.js";
-import {GitHubService} from "./services/github.service.js";
 import {addCleanCommand} from "./commands/clean.command.js";
 import path from "node:path";
-import {GithubConfig} from "./interfaces/github.interface.js";
 import {addGenerateCommand} from "./commands/generate.command.js";
+import {withOra} from "./utilities/util.js";
 
 // Entry point for the application
 export function main() {
@@ -135,7 +132,7 @@ async function generateReport({allure, reportUrl, args}: {
     reportUrl?: string,
     args: ArgsInterface
 }): Promise<string> {
-    const executor = args.host ? createExecutor({reportUrl, githubConfig: args.githubConfig}) : undefined
+    const executor = args.host ? createExecutor({reportUrl}) : undefined
     return await withOra({
         work: () => allure.generate(executor),
         start: 'Generating Allure report...',
@@ -143,20 +140,12 @@ async function generateReport({allure, reportUrl, args}: {
     });
 }
 
-function createExecutor({githubConfig, reportUrl}: {
-    githubConfig?: GithubConfig, reportUrl?: string,
+function createExecutor({reportUrl}: { reportUrl?: string,
 }): ExecutorInterface {
-    const buildName = githubConfig ? `GitHub Run ID: ${githubConfig.RUN_ID}` : new Date().toDateString()
     return {
         name: 'Allure Report Deployer',
         reportUrl: reportUrl,
-        buildUrl: githubConfig ? createGitHubBuildUrl(githubConfig) : undefined,
-        buildName: buildName,
-        type: githubConfig ? 'github' : undefined,
     }
-}
-function createGitHubBuildUrl(config: GithubConfig): string {
-    return `https://github.com/${config.OWNER}/${config.REPO}/actions/runs/${config.RUN_ID}`
 }
 
 // Deploys the report and associated artifacts
@@ -198,11 +187,6 @@ async function notify(args: ArgsInterface, resultsStatus: ReportStatistic, repor
         }) : undefined;
     };
 
-    const githubConfig = args.githubConfig;
-    if (githubConfig) {
-        const githubService = new GitHubService(githubConfig);
-        notifiers.push(new GitHubNotifier(githubService, args));
-    }
     const notificationData = new NotificationData(resultsStatus, reportUrl, dashboardUrl());
     await new NotifyHandler(notifiers).sendNotifications(notificationData); // Send notifications via all configured notifiers
 }
@@ -217,24 +201,5 @@ export function handleStorageError(error: any) {
         console.error('Invalid bucket name. Please ensure that the bucket name adheres to the naming guidelines.');
     } else {
         console.error('An unexpected error occurred:', error);
-    }
-}
-
-class NotifyHandler {
-    private notifiers: Notifier[];
-
-    constructor(notifiers: Notifier[]) {
-        this.notifiers = notifiers;
-    }
-
-    async sendNotifications(data: NotificationData): Promise<void> {
-        const promises = this.notifiers.map((notifier) => {
-            try {
-                notifier.notify(data)
-            } catch (e) {
-                console.warn(`${notifier.constructor.name} failed to send notification.`, e);
-            }
-        });
-        await Promise.all(promises);
     }
 }

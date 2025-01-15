@@ -38,13 +38,13 @@ export async function getUserAppDirectory(): Promise<string> {
     return appDir;
 }
 
-export function isJavaInstalled() {
+export function isJavaInstalled(additionalDirectories: string[] = []): boolean {
     const javaHome = process.env.JAVA_HOME;
     if (javaHome) {
         return fsSync.existsSync(path.join(javaHome, 'bin/java'))
     } else {
         // Check common system paths
-        const commonPaths = ["/usr/bin/java", "/usr/local/bin/java"];
+        const commonPaths = ["/usr/bin/java", "/usr/local/bin/java", ...additionalDirectories];
         const javaPath = commonPaths.find((path) => fsSync.existsSync(path));
         return javaPath !== undefined && fsSync.existsSync(javaPath)
     }

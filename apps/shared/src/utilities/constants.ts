@@ -1,0 +1,5 @@
+export const KEY_PROJECT_ID = 'project_id'
+export const KEY_BUCKET = 'bucket'
+export const KEY_SLACK = 'slack'
+export const KEY_SLACK_TOKEN = 'slack.token'
+export const KEY_SLACK_CHANNEL = 'slack.channel'

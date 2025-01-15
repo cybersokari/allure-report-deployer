@@ -1,0 +1,15 @@
+{
+  "name": "allure-report-deployer",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "apps/shared",
+    "apps/cli"
+  ],
+  "scripts": {
+    "build": "yarn workspaces run build"
+  },
+  "overrides": {
+    "whatwg-url": "^14.0.0"
+  }
+}

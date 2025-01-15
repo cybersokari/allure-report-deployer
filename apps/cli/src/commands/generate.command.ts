@@ -1,10 +1,7 @@
 import {Command, Option} from "commander";
-import {ArgsInterface} from "../interfaces/args.interface.js";
-import {getRuntimeDirectory, isJavaInstalled} from "../utilities/file-util.js";
 import process from "node:process";
 import {
     ERROR_MESSAGES,
-    getGithubConfig,
     validateBucket,
     validateCredentials, validateResultsPaths
 } from "../utilities/util.js";
@@ -20,6 +17,7 @@ import {
     retriesOption,
     showHistoryOption
 } from "./deploy.command.js";
+import {ArgsInterface, getRuntimeDirectory, isJavaInstalled} from "allure-deployer-shared";
 
 async function handleGenerateAction(resultPath: any, reportName: any, options: any): Promise<ArgsInterface> {
     try {
@@ -45,7 +43,6 @@ async function handleGenerateAction(resultPath: any, reportName: any, options: a
             showHistory: showHistory,
             reportName: reportName,
             clean: options.clean,
-            githubConfig: process.env.GITHUB_OUTPUT ? getGithubConfig() : undefined
         }
     } catch (error) {
         // @ts-ignore
