@@ -83,7 +83,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4.1.5
       - name: Generate Allure Report with History and Retries
-        uses: cybersokari/allure-deployer-action@v1.4.1
+        uses: cybersokari/allure-deployer-action@v1.4.2
         with:
           google_credentials_json: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
           allure_results_path: 'assets/allure-results'
