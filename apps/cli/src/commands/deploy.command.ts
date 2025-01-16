@@ -2,7 +2,7 @@ import {Argument, Command, Option} from "commander";
 import {db} from "../utilities/database.js";
 import process from "node:process";
 import path from "node:path";
-import {KEY_BUCKET, KEY_PROJECT_ID} from "../utilities/constants.js";
+import {KEY_BUCKET} from "../utilities/constants.js";
 import {GoogleCredentialsHelper} from "../utilities/google-credentials-helper.js";
 import {
     parseRetries,
@@ -50,7 +50,7 @@ export const targetOption = new Option("-t, --target", "Your preferred host for 
 
 async function handleDeployAction(resultPath: any, reportName: any, options: any): Promise<ArgsInterface> {
     try {
-        const firebaseProjectId = (await validateCredentials(options.gcpJson)) || db.get(KEY_PROJECT_ID);
+        const firebaseProjectId: string = await validateCredentials(options.gcpJson);
         validateBucket(options);
         const slackConfig = validateSlackConfig(options.slackChannel, options.slackToken);
 
@@ -66,7 +66,6 @@ async function handleDeployAction(resultPath: any, reportName: any, options: any
             prefix: options.prefix,
             runtimeCredentialDir: options.gcpJson || (await new GoogleCredentialsHelper().directory()),
             ARCHIVE_DIR: path.join(runtimeDir, 'archive'),
-            HOME_DIR: runtimeDir,
             REPORTS_DIR: reportsDirectory,
             host: host(),
             RESULTS_PATHS: await validateResultsPaths(resultPath),

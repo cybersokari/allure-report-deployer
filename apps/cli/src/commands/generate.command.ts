@@ -30,7 +30,6 @@ async function handleGenerateAction(resultPath: any, reportName: any, options: a
             prefix: options.prefix,
             runtimeCredentialDir: options.gcpJson || (await new GoogleCredentialsHelper().directory()),
             ARCHIVE_DIR: path.join(runtimeDir, 'archive'),
-            HOME_DIR: runtimeDir,
             REPORTS_DIR: path.normalize(options.output),
             RESULTS_PATHS: await validateResultsPaths(resultPath),
             RESULTS_STAGING_PATH: path.join(runtimeDir, 'allure-results'),

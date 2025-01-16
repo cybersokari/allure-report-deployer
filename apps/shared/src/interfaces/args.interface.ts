@@ -7,13 +7,12 @@ export interface ArgsInterface {
     reportName?: string;
     showHistory?: boolean;
     retries?: number;
-    HOME_DIR: string;
     RESULTS_STAGING_PATH: string;
     ARCHIVE_DIR: string;
     REPORTS_DIR: string;
     RESULTS_PATHS: string[];
     fileProcessingConcurrency: number;
-    firebaseProjectId: string;
+    firebaseProjectId? : string;
     uploadRequired: boolean;
     downloadRequired: boolean;
     runtimeCredentialDir: string

@@ -7,8 +7,6 @@ permissions:
 jobs:
     test-deploy:
         runs-on: ubuntu-latest
-        env:
-            DIR: apps/cli
         steps:
         - uses: actions/checkout@v4.1.5
         - name: Setup Node.js
@@ -17,29 +15,26 @@ jobs:
             node-version: '20'
 
         - name: Install deps
-          run: cd ${{env.DIR}} && npm i
+          run: npm i --workspaces
 
-        - name: Run test
-          run: cd ${{env.DIR}} && npm run test
+        - name: Test Shared package
+          run: cd apps/shared && npm run test
         
         - name: Generate and deploy Allure Report
-          uses: cybersokari/allure-deployer-action@v1.3
-          env:
-            SLACK_TOKEN: ${{secrets.SLACK_TOKEN}}
-            GOOGLE_CREDENTIALS_JSON: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
-            GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+          uses: cybersokari/allure-deployer-action@v1.4.2
           with:
-            allure_results_path: '${{env.DIR}}/allure-results'
+            allure_results_path: 'apps/shared/allure-results'
             storage_bucket: ${{vars.STORAGE_BUCKET}}
             slack_channel: ${{secrets.SLACK_CHANNEL_ID}}
+            slack_token: ${{secrets.SLACK_TOKEN}}
             show_history: true
             retries: 10
             prefix: 'pr-test'
-            update_pr: 'comment'
+            pr_comment : 'true'
+            github_token: ${{secrets.GITHUB_TOKEN}}
+            google_credentials_json: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
     test-output:
       runs-on: ubuntu-latest
-      env:
-        DIR: apps/cli
       steps:
         - uses: actions/checkout@v4.1.5
         - name: Setup Node.js
@@ -48,21 +43,20 @@ jobs:
             node-version: '20'
 
         - name: Install deps
-          run: cd ${{env.DIR}} && npm i
+          run: npm i --workspaces
 
-        - name: Run test
-          run: cd ${{env.DIR}} && npm run test
+        - name: Test Shared package
+          run: cd apps/shared && npm run test
 
         - name: Generate and deploy Allure Report
-          uses: cybersokari/allure-deployer-action@v1.3
-          env:
-            GOOGLE_CREDENTIALS_JSON: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
-            GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+          uses: cybersokari/allure-deployer-action@v1.4.2
           with:
-            allure_results_path: '${{env.DIR}}/allure-results'
+            allure_results_path: 'apps/shared/allure-results'
             storage_bucket: ${{vars.STORAGE_BUCKET}}
             show_history: true
             retries: 10
             prefix: 'pr-test'
-            update_pr: 'comment'
+            pr_comment: 'true'
             output: allure-report
+            google_credentials_json: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
+            github_token: ${{secrets.GITHUB_TOKEN}}

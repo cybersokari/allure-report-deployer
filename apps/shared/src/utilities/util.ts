@@ -137,14 +137,10 @@ export async function getReportStats(summaryJsonDir: string): Promise<ReportStat
     return summaryJson.statistic as ReportStatistic;
 }
 
-export function getDashboardUrl({projectId, storageBucket, prefix}: {
-    prefix?: string,
-    projectId?: string,
+export function getDashboardUrl({projectId, storageBucket}: {
+    projectId: string,
     storageBucket: string
 }): string {
-    if (!projectId) {
-        return `http://127.0.0.1:4000/storage/${storageBucket}`
-    }
     return new StringBuilder()
         .append("https://console.firebase.google.com/project")
         .append(`/${(projectId)}`)

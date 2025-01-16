@@ -181,7 +181,7 @@ async function notify(args: ArgsInterface, resultsStatus: ReportStatistic, repor
         notifiers.push(new SlackNotifier(slackClient, args));
     }
     const dashboardUrl = () => {
-        return args.storageBucket ? getDashboardUrl({
+        return args.storageBucket && args.firebaseProjectId ? getDashboardUrl({
             storageBucket: args.storageBucket,
             projectId: args.firebaseProjectId,
         }) : undefined;
