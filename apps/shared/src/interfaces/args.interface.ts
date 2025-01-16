@@ -1,6 +1,5 @@
 import {SlackConfig} from "./slack.interface.js";
-import {GithubConfig} from "./github.interface.js";
-import {HostingProvider} from "./hosting-provider.interface";
+import {HostingProvider} from "./hosting-provider.interface.js";
 
 export interface ArgsInterface {
     storageBucket?: string;
@@ -8,18 +7,16 @@ export interface ArgsInterface {
     reportName?: string;
     showHistory?: boolean;
     retries?: number;
-    HOME_DIR: string;
     RESULTS_STAGING_PATH: string;
     ARCHIVE_DIR: string;
     REPORTS_DIR: string;
     RESULTS_PATHS: string[];
     fileProcessingConcurrency: number;
-    firebaseProjectId: string;
+    firebaseProjectId? : string;
     uploadRequired: boolean;
     downloadRequired: boolean;
     runtimeCredentialDir: string
     slackConfig?: SlackConfig;
-    githubConfig?: GithubConfig
     clean?: boolean;
     host?: HostingProvider;
 }

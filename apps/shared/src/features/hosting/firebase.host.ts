@@ -7,7 +7,7 @@ import {FirebaseInterface} from "../../interfaces/firebase.interface.js";
 
 // Max allowed Firebase sites to prevent exceeding quota
 // https://firebase.google.com/docs/hosting/multisites
-const maxFirebaseAllowedSites = 36;
+const maxFirebaseAllowedSites = 35;
 
 // Implements Firebase-specific hosting provider functionality
 export class FirebaseHost implements HostingProvider {

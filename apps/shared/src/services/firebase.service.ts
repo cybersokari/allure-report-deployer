@@ -75,6 +75,7 @@ export class FirebaseService implements FirebaseInterface{
     private createSiteId(): string {
         const builder = new StringBuilder()
             .append(`${generate({maxLength: 6, minLength: 4})}`)
+            .append(`${generate({maxLength: 6, minLength: 3})}`)
             .append(Date.now().toString())
             .append(`${generate({maxLength: 6, minLength: 4})}`)
             .append(`${generate({maxLength: 6, minLength: 4})}`);

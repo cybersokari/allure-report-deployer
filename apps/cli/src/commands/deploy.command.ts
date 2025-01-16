@@ -1,25 +1,22 @@
 import {Argument, Command, Option} from "commander";
 import {db} from "../utilities/database.js";
 import process from "node:process";
-import {
-    getRuntimeDirectory,
-    isJavaInstalled,
-} from "../utilities/file-util.js";
 import path from "node:path";
-import {KEY_BUCKET, KEY_PROJECT_ID} from "../utilities/constants.js";
-import {ArgsInterface} from "../interfaces/args.interface.js";
+import {KEY_BUCKET} from "../utilities/constants.js";
 import {GoogleCredentialsHelper} from "../utilities/google-credentials-helper.js";
 import {
-    getGithubConfig,
     parseRetries,
     validateBucket,
     validateCredentials, validateResultsPaths,
     validateSlackConfig
 } from "../utilities/util.js";
-import {GithubHost} from "../features/hosting/github.host.js";
-import {GithubPagesService} from "../services/github-pages.service.js";
-import {FirebaseHost} from "../features/hosting/firebase.host.js";
-import {FirebaseService} from "../services/firebase.service.js";
+import {
+    ArgsInterface,
+    FirebaseHost,
+    FirebaseService,
+    getRuntimeDirectory,
+    isJavaInstalled
+} from "allure-deployer-shared";
 
 const ERROR_MESSAGES = {
     NO_JAVA: 'Error: JAVA_HOME not found. Allure 2.32 requires JAVA runtime installed'
@@ -53,7 +50,7 @@ export const targetOption = new Option("-t, --target", "Your preferred host for 
 
 async function handleDeployAction(resultPath: any, reportName: any, options: any): Promise<ArgsInterface> {
     try {
-        const firebaseProjectId = (await validateCredentials(options.gcpJson)) || db.get(KEY_PROJECT_ID);
+        const firebaseProjectId: string = await validateCredentials(options.gcpJson);
         validateBucket(options);
         const slackConfig = validateSlackConfig(options.slackChannel, options.slackToken);
 
@@ -62,22 +59,13 @@ async function handleDeployAction(resultPath: any, reportName: any, options: any
         const showHistory = options.showHistory
         const reportsDirectory = path.join(runtimeDir, 'allure-report')
         const host = ()=> {
-            if(options.output) return undefined;
-            const ghBranch = process.env.INPUT_GITHUB_PAGES_BRANCH
-            const token = process.env.INPUT_GITHUB_TOKEN
-            if(token && ghBranch){
-                const client = new GithubPagesService({config: getGithubConfig(), branch: ghBranch, filesDir: reportsDirectory})
-                return new GithubHost(client, ghBranch)
-            } else{
-                return new FirebaseHost(new FirebaseService(firebaseProjectId, reportsDirectory));
-            }
+            return new FirebaseHost(new FirebaseService(firebaseProjectId, reportsDirectory));
         }
 
         return {
             prefix: options.prefix,
             runtimeCredentialDir: options.gcpJson || (await new GoogleCredentialsHelper().directory()),
             ARCHIVE_DIR: path.join(runtimeDir, 'archive'),
-            HOME_DIR: runtimeDir,
             REPORTS_DIR: reportsDirectory,
             host: host(),
             RESULTS_PATHS: await validateResultsPaths(resultPath),
@@ -92,7 +80,6 @@ async function handleDeployAction(resultPath: any, reportName: any, options: any
             reportName: reportName,
             slackConfig: slackConfig,
             clean: options.clean,
-            githubConfig: process.env.GITHUB_OUTPUT ? getGithubConfig() : undefined
         }
     } catch (error) {
         // @ts-ignore

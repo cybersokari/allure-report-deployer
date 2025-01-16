@@ -1,7 +1,6 @@
 # Allure Report Deployer
 
-![Deploy](https://github.com/cybersokari/allure-docker-deploy/actions/workflows/deploy.yaml/badge.svg?branch=main)
-![Deploy](https://github.com/cybersokari/allure-docker-deploy/workflows/Test/badge.svg)
+![Test](https://github.com/cybersokari/allure-docker-deploy/workflows/Test/badge.svg)
 ![docker](https://img.shields.io/docker/pulls/sokari/allure-deployer)
 ![npm](https://img.shields.io/npm/dt/allure-deployer?label=npm%20downloads)
 

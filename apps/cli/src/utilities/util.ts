@@ -1,19 +1,15 @@
 import * as fsSync from 'fs'
 import * as fs from 'fs/promises'
 import * as path from "node:path";
-import archiver from 'archiver';
 
-import {StringBuilder} from "./string-builder.js";
 import process from "node:process";
 import {oraPromise} from "ora";
-import {ReportStatistic} from "../interfaces/counter.interface.js";
-import {readJsonFile} from "./file-util.js";
 import {GoogleCredentialsHelper, ServiceAccountJson} from "./google-credentials-helper.js";
 import {db} from "./database.js";
 import {KEY_BUCKET, KEY_SLACK_CHANNEL, KEY_SLACK_TOKEN} from "./constants.js";
-import {SlackConfig} from "../interfaces/slack.interface.js";
 import chalk from "chalk";
-import {GithubConfig} from "../interfaces/github.interface.js";
+import {SlackConfig} from "allure-deployer-shared/dist/interfaces/slack.interface";
+import {readJsonFile} from "allure-deployer-shared";
 
 
 export const ERROR_MESSAGES = {
@@ -50,66 +46,6 @@ export async function changePermissionsRecursively(dirPath: string, mode: fsSync
     }
 }
 
-
-export async function archiveFilesInDirectories(
-    {source, outputFilePath, exclude = []}: {
-        source: { path: string; destination?: string }[],
-        outputFilePath: string,
-        exclude?: string[]
-    }
-): Promise<string> {
-    return await new Promise((resolve: (value: string) => void, reject) => {
-        // Ensure the output directory exists
-        const outputDir = path.dirname(outputFilePath);
-        fsSync.mkdirSync(outputDir, {recursive: true});
-
-        // Create a file stream for the output zip file
-        const output = fsSync.createWriteStream(outputFilePath);
-        const archive = archiver('zip', {zlib: {level: 9}}); // Set the compression level
-
-        output.on('close', () => {
-            resolve(outputFilePath);
-        });
-        archive.on('error', (err) => {
-            console.error(`Zip file archive error: ${err}`);
-            reject(undefined);
-        });
-
-        // Pipe archive data to the file stream
-        archive.pipe(output);
-
-        // Append files/folders to the archive, excluding specified patterns
-        for (const folder of source) {
-            archive.glob('**/*', {
-                cwd: folder.path,
-                ignore: exclude, // Exclude patterns
-                dot: true, // Include hidden files
-            }, {prefix: folder.destination || undefined});
-        }
-
-        // Finalize the archive
-        archive.finalize();
-    });
-}
-
-export async function countFiles(directory: string[]) {
-    let count = 0;
-    try {
-        for (const dir of directory) {
-            const entries = await fs.readdir(dir, {withFileTypes: true});
-            const files = entries.filter((entry) => entry.isFile());
-            count += files.length;
-        }
-    } catch (err) {
-        appLog(`Error reading directory: ${err}`);
-    }
-    return count
-}
-
-export function isFileTypeAllure(filePath: string) {
-    return !!filePath.match(/^.*\.(json|png|jpeg|jpg|gif|properties|log|webm|html|mp4)$/i)
-}
-
 /**
  * Validates and filters the file paths from a comma-separated string.
  *
@@ -139,24 +75,6 @@ export async function validateResultsPaths(commaSeparatedResultPaths: string): P
     return validPaths;
 }
 
-export async function getReportStats(summaryJsonDir: string): Promise<ReportStatistic> {
-    const summaryJson = await readJsonFile(summaryJsonDir)
-    return summaryJson.statistic as ReportStatistic;
-}
-
-export function getDashboardUrl({projectId, storageBucket, prefix}: {
-    prefix?: string,
-    projectId?: string,
-    storageBucket: string
-}): string {
-    if (!projectId) {
-        return `http://127.0.0.1:4000/storage/${storageBucket}`
-    }
-    return new StringBuilder()
-        .append("https://console.firebase.google.com/project")
-        .append(`/${(projectId)}`)
-        .append(`/storage/${storageBucket}/files`).toString()
-}
 
 export interface WithOraParams<T> {
     start: string;
@@ -250,16 +168,7 @@ export function parseRetries(value: string): any {
     return value
 }
 
-export function getGithubConfig(): GithubConfig {
-    const [OWNER, REPO] = process.env.GITHUB_REPOSITORY!.split('/')
-    const STEP_SUMMARY_PATH = process.env.GITHUB_STEP_SUMMARY!;
-    const OUTPUT_PATH = process.env.GITHUB_OUTPUT!;
-    const TOKEN = process.env.INPUT_GITHUB_TOKEN;
-    const RUN_ID = process.env.GITHUB_RUN_ID!;
-    const RUN_NUM = process.env.GITHUB_RUN_NUMBER!
-    const PR_COMMENT = process.env.INPUT_PR_COMMENT?.toLowerCase() === 'true'
-    return {REPO, OWNER, STEP_SUMMARY_PATH, OUTPUT_PATH, RUN_ID, TOKEN, RUN_NUM, PR_COMMENT};
-}
+
 
 
 

@@ -1,9 +1,9 @@
 import fsSync from "fs";
-import {getUserAppDirectory, readJsonFile} from "./file-util.js";
 import fs from "fs/promises";
 import {db} from "./database.js";
 import {KEY_PROJECT_ID} from "./constants.js";
 import path from "node:path";
+import {getUserAppDirectory, readJsonFile} from "allure-deployer-shared";
 
 export type ServiceAccountJson = {
     "type": string,

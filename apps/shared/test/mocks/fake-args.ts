@@ -6,7 +6,6 @@ export const fakeArgs : ArgsInterface = {
     storageBucket: 'bucket',
     reportName: 'dd-site',
     ARCHIVE_DIR: '/app/archive',
-    HOME_DIR: "/app",
     RESULTS_PATHS: ['/allure-results'],
     REPORTS_DIR: "/app/allure-reports",
     RESULTS_STAGING_PATH: "/app/allure-results",
