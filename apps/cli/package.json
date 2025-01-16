@@ -35,7 +35,7 @@
   },
   "type": "module",
   "dependencies": {
-    "allure-deployer-shared": "file:../shared",
+    "allure-deployer-shared": "1.1.4",
     "@google-cloud/storage": "^7.14.0",
     "commander": "^12.1.0",
     "conf": "^13.1.0",

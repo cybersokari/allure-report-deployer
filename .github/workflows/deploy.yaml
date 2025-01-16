@@ -1,13 +1,14 @@
-name: Deploy
+name: Publish to NPM
 on:
   workflow_dispatch:
     inputs:
       job:
-        description: Job to run
+        description: Package to publish
         required: true
         type: choice
         options:
           - cli
+          - shared
         default: cli
       semver:
         description: Bump version
@@ -30,7 +31,7 @@ jobs:
     outputs:
       version: ${{steps.version-out.outputs.version}}
     env:
-      DIR: apps/cli
+      DIR: apps/${{github.event.inputs.job}}
     steps:
       - uses: actions/checkout@v4.1.5
         with:
@@ -41,9 +42,9 @@ jobs:
           node-version: '20'
 
       - name: Install deps
-        run: cd ${{env.DIR}} && npm install
+        run: npm install --workspaces
       - name: Run test
-        run: cd ${{env.DIR}} && npm run test
+        run: cd apps/shared && npm run test
       - name: Compile
         run: cd ${{env.DIR}} && npm run build
       - name: Bump version
@@ -66,10 +67,10 @@ jobs:
         with:
           author_name: Sokari
           author_email: sokariharry@gmail.com
-          message: "Release CLI version ${{ steps.publish.outputs.version }}"
+          message: "Release ${{github.event.inputs.job}} version ${{ steps.publish.outputs.version }}"
           add: '${{ env.DIR }}/*.json'
           push: 'origin main --force'
-          tag: 'v${{steps.publish.outputs.version}} --force'
+          tag: 'v${{steps.publish.outputs.version}}-${{github.event.inputs.job}} --force'
 
   deploy-docker:
     if: ${{ github.event.inputs.job == 'cli' && github.event.inputs.build-docker == 'true' }}

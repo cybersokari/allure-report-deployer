@@ -21,7 +21,7 @@ jobs:
           run: cd apps/shared && npm run test
         
         - name: Generate and deploy Allure Report
-          uses: cybersokari/allure-deployer-action@v1.4.2
+          uses: cybersokari/allure-deployer-action@v1.5.0
           with:
             allure_results_path: 'apps/shared/allure-results'
             storage_bucket: ${{vars.STORAGE_BUCKET}}
@@ -49,7 +49,7 @@ jobs:
           run: cd apps/shared && npm run test
 
         - name: Generate and deploy Allure Report
-          uses: cybersokari/allure-deployer-action@v1.4.2
+          uses: cybersokari/allure-deployer-action@v1.5.0
           with:
             allure_results_path: 'apps/shared/allure-results'
             storage_bucket: ${{vars.STORAGE_BUCKET}}
