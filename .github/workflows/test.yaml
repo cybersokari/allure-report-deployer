@@ -22,6 +22,8 @@ jobs:
         - name: Generate and deploy Allure Report
           uses: cybersokari/allure-deployer-action@v1.5.1
           with:
+            github_pages_branch: 'gh-pages'
+            target: 'github'
             allure_results_path: 'apps/shared/allure-results'
             storage_bucket: ${{vars.STORAGE_BUCKET}}
             slack_channel: ${{secrets.SLACK_CHANNEL_ID}}
