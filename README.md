@@ -10,7 +10,7 @@
 Example report: https://gatedaccessdev.web.app
 </br>
 
-![Demo](assets/demo.gif)
+[//]: # (![Demo]&#40;assets/demo.gif&#41;)
 
 ## Usage
 
@@ -25,13 +25,13 @@ This package can be used three different ways:
 
 <h2 id="quick-start">🚀 Quick Start</h2>
 
-### Prerequisites
+**Setup Google Credentials to enable History, Retries and Firebase Hosting**
 1. **Firebase/GCP Credentials**:
     - Create a Firebase/GCP [service account](https://firebase.google.com/docs/admin/setup#initialize_the_sdk_in_non-google_environments).
     - Download the `service-account-file.json` JSON file.
 
-2. **Firebase/Google Cloud Storage Bucket**:
-    - Create a bucket to store test results and reports. You can use the default.
+2. **Enable Google Cloud Storage**:
+    - Create a Firebase/GCP storage bucket when your test History and Retries will be stored. You can use the default bucket.
 
     
 
@@ -50,15 +50,14 @@ jobs:
       - name: Run test
         run: #Run test and create allure results
       - name: Deploy Reports to GitHub pages with History and Retries
-        uses: cybersokari/allure-deployer-action@v1.4.2
+        uses: cybersokari/allure-deployer-action@v1.5.1
         with:
           target: 'github'
           github_token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
           github_pages_branch: 'gh-pages'
           allure_results_path: 'allure-results'
           google_credentials_json: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }} # Required for History and Retries
-          storage_bucket: ${{vars.STORAGE_BUCKET}}
-          prefix: 'test-gh-pages'
+          storage_bucket: ${{vars.STORAGE_BUCKET}} # Required for History and Retries
           show_history: 'true'
           retries: 5
 ```
@@ -72,17 +71,14 @@ jobs:
       - name: Run test
         run: #Run test and create allure results
       - name: Deploy Reports to Firebase with History and Retries
-        uses: cybersokari/allure-deployer-action@v1.4.2
+        uses: cybersokari/allure-deployer-action@v1.5.1
         with:
           target: 'firebase'
           allure_results_path: 'allure-results'
           google_credentials_json: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
-          storage_bucket: ${{vars.STORAGE_BUCKET}}
+          storage_bucket: ${{vars.STORAGE_BUCKET}} # Required for History and Retries
           show_history: 'true'
           retries: 5
-          prefix: 'test-firebase'
-          slack_channel: ${{secrets.SLACK_CHANNEL_ID}}
-          slack_token: ${{secrets.SLACK_TOKEN}}
 ```
 
 See [configurations](#configuration-github) for the complete inputs.
