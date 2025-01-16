@@ -41,11 +41,11 @@ jobs:
           node-version: '20'
 
       - name: Install deps
-        run: cd ${{env.DIR}} && npm i
-      - name: Run test
-        run: cd ${{env.DIR}} && npm run test
+        run: npm i --workspaces
       - name: Compile
-        run: cd ${{env.DIR}} && npm run build
+        run: npm run build --workspaces
+      - name: Run test
+        run: npm run test --workspaces
       - name: Bump version
         run: cd ${{env.DIR}} && npm version ${{github.event.inputs.semver}}
 
