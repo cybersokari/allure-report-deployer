@@ -25,7 +25,8 @@ This package can be used three different ways:
 
 <h2 id="quick-start">🚀 Quick Start</h2>
 
-**Setup Google Credentials to enable History, Retries and Firebase Hosting**
+Setup Google Credentials if you intend to to enable History, Retries or host report on Firebase Hosting. Optional for GitHub pages deployment
+
 1. **Firebase/GCP Credentials**:
     - Create a Firebase/GCP [service account](https://firebase.google.com/docs/admin/setup#initialize_the_sdk_in_non-google_environments).
     - Download the `service-account-file.json` JSON file.
