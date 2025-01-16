@@ -1,0 +1,5 @@
+"DESCRIPTION","DURATION IN MS","NAME","PARENT SUITE","START TIME","STATUS","STOP TIME","SUB SUITE","SUITE","TEST CLASS","TEST METHOD"
+"","18","open should call allureRunner with correct arguments","ReportBuilder","Thu Jan 16 13:13:27 UTC 2025","passed","Thu Jan 16 13:13:27 UTC 2025","","","",""
+"","21","should create staging directories and unzip downloaded files","Storage","Thu Jan 16 13:13:27 UTC 2025","passed","Thu Jan 16 13:13:27 UTC 2025","","","",""
+"","2","generate should return report directory path on success","ReportBuilder","Thu Jan 16 13:13:27 UTC 2025","passed","Thu Jan 16 13:13:27 UTC 2025","","","",""
+"","11","generate should throw error if allure command fails","ReportBuilder","Thu Jan 16 13:13:27 UTC 2025","passed","Thu Jan 16 13:13:27 UTC 2025","","","",""
