@@ -41,9 +41,9 @@ jobs:
           node-version: '20'
 
       - name: Install deps
-        run: npm install --workspaces
+        run: cd ${{env.DIR}} && npm i
       - name: Run test
-        run: cd apps/shared && npm run test
+        run: cd ${{env.DIR}} && npm run test
       - name: Compile
         run: cd ${{env.DIR}} && npm run build
       - name: Bump version
