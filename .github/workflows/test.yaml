@@ -21,7 +21,7 @@ jobs:
           run: cd apps/shared && npm run test
         
         - name: Generate and deploy Allure Report
-          uses: cybersokari/allure-deployer-action@v1.5.0
+          uses: cybersokari/allure-deployer-action@v1.5.1
           with:
             allure_results_path: 'apps/shared/allure-results'
             storage_bucket: ${{vars.STORAGE_BUCKET}}
@@ -49,7 +49,7 @@ jobs:
           run: cd apps/shared && npm run test
 
         - name: Generate and deploy Allure Report
-          uses: cybersokari/allure-deployer-action@v1.5.0
+          uses: cybersokari/allure-deployer-action@v1.5.1
           with:
             allure_results_path: 'apps/shared/allure-results'
             storage_bucket: ${{vars.STORAGE_BUCKET}}
@@ -59,4 +59,4 @@ jobs:
             pr_comment: 'true'
             output: allure-report
             google_credentials_json: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
-            github_token: ${{secrets.GITHUB_TOKEN}}
+            github_token: ${{secrets.PERSONAL_ACCESS_TOKEN}}
