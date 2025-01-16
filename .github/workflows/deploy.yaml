@@ -26,7 +26,6 @@ on:
 
 jobs:
   deploy-cli:
-    if: ${{ github.event.inputs.job == 'cli' }}
     runs-on: ubuntu-latest
     outputs:
       version: ${{steps.version-out.outputs.version}}
@@ -67,7 +66,7 @@ jobs:
         with:
           author_name: Sokari
           author_email: sokariharry@gmail.com
-          message: "Release ${{github.event.inputs.job}} version ${{ steps.publish.outputs.version }}"
+          message: "Release ${{github.event.inputs.job}} package version ${{ steps.publish.outputs.version }}"
           add: '${{ env.DIR }}/*.json'
           push: 'origin main --force'
           tag: 'v${{steps.publish.outputs.version}}-${{github.event.inputs.job}} --force'
