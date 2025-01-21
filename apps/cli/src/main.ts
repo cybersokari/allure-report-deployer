@@ -17,7 +17,6 @@ import {addVersionCommand} from "./commands/version.command.js";
 import {addSlackTokenCommand} from "./commands/slack-setup.command.js";
 import {Storage as GCPStorage} from '@google-cloud/storage'
 import {addCleanCommand} from "./commands/clean.command.js";
-import path from "node:path";
 import {addGenerateCommand} from "./commands/generate.command.js";
 import {withOra} from "./utilities/util.js";
 
@@ -164,7 +163,7 @@ async function finalize({args, storage}: {
     }
     return await withOra({
         work: () => Promise.all([
-            getReportStats(path.join(args.REPORTS_DIR, 'widgets/summary.json')),
+            getReportStats(args.REPORTS_DIR),
             args.host?.deploy(), // Deploy to Firebase hosting
             storage?.uploadArtifacts(), // Upload artifacts to storage bucket
         ]),
