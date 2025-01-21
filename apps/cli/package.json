@@ -1,6 +1,6 @@
 {
   "name": "allure-deployer",
-  "version": "1.4.4",
+  "version": "1.4.5",
   "description": "Host Allure test reports on the web with history, retries, and Slack integration—no server required",
   "keywords": [
     "allure server",
