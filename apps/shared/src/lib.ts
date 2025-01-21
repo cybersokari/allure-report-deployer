@@ -3,7 +3,7 @@ export * from "./features/hosting/firebase.host.js"
 export * from "./features/messaging/console-notifier.js"
 export * from "./features/messaging/slack-notifier.js"
 export * from "./features/allure.js"
-export * from "./features/storage.js"
+export * from "./features/google-storage.js"
 // Interfaces
 export * from "./interfaces/notifier.interface.js"
 export * from "./interfaces/exec-function.interface.js"
@@ -18,6 +18,7 @@ export * from "./interfaces/firebase.interface.js"
 export * from "./interfaces/exec-function.interface.js"
 export * from "./interfaces/command.interface.js"
 export * from "./interfaces/allure.interface.js"
+export * from "./interfaces/storage.interface.js"
 // Models
 export * from "./models/notification.model.js"
 // Services

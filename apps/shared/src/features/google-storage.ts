@@ -9,6 +9,7 @@ import unzipper, {Entry} from "unzipper";
 import {ArgsInterface} from "../interfaces/args.interface.js";
 import {UnzipperProvider} from "../interfaces/unzipper.interface.js";
 import {GoogleStorageService} from "../services/google-storage.service.js";
+import {IStorage} from "../interfaces/storage.interface.js";
 
 const HISTORY_ARCHIVE_NAME = "last-history.zip";
 const RESULTS_ARCHIVE_GLOB_MATCH = '[0-9]*.zip';
@@ -17,7 +18,7 @@ const RESULTS_ARCHIVE_GLOB_MATCH = '[0-9]*.zip';
  * The Storage class manages the staging, uploading, and unzipping of files
  * from a remote Google Cloud Storage bucket.
  */
-export class Storage {
+export class GoogleStorage implements IStorage{
     private provider: GoogleStorageService;
     private args: ArgsInterface;
     private unzipper: UnzipperProvider;

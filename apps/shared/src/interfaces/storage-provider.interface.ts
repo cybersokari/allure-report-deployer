@@ -8,7 +8,7 @@ export interface StorageProvider {
     upload(filePath: string, destination: string): Promise<void>;
 
     getFiles({matchGlob, order, maxResults, endOffset}: {
-        matchGlob?: string,
+        matchGlob?: any,
         order?: Order,
         maxResults?: number,
         endOffset?: string
@@ -20,7 +20,7 @@ export interface StorageProvider {
         files: any[],
     }): Promise<any[]>;
 
-    deleteFiles(matchGlob?: string) : Promise<void>;
+    deleteFiles(matchGlob?: any) : Promise<void>;
     deleteFile(fileName: string) : Promise<void>;
 
     sortFiles(files: any[], order: Order): any[];

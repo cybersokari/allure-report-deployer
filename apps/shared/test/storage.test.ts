@@ -4,7 +4,7 @@ import * as fs from "fs/promises";
 import {jest} from "@jest/globals";
 import {Order, StorageProvider} from "../src/interfaces/storage-provider.interface.js";
 import {fakeArgs} from "./mocks/fake-args.js";
-import {Storage} from '../src/features/storage.js'
+import {GoogleStorage} from '../src/features/google-storage.js'
 
 
 // Partially mock the module
@@ -20,7 +20,7 @@ import {Storage} from '../src/features/storage.js'
 
 // const mockedUtils = jest.mocked(utils);
 describe("Storage", () => {
-    let storageInstance: Storage;
+    let storageInstance: GoogleStorage;
     const storageProviderMock: jest.Mocked<StorageProvider> = {
         bucket: undefined,
         prefix : 'string',
@@ -46,7 +46,7 @@ describe("Storage", () => {
         jest.resetModules(); // Clears cached modules
         jest.clearAllMocks(); // C
 
-        storageInstance = new Storage(storageProviderMock, fakeArgs);
+        storageInstance = new GoogleStorage(storageProviderMock, fakeArgs);
 
         // Mock file system
         mock({
