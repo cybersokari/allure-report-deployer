@@ -120,20 +120,24 @@ export async function validateResultsPaths(commaSeparatedResultPaths: string): P
     // Split the string into an array of paths and filter only existing paths
     const paths = commaSeparatedResultPaths.split(',');
     const validPaths: string[] = [];
+    const promises  = [];
     for (const path of paths) {
-        const trimmedPath = path.trim(); // Remove any extra spaces
-        const exists = await fs.access(trimmedPath)
-            .then(() => true)
-            .catch(() => false);
-        if (exists) {
-            validPaths.push(trimmedPath);
-        }
+        promises.push(async () => {
+            const trimmedPath = path.trim(); // Remove any extra spaces
+            const exists = await fs.access(trimmedPath)
+                .then(() => true)
+                .catch(() => false);
+            if (exists) {
+                validPaths.push(trimmedPath);
+            }
+        })
     }
+    await Promise.all(promises);
     return validPaths;
 }
 
-export async function getReportStats(summaryJsonDir: string): Promise<ReportStatistic> {
-    const summaryJson = await readJsonFile(summaryJsonDir)
+export async function getReportStats(reportDir: string): Promise<ReportStatistic> {
+    const summaryJson = await readJsonFile(path.join(reportDir, "widgets/summary.json"))
     return summaryJson.statistic as ReportStatistic;
 }
 

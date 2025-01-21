@@ -1,10 +1,10 @@
-allure-firebase.iml
+allure-deployer.iml
 .idea
 */**/node_modules
 */node_modules
+node_modules
 
-*/.env.slack
-# Act
+.env
 */act.secrets
 */act.variables
 */act.event.json
@@ -27,3 +27,4 @@ allure-report
 */**/allure-report
 allure-results
 */**/allure-results
+*.cast

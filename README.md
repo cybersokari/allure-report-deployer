@@ -4,7 +4,7 @@
 ![docker](https://img.shields.io/docker/pulls/sokari/allure-deployer)
 ![npm](https://img.shields.io/npm/dt/allure-deployer?label=npm%20downloads)
 
-**Host your Allure test reports on the web with history, retries, and Slack integration—no server required.**
+**Host your Allure test reports on the web with History, Retries, Aggregation and Slack integration—no server required.**
 </br>
 </br>
 Example report: https://gatedaccessdev.web.app
@@ -25,14 +25,15 @@ This package can be used three different ways:
 
 <h2 id="quick-start">🚀 Quick Start</h2>
 
-Setup Google Credentials if you intend to to enable History, Retries or host report on Firebase Hosting. Optional for GitHub pages deployment
+Setup Google Credentials if you intend to enable History, Retries or host report on Firebase Hosting.
+</br>Not required for GitHub pages deployment via [Allure Deployer Action](https://github.com/marketplace/actions/allure-deployer-action).
 
 1. **Firebase/GCP Credentials**:
     - Create a Firebase/GCP [service account](https://firebase.google.com/docs/admin/setup#initialize_the_sdk_in_non-google_environments).
     - Download the `service-account-file.json` JSON file.
 
 2. **Enable Google Cloud Storage**:
-    - Create a Firebase/GCP storage bucket when your test History and Retries will be stored. You can use the default bucket.
+    - Create a Firebase/GCP storage bucket when your test History and Retries are stored. You can use the default bucket.
 
     
 
@@ -82,7 +83,7 @@ jobs:
           retries: 5
 ```
 
-See [configurations](#configuration-github) for the complete inputs.
+See [GitHub Action configurations](https://github.com/marketplace/actions/allure-deployer-action#configuration-options-inputs) for the complete inputs.
 ___
  
 #### 2.	Check your Pull request or GitHub Actions summary:
@@ -229,36 +230,6 @@ allure-deployer deploy path/to/allure-results my-report-name \
 
 <h2 id="configuration">Configurations</h2>
 
-<h3 id="configuration-github">GitHub Action</h2>
-
-https://github.com/marketplace/actions/allure-deployer-action
-
-#### Inputs
-
-| Input                     | Description                                                                                                      | Required | Default          |
-|---------------------------|------------------------------------------------------------------------------------------------------------------|----------|------------------|
-| `google_credentials_json` | Firebase (Google Cloud) credentials JSON                                                                         | Yes      | None             |
-| `allure_results_path`     | Path to the directory containing Allure results files.                                                           | Yes      | `allure-results` |
-| `report_name`             | The name/title of your report.                                                                                   | No       | `Allure Report`  |
-| `target`                  | Set where to deploy test Report. `firebase` or `github`. `github` requires `github_token`                        | No       | `firebase`       |
-| `storage_bucket`          | Name of the Google Cloud Storage bucket for backup and history storage.                                          | No       | None             |
-| `prefix`                  | Path prefix in the Cloud Storage bucket for archiving files.                                                     | No       | None             |
-| `show_history`            | Display history from previous test runs.                                                                         | No       | `true`           |
-| `retries`                 | Number of previous test runs to show as retries in the upcoming report when Storage `storage_bucket` is provided | No       | 0                |
-| `output`                  | A directory to generate Allure report into. Setting this value disables report hosting and Slack notification    | No       | None             |
-| `slack_channel`           | ID of the Slack channel to send notifications about report links.                                                | No       | None             |
-| `slack_token`             | Token for Slack App to send notifications with report URLs.                                                      | No       | None             |
-| `github_token`            | A generated GITHUB_TOKEN for when `github_pages_branch` is provide or when `pr_comment` is set to `true`         | No       | None             |
-| `pr_comment`              | Post test report information as pull request comment. Requires `github_token` to be set with permission          | No       | `false`          |
-| `github_pages_branch`     | Set target branch for Deploying test report to GitHub Pages. Requires `github_token` to be set with permission   | No       | None             |
-
-#### Outputs
-| Key          | Description             |
-|--------------|-------------------------|
-| `report_url` | URL of the test report. |
-
----
-
 <h3 id="configuration-docker">🐳 Docker</h2>
 
 ```shell
@@ -296,7 +267,7 @@ docker pull sokari/allure-deployer:latest
 
 <h3 id="hosting">🌐 Firebase Hosting</h3>
 
-Allure Report Deployer hosts your Reports on Firebase Hosting and saves your history and  
+Allure Deployer CLI and Docker Image hosts your Reports on Firebase Hosting and saves your history and  
 results files in Firebase/GCP storage.
 A **secure URL** will be generated and displayed in the console logs.
 If configured, the URL will also appear in **GitHub Summary** and **Slack notifications**.
@@ -310,7 +281,7 @@ Your files are backed up as `.zip` archives when you set `SHOW_HISTORY` or `RETR
 *  `SHOW_HISTORY` adds the `history` [subdirectory of your latest report](https://allurereport.org/docs/how-it-works-history-files/#history-files) to an archive named `last-history.zip`
 
 
-Example of an archive when both `RETRIES` and `RETRIES` are set
+Example of an archive when both `SHOW_HISTORY` and `RETRIES` are set
 ```text
 last-history.zip/
             ├── categories-trend.json
@@ -385,7 +356,7 @@ gcloud firebase hosting:list
 #### 2. Files Not Uploaded to Firebase
 - **Problem**: Misconfigured `STORAGE_BUCKET`.
 - **Solution**:
-  - Verify the `STORAGE_BUCKET` environment variable matches the name of your Google Cloud Storage bucket.
+  - Verify the `STORAGE_BUCKET` matches the name of your Google Cloud Storage bucket.
   - Confirm the Google credential file has write access to the bucket.
 
 ### ❓ FAQs
@@ -395,36 +366,15 @@ gcloud firebase hosting:list
 
 ---
 
-#### Q2: What is the maximum number of live report URLs?
-- **A**: 36, due to Firebase [limitation](https://firebase.google.com/docs/hosting/multisites):
----
-
-#### Q3: Can I deploy reports to multiple Firebase sites?
-- **A**: Yes, each deployment creates a new report site. This allows you to manage separate URLs for different test runs or environments.
-
----
-
-#### Q4: Do I need a paid Firebase plan?
+#### Q2: Do I need a paid Firebase plan?
 - **A**: No, the free Firebase plan is sufficient to host your reports. However, you will need to enable billing to use cloud storage for History and Retries.
 Firebase Storage is free for the first [5GB of storage](https://firebase.google.com/pricing)
 
 ---
 
-#### Q5: What happens if I don’t set REPORT_NAME?
-- **A**: If `REPORT_NAME` is not set, `Allure Report` will be used as your report id.
 
----
-
-#### Q6: How do I configure Slack notifications?
-- **A**: Set the following environment variables:
-  - `SLACK_TOKEN`: Your Slack Bot's token.
-  - `SLACK_CHANNEL`: The ID of the channel where you want to send notifications.
-  - Test the bot by sending a manual message before integrating with the container.
-
----
-
-#### Q7: Can I merge results from multiple directories?
-- **A**: Not directly. You will need to merge allure-results directories manually before generating a report.
+#### Q3: Can I merge results from multiple directories?
+- **A**: Yes. Use a comma seperated list of Allure result paths. CLI and GitHub Action only.
 
 ---
 

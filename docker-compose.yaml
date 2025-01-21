@@ -1,52 +1,37 @@
 services:
-  firebase:
-    image: goatlab/firebase-emulator:1.2-arm64
-    container_name: emulator
+  storage:
+    image: oittaa/gcp-storage-emulator
+    container_name: storage-emulator
+    env_file: .env
+    environment:
+      PORT: 9023
+      HOST: localhost
     ports:
-      - "9199:9199"
-      - "4000:4000"
-      - "8090:8090"
-    command: ["firebase", "emulators:start", "--only", "storage,logging", "--project", "fir-demo-project", '--config', "./startfirebase.json"]
+      - "9023:9023"
     restart: unless-stopped
+    entrypoint: ["gcp-storage-emulator", "start", "--default-bucket", "gatedaccessdev.appspot.com"]
+    volumes:
+      - "${PWD}/cloudstorage:/storage"
     healthcheck:
-      test: ["CMD", "curl", "localhost:4400/emulators"]
+      test: ["CMD", "gcp-storage-emulator", "--help"]
       interval: 10s
       start_period: 10s
       retries: 3
       timeout: 5s
   test-docker:
     build:
-      dockerfile: test-docker.Dockerfile
+      dockerfile: test.Dockerfile
       context: apps
     container_name: allure-docker
-#    env_file: .env.slack
-    environment:
-      FIREBASE_STORAGE_EMULATOR_HOST: 127.0.0.1:9199 # Dev mode
-      STORAGE_BUCKET: $GCP_BUCKET
-      PREFIX: 'project-999'
-      REPORT_NAME: 'Demo Report 1'
-      SHOW_HISTORY: false
-      RETRIES: 6
+    env_file: .env
     volumes:
       - ./key.json:/credentials/key.json:ro
       - ./assets/allure-results:/allure-results
     cpus: 1
     mem_limit: 2048m
-    network_mode: service:firebase
+    network_mode: service:storage
     depends_on:
-      firebase:
+      storage:
         condition: service_healthy
-  test-cli:
-    build:
-      context: apps
-      dockerfile: test-cli.Dockerfile
-    container_name: allure-cli
-    environment:
-      CI: 'true'
-    tty: false
-    command: ['sh', '-c', 'allure-deployer deploy /allure-results -h -r 5 --gcp-json /key.json --bucket $GCP_BUCKET']
-    volumes:
-      - ./assets/allure-results:/allure-results
-      - ./key.json:/key.json:ro
 
 
