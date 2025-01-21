@@ -18,7 +18,7 @@ export interface StorageProvider {
         destination: string,
         concurrency?: number,
         files: any[],
-    }): Promise<string[]>;
+    }): Promise<any[]>;
 
     deleteFiles(matchGlob?: string) : Promise<void>;
     deleteFile(fileName: string) : Promise<void>;
