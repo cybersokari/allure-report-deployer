@@ -24,17 +24,6 @@ This package can be used three different ways:
 
 
 <h2 id="quick-start">🚀 Quick Start</h2>
-
-Setup Google Credentials if you intend to enable History, Retries or host report on Firebase Hosting.
-</br>Not required for GitHub pages deployment via [Allure Deployer Action](https://github.com/marketplace/actions/allure-deployer-action).
-
-1. **Firebase/GCP Credentials**:
-    - Create a Firebase/GCP [service account](https://firebase.google.com/docs/admin/setup#initialize_the_sdk_in_non-google_environments).
-    - Download the `service-account-file.json` JSON file.
-
-2. **Enable Google Cloud Storage**:
-    - Create a Firebase/GCP storage bucket when your test History and Retries are stored. You can use the default bucket.
-
     
 
 ### GitHub
@@ -58,8 +47,6 @@ jobs:
           github_token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
           github_pages_branch: 'gh-pages'
           allure_results_path: 'allure-results'
-          google_credentials_json: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }} # Required for History and Retries
-          storage_bucket: ${{vars.STORAGE_BUCKET}} # Required for History and Retries
           show_history: 'true'
           retries: 5
 ```
@@ -84,20 +71,7 @@ jobs:
 ```
 
 See [GitHub Action configurations](https://github.com/marketplace/actions/allure-deployer-action#configuration-options-inputs) for the complete inputs.
-___
- 
-#### 2.	Check your Pull request or GitHub Actions summary:
-Pull request comment [example](https://github.com/cybersokari/allure-report-deployer/pull/6#issuecomment-2564403881)
-```markdown
-📊 Your Test Report is ready
 
-Test Report: https://your-example-url.web.app
-File Storage: https://console.firebase.google.com/project/${project-id}/storage/${storage-bucket}/files
-
-| ✅ Passed | ⚠️ Broken |
-|----------|-----------|
-| 15       | 2         |
-```
 ___
 ### Gitlab
 #### Add the [docker image](https://hub.docker.com/r/sokari/allure-deployer) to your Gitlab workflow and run it.
@@ -153,7 +127,7 @@ deploy:
   dependencies:
     - test
 ```
-See the Docker [configuration section](#docker-image-configuration) for more info
+See the Docker image [configuration section](https://hub.docker.com/r/sokari/allure-deployer#docker-image-configuration) for more info
 
 ### **Codemagic**
 
@@ -196,6 +170,7 @@ workflows:
       - android/app/build/outputs/**/*.apk
 
 ```
+See the [CLI documentation](https://www.npmjs.com/package/allure-deployer) for more info
 
 ### **Local test runs**
 #### 1. Install the CLI
@@ -228,51 +203,14 @@ allure-deployer deploy path/to/allure-results my-report-name \
 ```
 
 
-<h2 id="configuration">Configurations</h2>
-
-<h3 id="configuration-docker">🐳 Docker</h2>
-
-```shell
-docker pull sokari/allure-deployer:latest
-```
-
-<h4 id="environment-variables-docker">Environment Variables</h3>
-
-
-| Variable         | Description                                                                                                      | Example                        | Default        |
-|------------------|------------------------------------------------------------------------------------------------------------------|--------------------------------|----------------|
-| `STORAGE_BUCKET` | Google Cloud Storage bucket name                                                                                 | project-id.firebasestorage.app | None           |
-| `PREFIX`         | A path in your Storage bucket. Optional.                                                                         | project-123                    | None           |
-| `REPORT_NAME`    | The name/title of your report                                                                                    | Space ship report              | `Alure Report` |
-| `SHOW_HISTORY`   | Show history in the current report by pulling the history from the last Cloud Storage backup                     | true                           | true           |
-| `RETRIES`        | Number of previous test runs to show as retries in the upcoming report when Storage `STORAGE_BUCKET` is provided | 5                              | 0              |
-| `SLACK_TOKEN`    | Your Slack App token                                                                                             | xoxb-XXXXXXXXXX-XXXXXXXX       | None           |
-| `SLACK_CHANNEL`  | The Slack channel ID or conversation to notify with Allure report details                                        | DC56JYGT8                      | None           |
-
----
-
-<h4 id="mount-volumes">Mount Volumes</h3>
-
-| Host                        | Container               | Description                                                                                                                          |
-|-----------------------------|-------------------------|--------------------------------------------------------------------------------------------------------------------------------------|
-| `/path/to/allure-results`   | `/allure-results`       | Allure test results directory.                                                                                                       |
-| `/path/to/credentials.json` | `/credentials/key.json` | Google Cloud service account JSON file.                                                                                              |
-**Notes**:
-- Ensure that the directories and files exist on your local machine or CI environment.
-- Use absolute paths to avoid errors with relative paths in Docker commands.
-
----
-
 <h2 id="how-it-works">🛠️ How It Works</h2>
 
-<h3 id="hosting">🌐 Firebase Hosting</h3>
+<h3 id="hosting">🌐 Hosting</h3>
 
-Allure Deployer CLI and Docker Image hosts your Reports on Firebase Hosting and saves your history and  
+The CLI and Docker Image hosts your Reports on **Firebase Hosting** and saves your history and  
 results files in Firebase/GCP storage.
-A **secure URL** will be generated and displayed in the console logs.
-If configured, the URL will also appear in **GitHub Summary** and **Slack notifications**.
+While the GitHub Action supports both **Firebase Hosting** and **GitHub Pages**.
 
-For more information, check the [Configuration](#configuration) section.
 
 <h3 id="cloud-storage">☁️ Cloud Storage</h3>
 
@@ -353,30 +291,11 @@ gcloud auth activate-service-account --key-file=/path/to/credentials.json
 gcloud firebase hosting:list
 ```
 
-#### 2. Files Not Uploaded to Firebase
+#### 2. History and Retries disabled
 - **Problem**: Misconfigured `STORAGE_BUCKET`.
 - **Solution**:
   - Verify the `STORAGE_BUCKET` matches the name of your Google Cloud Storage bucket.
   - Confirm the Google credential file has write access to the bucket.
-
-### ❓ FAQs
-
-#### Q1: Can I use this tool without Google Cloud Storage bucket?
-- **A**: Yes, you can generate and share reports without using cloud storage. However, enabling `STORAGE_BUCKET` allows you to enable test report History and Retries.
-
----
-
-#### Q2: Do I need a paid Firebase plan?
-- **A**: No, the free Firebase plan is sufficient to host your reports. However, you will need to enable billing to use cloud storage for History and Retries.
-Firebase Storage is free for the first [5GB of storage](https://firebase.google.com/pricing)
-
----
-
-
-#### Q3: Can I merge results from multiple directories?
-- **A**: Yes. Use a comma seperated list of Allure result paths. CLI and GitHub Action only.
-
----
 
 ## License
 

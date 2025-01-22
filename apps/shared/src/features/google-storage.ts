@@ -134,7 +134,7 @@ export class GoogleStorage implements IStorage{
     private async stageHistoryFiles(): Promise<void> {
         const files = await this.provider.getFiles({
             maxResults: 1,
-            matchGlob: `**${HISTORY_ARCHIVE_NAME}`,
+            matchGlob: `**/${HISTORY_ARCHIVE_NAME}`,
         });
 
         if (files.length === 0) {

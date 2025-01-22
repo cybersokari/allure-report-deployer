@@ -1,21 +1,19 @@
 
 # Allure Deployer CLI
 
-A command-line tool for deploying Allure test reports to Firebase Hosting. History and Retries and Slack notification.
+A command-line tool for deploying Allure test reports to Firebase Hosting. History, Retries, Aggregation and Slack notification.
 No server Required.
 </br>
 </br>
 Example report: https://gatedaccessdev.web.app
 ## Features
 
-- **Web hosting**: Host your Allure reports on web, not storage.
+- **Firebase hosting**: Host your Allure reports on Firebase.
 - **History and Retries**: Show Allure [History and Retries](https://allurereport.org/docs/history-and-retries/) in reports with history linking to previous reports.
-- **Cloud Backup**: Save test results in storage for future analysis.
+- **Report Aggregation**: Aggregate report from multiple Allure result directories.
 - **Slack integration**: Send report URL to Slack.
 
 ## Installation
-
-Install globally using npm:
 
 ```bash
 npm install -g allure-deployer
@@ -39,7 +37,7 @@ allure-deployer deploy ./allure-results my-report-name \
 ```
 
 #### Arguments
-- `<allure-results-path>`: Path to the directory containing Allure results (Default: `./allure-results`).
+- `<allure-results-path>`: Path or comma-seperated paths to the directory containing Allure results (Default: `./allure-results`).
 - `<report-name>`: The name/title of your report (Default: `Allure Report`).
 
 #### Options
@@ -126,6 +124,12 @@ allure-deployer bucket:set my-bucket.firebasestorage.app
 
 - **Node.js**: Version 14 or higher.
 - **Java**: Version 8 or higher
+- **Firebase Credentials**:
+   - Create a Firebase/GCP [service account](https://firebase.google.com/docs/admin/setup#initialize_the_sdk_in_non-google_environments).
+   - Download the `service-account-file.json` JSON file.
+
+- **Firebase Storage bucket**:
+   - Create a Firebase storage bucket when your test History and Retries are stored. You can use the default bucket.
 
 ## Help
 The CLI provides a set of commands to help you generate and deploy your Allure Reports. To see the list of available commands, run:

@@ -9,7 +9,7 @@ export class GoogleStorageService implements StorageProvider {
 
     constructor(storageBucket: Bucket, prefix: string | undefined) {
         this.bucket = storageBucket;
-        this.prefix = prefix;
+        this.prefix = prefix? path.normalize(prefix + '/'): undefined;
     }
 
     public async upload(filePath: string, destination: string) {

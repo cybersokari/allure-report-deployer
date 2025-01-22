@@ -7,7 +7,7 @@ import {
     getDashboardUrl,
     NotificationData, Notifier,
     SlackService, SlackNotifier,
-    Storage, getReportStats, ExecutorInterface, NotifyHandler, ReportStatistic, readJsonFile, copyFiles
+    GoogleStorage, getReportStats, ExecutorInterface, NotifyHandler, ReportStatistic, readJsonFile, copyFiles
 } from "allure-deployer-shared";
 import {Command} from "commander";
 import {addDeployCommand} from "./commands/deploy.command.js";
@@ -88,7 +88,7 @@ async function runDeploy(args: ArgsInterface) {
 }
 
 // Initializes cloud storage and verifies the bucket existence
-async function initializeCloudStorage(args: ArgsInterface): Promise<Storage | undefined> {
+async function initializeCloudStorage(args: ArgsInterface): Promise<GoogleStorage | undefined> {
     if (!args.storageBucket) return undefined;
     try {
         const credentials = await readJsonFile(args.runtimeCredentialDir);
@@ -98,7 +98,7 @@ async function initializeCloudStorage(args: ArgsInterface): Promise<Storage | un
             console.log(`Storage Bucket '${args.storageBucket}' does not exist. History and Retries will be disabled`);
             return undefined;
         }
-        return new Storage(new GoogleStorageService(bucket, args.prefix), args);
+        return new GoogleStorage(new GoogleStorageService(bucket, args.prefix), args);
     } catch (error) {
         handleStorageError(error);
         throw error;
@@ -106,7 +106,7 @@ async function initializeCloudStorage(args: ArgsInterface): Promise<Storage | un
 }
 
 // Prepares files and configurations for deployment
-async function setupStaging(args: ArgsInterface, storage?: Storage) {
+async function setupStaging(args: ArgsInterface, storage?: GoogleStorage) {
     const copyResultsFiles = (async (): Promise<number> => {
         return await copyFiles({
             from: args.RESULTS_PATHS,
@@ -142,14 +142,14 @@ async function generateReport({allure, reportUrl, args}: {
 function createExecutor({reportUrl}: { reportUrl?: string,
 }): ExecutorInterface {
     return {
-        name: 'Allure Report Deployer',
+        name: 'Allure Deployer CLI',
         reportUrl: reportUrl,
     }
 }
 
 // Deploys the report and associated artifacts
 async function finalize({args, storage}: {
-    args: ArgsInterface, storage?: Storage
+    args: ArgsInterface, storage?: GoogleStorage
 }) {
     const start = (): string => {
         if(args.host)  return 'Deploying report...'

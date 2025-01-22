@@ -29,9 +29,9 @@ services:
       - ./assets/allure-results:/allure-results
     cpus: 1
     mem_limit: 2048m
-    network_mode: service:storage
-    depends_on:
-      storage:
-        condition: service_healthy
+#    network_mode: service:storage
+#    depends_on:
+#      storage:
+#        condition: service_healthy
 
 
