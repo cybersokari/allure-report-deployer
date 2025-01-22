@@ -57,8 +57,8 @@ export class GoogleStorageService implements StorageProvider {
         });
     }
 
-    async deleteFile(fileName: string): Promise<void> {
-        await this.bucket.file(fileName).delete();
+    async deleteFile(file: string): Promise<void> {
+        await this.bucket.file(file).delete();
     }
 
     async deleteFiles(matchGlob = '**.zip'): Promise<void> {

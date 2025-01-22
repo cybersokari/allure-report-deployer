@@ -21,7 +21,7 @@ export interface StorageProvider {
     }): Promise<any[]>;
 
     deleteFiles(matchGlob?: any) : Promise<void>;
-    deleteFile(fileName: string) : Promise<void>;
+    deleteFile(file: any) : Promise<void>;
 
     sortFiles(files: any[], order: Order): any[];
 }
