@@ -44,8 +44,8 @@ export const prefixOption = new Option("-p, --prefix <prefix>", COMMAND_DESCRIPT
 
 export const cleanOption = new Option("-c, --clean", "Delete all live test reports and files in storage bucket before generating report");
 
-export const targetOption = new Option("-t, --target", "Your preferred host for the test report. Default is 'firebase'")
-    .choices(['firebase', 'github']).default('firebase');
+export const languageOption = new Option("-lang, --report-language <language>", "Allure report language");
+
 
 
 async function handleDeployAction(resultPath: any, reportName: any, options: any): Promise<ArgsInterface> {
@@ -80,6 +80,7 @@ async function handleDeployAction(resultPath: any, reportName: any, options: any
             reportName: reportName,
             slackConfig: slackConfig,
             clean: options.clean,
+            reportLanguage: options.reportLanguage,
         }
     } catch (error) {
         // @ts-ignore
@@ -97,7 +98,7 @@ export function addDeployCommand(defaultProgram: Command, onCommand: (args: Args
         .description("Generate and deploy report to host provider")
         .addArgument(allureResultsPathArg)
         .addArgument(reportNameArg)
-        .addOption(targetOption)
+        .addOption(languageOption)
         .addOption(retriesOption)
         .addOption(showHistoryOption)
         .addOption(gcpJsonOption)

@@ -12,7 +12,7 @@ import {KEY_BUCKET, KEY_PROJECT_ID} from "../utilities/constants.js";
 import {
     allureResultsPathArg,
     bucketOption,
-    gcpJsonOption, prefixOption,
+    gcpJsonOption, languageOption, prefixOption,
     reportNameArg,
     retriesOption,
     showHistoryOption
@@ -42,6 +42,7 @@ async function handleGenerateAction(resultPath: any, reportName: any, options: a
             showHistory: showHistory,
             reportName: reportName,
             clean: options.clean,
+            reportLanguage: options.reportLanguage,
         }
     } catch (error) {
         // @ts-ignore
@@ -57,6 +58,7 @@ export function addGenerateCommand(defaultProgram: Command, onCommand: (args: Ar
         .description("Generate report to output directory")
         .addArgument(allureResultsPathArg)
         .addArgument(reportNameArg)
+        .addOption(languageOption)
         .addOption(retriesOption)
         .addOption(showHistoryOption)
         .addOption(gcpJsonOption)
