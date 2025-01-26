@@ -72,6 +72,7 @@ allure-deployer generate ./allure-results my-local-report --show-history --retri
 - `--gcp-json <json-path>`: Firebase/GCP JSON credential file for additional configurations.
 - `-p, --prefix <prefix>`: Storage bucket path to back up Allure results and history files.
 - `-o, --output <output-dir>` A directory to generate the Allure report into (default: "allure-report")
+- `-lang, --report-language` Allure report language
 
 #### Description
 The `generate` command is useful for creating an Allure test report locally without deploying it to the cloud.

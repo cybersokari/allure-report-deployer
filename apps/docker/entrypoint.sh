@@ -29,6 +29,7 @@ deploy_command="allure-deployer deploy \"$ALLURE_RESULTS_PATH\""
 [ -n "$SLACK_CHANNEL" ] && deploy_command="$deploy_command --slack-channel $SLACK_CHANNEL"
 [ -n "$SLACK_TOKEN" ] && deploy_command="$deploy_command --slack-token $SLACK_TOKEN"
 [ -n "$PREFIX" ] && deploy_command="$deploy_command --prefix $PREFIX"
+[ -n "$LANG" ] && deploy_command="$deploy_command -lang $LANG"
 
 # Execute the constructed command
 eval "$deploy_command"

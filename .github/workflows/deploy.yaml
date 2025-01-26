@@ -69,7 +69,17 @@ jobs:
           message: "Release ${{github.event.inputs.job}} package version ${{ steps.publish.outputs.version }}"
           add: '${{ env.DIR }}/*.json'
           push: 'origin main --force'
-          tag: 'v${{steps.publish.outputs.version}}-${{github.event.inputs.job}} --force'
+
+      - name: Create GitHub Release
+        if: github.event.inputs.job == 'cli'
+        uses: ncipollo/release-action@v1.15.0
+        continue-on-error: true
+        with:
+          artifacts: '${{env.DIR}}/*.tgz'
+          tag: 'v${{steps.publish.outputs.version}}'
+          name: 'v${{steps.publish.outputs.version}}'
+          skipIfReleaseExists: 'true'
+
 
   deploy-docker:
     if: ${{ github.event.inputs.job == 'cli' && github.event.inputs.build-docker == 'true' }}
