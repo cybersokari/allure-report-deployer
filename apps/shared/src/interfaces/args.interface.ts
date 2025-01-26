@@ -19,5 +19,6 @@ export interface ArgsInterface {
     slackConfig?: SlackConfig;
     clean?: boolean;
     host?: HostingProvider;
+    reportLanguage?: string;
 }
 

@@ -38,6 +38,9 @@ export class Allure {
         if(this.args.reportName){
             command.push('--report-name', this.args.reportName)
         }
+        if(this.args.reportLanguage){
+            command.push('--report-language', this.args.reportLanguage)
+        }
         const { exitCode} = await this.allureRunner.runCommand(command);
         if (exitCode !== 0) {
             throw new Error("Failed to generate Allure report");
