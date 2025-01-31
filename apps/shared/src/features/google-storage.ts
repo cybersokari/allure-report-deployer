@@ -27,8 +27,9 @@ export class GoogleStorage implements IStorage{
      * Constructs a Storage instance.
      * @param provider - The storage provider to interact with cloud storage.
      * @param args - Arguments for file handling and configuration.
+     * @param excludes Files names to exclude during backup
      */
-    constructor(provider: StorageProvider, args: ArgsInterface) {
+    constructor(provider: StorageProvider, args: ArgsInterface, readonly excludes: string[] = ['executor.json', 'environment.properties']) {
         this.provider = provider;
         this.args = args;
         this.unzipper = unzipper;
@@ -221,7 +222,7 @@ export class GoogleStorage implements IStorage{
         for (const filePath of this.args.RESULTS_PATHS) {
             source.push({path: filePath})
         }
-        const resultsPath = await archiveFilesInDirectories({source, outputFilePath: resultsArchivePath, exclude: ['executor.json']});
+        const resultsPath = await archiveFilesInDirectories({source, outputFilePath: resultsArchivePath, exclude: this.excludes});
         await this.provider.upload(resultsPath, path.basename(resultsPath));
     }
 

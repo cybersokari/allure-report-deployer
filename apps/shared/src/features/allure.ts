@@ -5,6 +5,7 @@ import {CommandRunner} from "../interfaces/command.interface.js";
 import {ArgsInterface} from "../interfaces/args.interface.js";
 import {AllureService} from "../services/allure.service.js";
 import {ExecutorInterface} from "../interfaces/executor.interface.js";
+import PropertiesReader from "properties-reader";
 
 export class Allure {
     private readonly allureRunner: CommandRunner;
@@ -13,6 +14,23 @@ export class Allure {
     constructor({allureRunner, args}: {allureRunner?: CommandRunner , args: ArgsInterface}) {
         this.allureRunner = allureRunner ?? new AllureService()
         this.args = args;
+    }
+
+    get environments(): Map<string, string> | undefined {
+        const map = new Map<string, string>();
+        // Read the properties file
+        try {
+            const properties = PropertiesReader(path.join(this.args.RESULTS_STAGING_PATH, 'environment.properties'));
+            console.log('Environments')
+            properties.each((key, value) => {
+                console.log(`${key}: ${value}`);
+                map.set(key, value.toString())
+            });
+            return map
+        }catch (e) {
+            //Ignore. environment.properties file does not exist
+        }
+        return undefined
     }
 
     async open(port = 8090): Promise<void> {

@@ -5,6 +5,7 @@ import {ArgsInterface} from "../../interfaces/args.interface.js";
 import {SlackInterface} from "../../interfaces/slack.interface.js";
 import {SlackService} from "../../services/slack.service.js";
 
+
 export class SlackNotifier implements Notifier {
     private readonly slackClient: SlackService;
     args: ArgsInterface;
@@ -49,10 +50,11 @@ export class SlackNotifier implements Notifier {
                 type: "section",
                 text: {
                     type: "mrkdwn",
-                    text: `*Your ${this.args.reportName ?? 'Allure'} report is ready* 📊`,
+                    text: `*Allure Deployer* 📊`,
                 },
             },
         ];
+
 
         // Add status blocks
         const { resultStatus } = data;

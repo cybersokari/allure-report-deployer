@@ -20,5 +20,6 @@ export interface ArgsInterface {
     clean?: boolean;
     host?: HostingProvider;
     reportLanguage?: string;
+    environments?: Map<string, string>
 }
 
