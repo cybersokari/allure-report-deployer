@@ -6,6 +6,17 @@ import {SlackInterface} from "../../interfaces/slack.interface.js";
 import {SlackService} from "../../services/slack.service.js";
 
 
+interface TextBlock {
+    type: string;
+    text: string;
+    emoji?: boolean
+}
+interface FieldBlock {
+    type: 'section'
+    fields?: TextBlock[]
+    text?: any
+}
+
 export class SlackNotifier implements Notifier {
     private readonly slackClient: SlackService;
     args: ArgsInterface;
@@ -14,6 +25,26 @@ export class SlackNotifier implements Notifier {
         this.slackClient = client;
         this.args = args;
     }
+
+    private buildEnvironmentRow(title: string, value: string): TextBlock[] {
+        return [{
+                type: "mrkdwn",
+                text: `*${title}*`
+            },
+            {
+                type: "plain_text",
+                text: value,
+                emoji: true
+            }];
+    }
+
+    private buildEnvironmentBlock(fields: TextBlock[]): FieldBlock {
+        return <FieldBlock>{
+            type: 'section',
+            fields
+        }
+    }
+
 
     private buildStatusBlock(label: string, emoji: string, count: number): any {
         return {
@@ -44,8 +75,8 @@ export class SlackNotifier implements Notifier {
         };
     }
 
-    async notify(data: NotificationData): Promise<void> {
-        const blocks = [
+    async notify({resultStatus, reportUrl, environment}: NotificationData): Promise<void> {
+        const blocks: FieldBlock[] = [
             {
                 type: "section",
                 text: {
@@ -55,9 +86,16 @@ export class SlackNotifier implements Notifier {
             },
         ];
 
+        // Add environment block
+        if (environment && environment.size > 0) {
+            const fields: TextBlock[] = []
+            environment.forEach((key, value) => {
+                fields.push(...this.buildEnvironmentRow(key, value))
+            })
+            blocks.push(this.buildEnvironmentBlock(fields))
+        }
 
         // Add status blocks
-        const { resultStatus } = data;
         if (resultStatus.passed) blocks.push(this.buildStatusBlock("Passed", ":white_check_mark:", resultStatus.passed));
         if (resultStatus.broken) blocks.push(this.buildStatusBlock("Broken", ":warning:", resultStatus.broken));
         if (resultStatus.skipped) blocks.push(this.buildStatusBlock("Skipped", ":next_track_button:", resultStatus.skipped));
@@ -65,7 +103,7 @@ export class SlackNotifier implements Notifier {
         if (resultStatus.unknown) blocks.push(this.buildStatusBlock("Unknown", ":question:", resultStatus.unknown));
 
         // Add report and storage buttons
-        if (data.reportUrl) blocks.push(this.buildButtonBlock("View report", data.reportUrl));
+        if (reportUrl) blocks.push(this.buildButtonBlock("View report", reportUrl));
         // if (data.storageUrl) blocks.push(this.buildButtonBlock("View files in storage", data.storageUrl));
 
         // Add GitHub promotion button

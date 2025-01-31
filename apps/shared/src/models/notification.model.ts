@@ -1,9 +1,8 @@
 import {ReportStatistic} from "../interfaces/counter.interface.js";
 
-export class NotificationData {
-    constructor(
-        public readonly resultStatus: ReportStatistic,
-        public readonly reportUrl?: string,
-        public readonly storageUrl?: string
-    ) {}
+export interface NotificationData {
+    resultStatus: ReportStatistic,
+    environment?: Map<string, string>,
+    reportUrl?: string,
+    storageUrl?: string
 }
