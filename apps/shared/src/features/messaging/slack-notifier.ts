@@ -49,7 +49,7 @@ export class SlackNotifier implements Notifier {
                 type: "section",
                 text: {
                     type: "mrkdwn",
-                    text: "*Your Allure report is ready* 📊",
+                    text: `*Your ${this.args.reportName ?? 'Allure'} report is ready* 📊`,
                 },
             },
         ];
@@ -64,13 +64,13 @@ export class SlackNotifier implements Notifier {
 
         // Add report and storage buttons
         if (data.reportUrl) blocks.push(this.buildButtonBlock("View report", data.reportUrl));
-        if (data.storageUrl) blocks.push(this.buildButtonBlock("View files in storage", data.storageUrl));
+        // if (data.storageUrl) blocks.push(this.buildButtonBlock("View files in storage", data.storageUrl));
 
         // Add GitHub promotion button
-        blocks.push(this.buildButtonBlock("Star us on GitHub :smile:", "https://github.com/cybersokari/allure-report-deployer"));
+        blocks.push(this.buildButtonBlock("Give us a GitHub :star:", "https://github.com/cybersokari/allure-report-deployer"));
 
         try {
-            await this.slackClient.postMessage(blocks, 'Your Allure report is ready.');
+            await this.slackClient.postMessage(blocks, 'Your test report is ready.');
             appLog('Slack message sent');
         } catch (error) {
             console.error('Error sending Slack message:', error);
