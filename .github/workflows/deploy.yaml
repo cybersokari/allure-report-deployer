@@ -20,19 +20,62 @@ on:
           - major
         default: patch
       build-docker:
-        description: Release companion Docker image
+        description: Release new Docker image
         type: boolean
         default: true
 
 jobs:
+  deploy-shared:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.inputs.job == 'shared'}}
+    permissions:
+      contents: write
+    env:
+      DIR: apps/shared
+    steps:
+      - uses: actions/checkout@v4.1.5
+        with:
+          token: '${{ secrets.PERSONAL_ACCESS_TOKEN }}'
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install deps
+        run: npm i --workspace=${{env.DIR}}
+      - name: Compile
+        run: npm run build --workspace=${{env.DIR}}
+      - name: Run test
+        run: npm run test --workspace=${{env.DIR}}
+      - name: Bump version
+        run: cd ${{env.DIR}} && npm version ${{github.event.inputs.semver}}
+
+      - name: NPM Publish
+        id: publish
+        uses: JS-DevTools/npm-publish@v3.1.1
+        with:
+          token: ${{ secrets.NPM_TOKEN }}
+          package: ${{env.DIR}}
+          ignore-scripts: false
+
+      - name: Commit package.json changes
+        uses: EndBug/add-and-commit@v9.1.4
+        with:
+          author_name: Sokari
+          author_email: sokariharry@gmail.com
+          message: "Release Shared package v${{ steps.publish.outputs.version }}"
+          add: '${{ env.DIR }}/*.json'
+          push: 'origin main --force'
+
   deploy-cli:
     runs-on: ubuntu-latest
+    if: ${{ github.event.inputs.job == 'cli'}}
     permissions:
       contents: write
     outputs:
       version: ${{steps.version-out.outputs.version}}
     env:
-      DIR: apps/${{github.event.inputs.job}}
+      DIR: apps/cli
     steps:
       - uses: actions/checkout@v4.1.5
         with:
@@ -68,12 +111,11 @@ jobs:
         with:
           author_name: Sokari
           author_email: sokariharry@gmail.com
-          message: "Release ${{github.event.inputs.job}} package version ${{ steps.publish.outputs.version }}"
+          message: "Release CLI package v${{ steps.publish.outputs.version }}"
           add: '${{ env.DIR }}/*.json'
           push: 'origin main --force'
 
       - name: Create GitHub Release
-        if: github.event.inputs.job == 'cli'
         uses: ncipollo/release-action@v1.15.0
         continue-on-error: true
         with:
@@ -81,7 +123,6 @@ jobs:
           tag: 'v${{steps.publish.outputs.version}}'
           name: 'v${{steps.publish.outputs.version}}'
           skipIfReleaseExists: 'true'
-
 
   deploy-docker:
     if: ${{ github.event.inputs.job == 'cli' && github.event.inputs.build-docker == 'true' }}
