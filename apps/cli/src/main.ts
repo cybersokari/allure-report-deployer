@@ -4,8 +4,7 @@ import {
     Allure, ArgsInterface,
     ConsoleNotifier, counter,
     GoogleStorageService,
-    getDashboardUrl,
-    NotificationData, Notifier,
+    getDashboardUrl, Notifier,
     SlackService, SlackNotifier,
     GoogleStorage, getReportStats, ExecutorInterface, NotifyHandler, ReportStatistic, readJsonFile, copyFiles
 } from "allure-deployer-shared";
@@ -80,7 +79,7 @@ async function runDeploy(args: ArgsInterface) {
         const allure = new Allure({args});
         await generateReport({allure, reportUrl, args}); // Generate Allure report
         const [resultsStats] = await finalize({args, storage}); // Deploy report and artifacts
-        await notify(args, resultsStats, reportUrl); // Send deployment notifications
+        await notify(args, resultsStats, reportUrl, allure.environments); // Send deployment notifications
     } catch (error) {
         console.error("Deployment failed:", error);
         process.exit(1); // Exit with error code
@@ -173,7 +172,7 @@ async function finalize({args, storage}: {
 }
 
 // Sends notifications about deployment status
-async function notify(args: ArgsInterface, resultsStatus: ReportStatistic, reportUrl?: string) {
+async function notify(args: ArgsInterface, resultStatus: ReportStatistic, reportUrl?: string, environment?: Map<string,string>) {
     const notifiers: Notifier[] = [new ConsoleNotifier(args)];
     if (args.slackConfig) {
         const slackClient = new SlackService(args.slackConfig)
@@ -186,7 +185,7 @@ async function notify(args: ArgsInterface, resultsStatus: ReportStatistic, repor
         }) : undefined;
     };
 
-    const notificationData = new NotificationData(resultsStatus, reportUrl, dashboardUrl());
+    const notificationData = {resultStatus, reportUrl, storageUrl: dashboardUrl(), environment}
     await new NotifyHandler(notifiers).sendNotifications(notificationData); // Send notifications via all configured notifiers
 }
 

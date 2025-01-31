@@ -1,4 +1,5 @@
 import type { Config } from '@jest/types';
+import os from "node:os";
 
 const config: Config.InitialOptions = {
     preset: 'ts-jest/presets/default-esm', // Use ESM preset for TypeScript
@@ -8,6 +9,14 @@ const config: Config.InitialOptions = {
     transformIgnorePatterns: [
         "/node_modules/(?!(ansi-escapes|chalk)/)" // Transform 'ansi-escapes' and 'chalk'
     ],
+    testEnvironmentOptions: {
+        environmentInfo: {
+            "Platform": os.platform(),
+            "Release": os.release(),
+            "Version": os.version(),
+            "Node version": process.version,
+        },
+    },
     transform: {
         '^.+\\.tsx?$': [
             'ts-jest',

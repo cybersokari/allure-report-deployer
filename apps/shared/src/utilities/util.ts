@@ -100,7 +100,7 @@ export async function countFiles(directory: string[]) {
 }
 
 export function isFileTypeAllure(filePath: string) {
-    return !!filePath.match(/^.*\.(json|png|jpeg|jpg|gif|properties|log|webm|html|mp4)$/i)
+    return !!filePath.match(/^.*\.(jsonl|json|png|jpeg|jpg|gif|properties|log|webm|html|mp4)$/i)
 }
 
 /**

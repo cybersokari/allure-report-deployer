@@ -29,7 +29,7 @@ export class SlackNotifier implements Notifier {
     private buildEnvironmentRow(title: string, value: string): TextBlock[] {
         return [{
                 type: "mrkdwn",
-                text: `*${title}*`
+                text: `${title}:`
             },
             {
                 type: "plain_text",
@@ -76,20 +76,11 @@ export class SlackNotifier implements Notifier {
     }
 
     async notify({resultStatus, reportUrl, environment}: NotificationData): Promise<void> {
-        const blocks: FieldBlock[] = [
-            {
-                type: "section",
-                text: {
-                    type: "mrkdwn",
-                    text: `*Allure Deployer* 📊`,
-                },
-            },
-        ];
-
+        const blocks: FieldBlock[] = [];
         // Add environment block
         if (environment && environment.size > 0) {
             const fields: TextBlock[] = []
-            environment.forEach((key, value) => {
+            environment.forEach((value,key, ) => {
                 fields.push(...this.buildEnvironmentRow(key, value))
             })
             blocks.push(this.buildEnvironmentBlock(fields))
@@ -103,11 +94,11 @@ export class SlackNotifier implements Notifier {
         if (resultStatus.unknown) blocks.push(this.buildStatusBlock("Unknown", ":question:", resultStatus.unknown));
 
         // Add report and storage buttons
-        if (reportUrl) blocks.push(this.buildButtonBlock("View report", reportUrl));
+        if (reportUrl) blocks.push(this.buildButtonBlock("View report :bar_chart:", reportUrl));
         // if (data.storageUrl) blocks.push(this.buildButtonBlock("View files in storage", data.storageUrl));
 
         // Add GitHub promotion button
-        blocks.push(this.buildButtonBlock("Give us a GitHub :star:", "https://github.com/cybersokari/allure-report-deployer"));
+        blocks.push(this.buildButtonBlock("Give Allure Deployer a :star:", "https://github.com/cybersokari/allure-report-deployer"));
 
         try {
             await this.slackClient.postMessage(blocks, 'Your test report is ready.');
