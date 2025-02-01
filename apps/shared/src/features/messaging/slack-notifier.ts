@@ -11,6 +11,7 @@ interface TextBlock {
     text: string;
     emoji?: boolean
 }
+
 interface FieldBlock {
     type: 'section'
     fields?: TextBlock[]
@@ -28,9 +29,9 @@ export class SlackNotifier implements Notifier {
 
     private buildEnvironmentRow(title: string, value: string): TextBlock[] {
         return [{
-                type: "mrkdwn",
-                text: `${title}:`
-            },
+            type: "mrkdwn",
+            text: `${title}:`
+        },
             {
                 type: "plain_text",
                 text: value,
@@ -80,10 +81,14 @@ export class SlackNotifier implements Notifier {
         // Add environment block
         if (environment && environment.size > 0) {
             const fields: TextBlock[] = []
-            environment.forEach((value,key, ) => {
-                fields.push(...this.buildEnvironmentRow(key, value))
+            environment.forEach((value, key,) => {
+                if (key !== '' && value !== '') {
+                    fields.push(...this.buildEnvironmentRow(key, value))
+                }
             })
-            blocks.push(this.buildEnvironmentBlock(fields))
+            if (fields.length > 0) {
+                blocks.push(this.buildEnvironmentBlock(fields))
+            }
         }
 
         // Add status blocks
