@@ -115,8 +115,12 @@ jobs:
           add: '${{ env.DIR }}/*.json'
           push: 'origin main --force'
 
+      - name: Create NPM artifact for release
+        run: cd ${{env.DIR}} && npm pack
+        continue-on-error: true
       - name: Create GitHub Release
         uses: ncipollo/release-action@v1.15.0
+        if: success()
         continue-on-error: true
         with:
           artifacts: '${{env.DIR}}/*.tgz'
