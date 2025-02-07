@@ -1,6 +1,6 @@
 {
   "name": "allure-deployer-shared",
-  "version": "1.2.5",
+  "version": "1.2.6",
   "description": "Shared package for Allure Deployer project",
   "author": "Sokari Gillis-Harry",
   "license": "BSD-3-Clause",
