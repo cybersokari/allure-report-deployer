@@ -1,10 +1,9 @@
 // @ts-ignore
 import mock from "mock-fs";
-import {fakeArgs} from "./mocks/fake-args.js";
 import {jest} from "@jest/globals";
 import {ExecutorInterface} from "../src/interfaces/executor.interface.js";
 import {AllureService} from "../src/services/allure.service.js";
-import {Allure} from "../src/features/allure.js";
+import {Allure, AllureConfig} from "../src/features/allure.js";
 
 const REPORTS_DIR = '/app/allure-reports';
 
@@ -27,6 +26,10 @@ const executor: ExecutorInterface = {
 }
 
 describe("ReportBuilder", () => {
+    const config : AllureConfig = {
+        RESULTS_STAGING_PATH: '',
+        REPORTS_DIR: ''
+    }
     let mockAllureService: AllureService | null = null;
     let reportBuilder: Allure;
     const allureCommandSuccess = (s: string[]) => {
@@ -46,7 +49,7 @@ describe("ReportBuilder", () => {
         mockAllureService = {
             runCommand: jest.fn(allureCommandSuccess),
         };
-        reportBuilder = new Allure({allureRunner: mockAllureService, args: fakeArgs});
+        reportBuilder = new Allure({allureRunner: mockAllureService, config});
         try {
             await reportBuilder.open();
         } catch (e) {
@@ -67,7 +70,7 @@ describe("ReportBuilder", () => {
         mockAllureService = {
             runCommand: jest.fn(allureCommandFail), // Mock the AllureCommandRunner interface
         };
-        reportBuilder = new Allure({allureRunner: mockAllureService, args: fakeArgs});
+        reportBuilder = new Allure({allureRunner: mockAllureService, config});
 
         await expect(reportBuilder.generate(executor)).rejects.toThrow("Failed to generate Allure report");
     });
@@ -79,18 +82,16 @@ describe("ReportBuilder", () => {
         mockAllureService = {
             runCommand: jest.fn(allureCommandSuccess), // Mock the AllureCommandRunner interface
         };
-        reportBuilder = new Allure({allureRunner: mockAllureService, args: fakeArgs});
+        reportBuilder = new Allure({allureRunner: mockAllureService, config});
         const result = await reportBuilder.generate(executor);
 
         expect(result).toBe(REPORTS_DIR);
         expect(mockAllureService.runCommand).toHaveBeenCalledWith([
             "generate",
-            fakeArgs.RESULTS_STAGING_PATH,
+            config.RESULTS_STAGING_PATH,
             "--report-dir",
             REPORTS_DIR,
-            "--clean",
-            "--report-name",
-            fakeArgs.reportName
+            "--clean"
         ]);
     });
 
