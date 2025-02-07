@@ -1,8 +1,11 @@
 // @ts-ignore
 import mock from "mock-fs";
-import {jest} from "@jest/globals";
+import {jest, expect, test, afterEach, describe} from "@jest/globals";
+// @ts-ignore
 import {ExecutorInterface} from "../src/interfaces/executor.interface.js";
+// @ts-ignore
 import {AllureService} from "../src/services/allure.service.js";
+// @ts-ignore
 import {Allure, AllureConfig} from "../src/features/allure.js";
 
 const REPORTS_DIR = '/app/allure-reports';
@@ -27,8 +30,8 @@ const executor: ExecutorInterface = {
 
 describe("ReportBuilder", () => {
     const config : AllureConfig = {
-        RESULTS_STAGING_PATH: '',
-        REPORTS_DIR: ''
+        RESULTS_STAGING_PATH: '/app/allure-results',
+        REPORTS_DIR
     }
     let mockAllureService: AllureService | null = null;
     let reportBuilder: Allure;

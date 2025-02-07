@@ -2,7 +2,7 @@
   "compilerOptions": {
     "rootDirs": ["./test"],
     "esModuleInterop": true,
-    "types": ["jest","node"],
+    "types": ["jest","node", "mocha"],
     "module": "esnext",
     "moduleResolution": "node",
     "noImplicitReturns": true,
@@ -11,7 +11,7 @@
     "target": "es2020",
     "allowSyntheticDefaultImports": true,
     "resolveJsonModule": true,
-    "declaration": true
+    "declaration": true,
   },
   "include": ["src/**/*"]
 }
