@@ -1,7 +1,6 @@
 import {Notifier} from "../../interfaces/notifier.interface.js";
 import {NotificationData} from "../../models/notification.model.js";
 import {appLog} from "../../utilities/util.js";
-import {ArgsInterface} from "../../interfaces/args.interface.js";
 import {SlackInterface} from "../../interfaces/slack.interface.js";
 import {SlackService} from "../../services/slack.service.js";
 
@@ -20,11 +19,9 @@ interface FieldBlock {
 
 export class SlackNotifier implements Notifier {
     private readonly slackClient: SlackService;
-    args: ArgsInterface;
 
-    constructor(client: SlackInterface, args: ArgsInterface) {
+    constructor(client: SlackInterface) {
         this.slackClient = client;
-        this.args = args;
     }
 
     private buildEnvironmentRow(title: string, value: string): TextBlock[] {

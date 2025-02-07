@@ -4,14 +4,11 @@ import {Icon} from "../../utilities/icon.js";
 import {appLog} from "../../utilities/util.js";
 import ansiEscapes from "ansi-escapes";
 import chalk from "chalk";
-import {ArgsInterface} from "../../interfaces/args.interface.js";
 import { ReportStatistic } from "../../interfaces/counter.interface.js";
 import { StringBuilder } from "../../lib.js";
 
 export class ConsoleNotifier implements Notifier {
-    args: ArgsInterface;
-    constructor(args: ArgsInterface) {
-        this.args = args;
+    constructor() {
     }
     private isHyperlinkSupported(): boolean {
         // Check for CI environments or non-TTY outputs
