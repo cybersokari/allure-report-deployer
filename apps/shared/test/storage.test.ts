@@ -4,7 +4,7 @@ import * as fs from "fs/promises";
 import {jest} from "@jest/globals";
 import {Order, StorageProvider} from "../src/interfaces/storage-provider.interface.js";
 import {fakeArgs} from "./mocks/fake-args.js";
-import {GoogleStorage} from '../src/features/google-storage.js'
+import {GoogleStorage, GoogleStorageConfig} from '../src/features/google-storage.js'
 
 
 // Partially mock the module
@@ -21,6 +21,16 @@ import {GoogleStorage} from '../src/features/google-storage.js'
 // const mockedUtils = jest.mocked(utils);
 describe("Storage", () => {
     let storageInstance: GoogleStorage;
+    let storageConfig: GoogleStorageConfig = {
+        ARCHIVE_DIR: '/app/archive',
+        RESULTS_PATHS: '/allure-results',
+        REPORTS_DIR: "/app/allure-reports",
+        RESULTS_STAGING_PATH: "/app/allure-results",
+        fileProcessingConcurrency: 10,
+        showHistory: true,
+        retries: 5,
+        clean: false,
+    }
     const storageProviderMock: jest.Mocked<StorageProvider> = {
         bucket: undefined,
         prefix : 'string',
@@ -46,7 +56,7 @@ describe("Storage", () => {
         jest.resetModules(); // Clears cached modules
         jest.clearAllMocks(); // C
 
-        storageInstance = new GoogleStorage(storageProviderMock, fakeArgs);
+        storageInstance = new GoogleStorage(storageProviderMock, storageConfig);
 
         // Mock file system
         mock({
