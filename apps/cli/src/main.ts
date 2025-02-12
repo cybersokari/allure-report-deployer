@@ -1,12 +1,22 @@
 import * as process from "node:process";
 // Import necessary modules and commands for the main program functionality
 import {
-    Allure, ArgsInterface,
-    ConsoleNotifier, counter,
+    Allure,
+    ArgsInterface,
+    ConsoleNotifier,
     GoogleStorageService,
-    getDashboardUrl, Notifier,
-    SlackService, SlackNotifier,
-    GoogleStorage, getReportStats, ExecutorInterface, NotifyHandler, ReportStatistic, readJsonFile, copyFiles
+    getDashboardUrl,
+    Notifier,
+    SlackService,
+    SlackNotifier,
+    GoogleStorage,
+    getReportStats,
+    ExecutorInterface,
+    NotifyHandler,
+    ReportStatistic,
+    readJsonFile,
+    copyFiles,
+    AllureConfig
 } from "allure-deployer-shared";
 import {Command} from "commander";
 import {addDeployCommand} from "./commands/deploy.command.js";
@@ -21,7 +31,6 @@ import {withOra} from "./utilities/util.js";
 
 // Entry point for the application
 export function main() {
-    counter.startTimer(); // Start a timer for tracking execution duration
     const program = new Command();
     (async () => {
         setupCommands(program); // Configure CLI commands
@@ -61,7 +70,7 @@ async function runGenerate(args: ArgsInterface): Promise<void> {
     try {
         const storage = await initializeCloudStorage(args); // Initialize storage bucket
         await setupStaging(args, storage);
-        const allure = new Allure({args});
+        const allure = getAllure(args)
         await generateReport({allure, args}); // Generate Allure report
         const [resultsStats] = await finalize({storage, args}); // Deploy report and artifacts
         await notify(args, resultsStats); // Send deployment notifications
@@ -71,12 +80,21 @@ async function runGenerate(args: ArgsInterface): Promise<void> {
     }
 }
 
+function getAllure(args: ArgsInterface): Allure {
+    const config: AllureConfig = {
+        RESULTS_STAGING_PATH: args.RESULTS_STAGING_PATH,
+        REPORTS_DIR: args.REPORTS_DIR,
+        reportLanguage: args.reportLanguage
+    }
+    return new Allure({config})
+}
+
 // Executes the deployment process
 async function runDeploy(args: ArgsInterface) {
     try {
         const storage = await initializeCloudStorage(args); // Initialize storage bucket
         const [reportUrl] = await setupStaging(args, storage);
-        const allure = new Allure({args});
+        const allure = getAllure(args)
         await generateReport({allure, reportUrl, args}); // Generate Allure report
         const [resultsStats] = await finalize({args, storage}); // Deploy report and artifacts
         await notify(args, resultsStats, reportUrl, allure.environments); // Send deployment notifications
@@ -130,7 +148,7 @@ async function generateReport({allure, reportUrl, args}: {
     reportUrl?: string,
     args: ArgsInterface
 }): Promise<string> {
-    const executor = args.host ? createExecutor({reportUrl}) : undefined
+    const executor = args.host ? createExecutor({reportUrl, reportName: args.reportName}) : undefined
     return await withOra({
         work: () => allure.generate(executor),
         start: 'Generating Allure report...',
@@ -138,11 +156,12 @@ async function generateReport({allure, reportUrl, args}: {
     });
 }
 
-function createExecutor({reportUrl}: { reportUrl?: string,
+function createExecutor({reportUrl, reportName}: { reportUrl?: string, reportName?: string
 }): ExecutorInterface {
     return {
         name: 'Allure Deployer CLI',
-        reportUrl: reportUrl,
+        reportUrl,
+        reportName
     }
 }
 
@@ -173,10 +192,10 @@ async function finalize({args, storage}: {
 
 // Sends notifications about deployment status
 async function notify(args: ArgsInterface, resultStatus: ReportStatistic, reportUrl?: string, environment?: Map<string,string>) {
-    const notifiers: Notifier[] = [new ConsoleNotifier(args)];
+    const notifiers: Notifier[] = [new ConsoleNotifier()];
     if (args.slackConfig) {
         const slackClient = new SlackService(args.slackConfig)
-        notifiers.push(new SlackNotifier(slackClient, args));
+        notifiers.push(new SlackNotifier(slackClient));
     }
     const dashboardUrl = () => {
         return args.storageBucket && args.firebaseProjectId ? getDashboardUrl({

@@ -13,13 +13,13 @@ import {
     allureResultsPathArg,
     bucketOption,
     gcpJsonOption, languageOption, prefixOption,
-    reportNameArg,
+    reportNameOption,
     retriesOption,
     showHistoryOption
 } from "./deploy.command.js";
 import {ArgsInterface, getRuntimeDirectory, isJavaInstalled} from "allure-deployer-shared";
 
-async function handleGenerateAction(resultPath: any, reportName: any, options: any): Promise<ArgsInterface> {
+async function handleGenerateAction(resultPath: any, options: any): Promise<ArgsInterface> {
     try {
         const firebaseProjectId = await validateCredentials(options.gcpJson);
         validateBucket(options);
@@ -40,7 +40,7 @@ async function handleGenerateAction(resultPath: any, reportName: any, options: a
             storageBucket: options.bucket || db.get(KEY_BUCKET),
             retries: retries,
             showHistory: showHistory,
-            reportName: reportName,
+            reportName: options.reportName,
             clean: options.clean,
             reportLanguage: options.reportLanguage,
         }
@@ -57,7 +57,7 @@ export function addGenerateCommand(defaultProgram: Command, onCommand: (args: Ar
     return defaultProgram.command('generate')
         .description("Generate report to output directory")
         .addArgument(allureResultsPathArg)
-        .addArgument(reportNameArg)
+        .addOption(reportNameOption)
         .addOption(languageOption)
         .addOption(retriesOption)
         .addOption(showHistoryOption)
@@ -65,12 +65,12 @@ export function addGenerateCommand(defaultProgram: Command, onCommand: (args: Ar
         .addOption(bucketOption)
         .addOption(prefixOption)
         .addOption(outputDirOption)
-        .action(async (resultPath, reportName, options) => {
+        .action(async (resultPath, options) => {
             if (!isJavaInstalled()) {
                 console.warn(ERROR_MESSAGES.NO_JAVA);
                 process.exit(1);
             }
-            const cliArgs = await handleGenerateAction(resultPath, reportName, options);
+            const cliArgs = await handleGenerateAction(resultPath, options);
             await onCommand(cliArgs);
         });
 }

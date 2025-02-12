@@ -1,12 +1,10 @@
 import * as path from "node:path";
-import {countFiles, isFileTypeAllure, archiveFilesInDirectories} from "../utilities/util.js";
-import {counter} from "../utilities/counter.js";
+import {archiveFilesInDirectories} from "../utilities/util.js";
 import pLimit from "p-limit";
 import {Order, StorageProvider} from "../interfaces/storage-provider.interface.js";
 import fs from "fs/promises";
 import fsSync from "fs";
 import unzipper, {Entry} from "unzipper";
-import {ArgsInterface} from "../interfaces/args.interface.js";
 import {UnzipperProvider} from "../interfaces/unzipper.interface.js";
 import {GoogleStorageService} from "../services/google-storage.service.js";
 import {IStorage} from "../interfaces/storage.interface.js";
@@ -14,13 +12,25 @@ import {IStorage} from "../interfaces/storage.interface.js";
 const HISTORY_ARCHIVE_NAME = "last-history.zip";
 const RESULTS_ARCHIVE_GLOB_MATCH = '[0-9]*.zip';
 
+
+export interface GoogleStorageConfig {
+    fileProcessingConcurrency: number;
+    clean: boolean;
+    showHistory: boolean;
+    retries: number;
+    RESULTS_PATHS: string;
+    RESULTS_STAGING_PATH: string;
+    ARCHIVE_DIR: string;
+    REPORTS_DIR: string;
+}
+
 /**
  * The Storage class manages the staging, uploading, and unzipping of files
  * from a remote Google Cloud Storage bucket.
  */
 export class GoogleStorage implements IStorage{
     private provider: GoogleStorageService;
-    private args: ArgsInterface;
+    private args: GoogleStorageConfig;
     private unzipper: UnzipperProvider;
 
     /**
@@ -29,7 +39,7 @@ export class GoogleStorage implements IStorage{
      * @param args - Arguments for file handling and configuration.
      * @param excludes Files names to exclude during backup
      */
-    constructor(provider: StorageProvider, args: ArgsInterface, readonly excludes: string[] = ['executor.json', 'environment.properties']) {
+    constructor(provider: StorageProvider, args: GoogleStorageConfig, readonly excludes: string[] = ['executor.json', 'environment.properties']) {
         this.provider = provider;
         this.args = args;
         this.unzipper = unzipper;
@@ -66,9 +76,6 @@ export class GoogleStorage implements IStorage{
             await Promise.all([
                 this.uploadNewResults(this.getResultsArchivePath()),
                 this.uploadHistory(this.getHistoryArchivePath()),
-                counter.addFilesUploaded(
-                    await countFiles([this.getHistoryFolder(), ...this.args.RESULTS_PATHS])
-                ),
             ]);
         } catch (error) {
             console.warn("Error uploading artifacts:", error);
@@ -87,11 +94,7 @@ export class GoogleStorage implements IStorage{
                 .pipe(this.unzipper.Parse())
                 .on("entry", async (entry: Entry) => {
                     const fullPath = path.join(outputDir, entry.path);
-                    if (isFileTypeAllure(entry.path)) {
-                        entry.pipe(fsSync.createWriteStream(fullPath));
-                    } else {
-                        entry.autodrain();
-                    }
+                    entry.pipe(fsSync.createWriteStream(fullPath));
                 })
                 .on("close", () => resolve(true))
                 .on("error", (err) => {

@@ -32,8 +32,8 @@ const COMMAND_DESCRIPTIONS = {
 export const allureResultsPathArg = new Argument("<allure-results-path>", "Single or comma separated paths to results files, Default 'allure-results'")
     .default("allure-results")
     .argOptional();
-export const reportNameArg = new Argument("<report-name>", "Name of your report. Default is 'Allure Report'")
-    .argOptional();
+export const reportNameOption = new Option("-n, --report-name <report-name>", "Name of your report")
+    .default('Allure Report', 'Default report name');
 export const retriesOption = new Option("-r, --retries <limit>", COMMAND_DESCRIPTIONS.RETRIES)
     .argParser(parseRetries);
 export const showHistoryOption = new Option("-h, --show-history", COMMAND_DESCRIPTIONS.SHOW_HISTORY);
@@ -48,7 +48,7 @@ export const languageOption = new Option("-lang, --report-language <language>", 
 
 
 
-async function handleDeployAction(resultPath: any, reportName: any, options: any): Promise<ArgsInterface> {
+async function handleDeployAction(resultPath: any, options: any): Promise<ArgsInterface> {
     try {
         const firebaseProjectId: string = await validateCredentials(options.gcpJson);
         validateBucket(options);
@@ -77,7 +77,7 @@ async function handleDeployAction(resultPath: any, reportName: any, options: any
             storageBucket: options.bucket || db.get(KEY_BUCKET),
             retries: retries,
             showHistory: showHistory,
-            reportName: reportName,
+            reportName: options.reportName,
             slackConfig: slackConfig,
             clean: options.clean,
             reportLanguage: options.reportLanguage,
@@ -97,7 +97,7 @@ export function addDeployCommand(defaultProgram: Command, onCommand: (args: Args
         .command("deploy")
         .description("Generate and deploy report to host provider")
         .addArgument(allureResultsPathArg)
-        .addArgument(reportNameArg)
+        .addOption(reportNameOption)
         .addOption(languageOption)
         .addOption(retriesOption)
         .addOption(showHistoryOption)
@@ -107,12 +107,12 @@ export function addDeployCommand(defaultProgram: Command, onCommand: (args: Args
         .addOption(slackTokenOption)
         .addOption(prefixOption)
         .addOption(cleanOption)
-        .action(async (resultPath, reportName, options) => {
+        .action(async (resultPath, options) => {
             if (!isJavaInstalled()) {
                 console.warn(ERROR_MESSAGES.NO_JAVA);
                 process.exit(1);
             }
-            const cliArgs = await handleDeployAction(resultPath, reportName, options);
+            const cliArgs = await handleDeployAction(resultPath, options);
             await onCommand(cliArgs);
         });
 }

@@ -25,7 +25,7 @@ Host your Allure test report on Firebase.
 
 #### Syntax
 ```bash
-allure-deployer deploy <allure-results-path> <report-name>
+allure-deployer deploy <allure-results-path>
 ```
 
 #### Example
@@ -38,9 +38,9 @@ allure-deployer deploy ./allure-results my-report-name \
 
 #### Arguments
 - `<allure-results-path>`: Path or comma-seperated paths to the directory containing Allure results (Default: `./allure-results`).
-- `<report-name>`: The name/title of your report (Default: `Allure Report`).
 
 #### Options
+- `-n, --report-name`: Custom name of your Allure report
 - `-h, --show-history`: Show history in the upcoming report when Storage `bucket` is provided.
 - `-r, --retries <limit>`: Number of previous test runs to show as retries in the upcoming report when Storage `bucket` is provided.
 - `--bucket <bucket-name>`: Directly provide a Firebase/GCP bucket name for History and Retries.
@@ -58,14 +58,14 @@ allure-deployer generate <allure-results-path> <report-name>
 
 #### Example
 ```bash
-allure-deployer generate ./allure-results my-local-report --show-history --retries 5 --output ./allure-report
+allure-deployer generate ./allure-results --show-history --retries 5 --output ./allure-report
 ```
 
 #### Arguments
 - `<allure-results-path>`: Path to the directory containing Allure results (Default: `./allure-results`).
-- `<report-name>`: The name/title of your report (Default: `Allure Report`).
 
 #### Options
+- `-n, --report-name`: Custom name of your Allure report
 - `-h, --show-history`: Include history in the generated report.
 - `-r, --retries <limit>`: Specify the number of previous test runs to include as retries.
 - `--bucket <bucket-name>`: Firebase/GCP bucket name for History and Retries.
