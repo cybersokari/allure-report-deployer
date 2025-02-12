@@ -18,7 +18,7 @@ export interface GoogleStorageConfig {
     clean: boolean;
     showHistory: boolean;
     retries: number;
-    RESULTS_PATHS: string;
+    RESULTS_PATHS: string[];
     RESULTS_STAGING_PATH: string;
     ARCHIVE_DIR: string;
     REPORTS_DIR: string;

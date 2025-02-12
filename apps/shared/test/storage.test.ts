@@ -23,7 +23,7 @@ describe("Storage", () => {
     let storageInstance: GoogleStorage;
     let storageConfig: GoogleStorageConfig = {
         ARCHIVE_DIR: '/app/archive',
-        RESULTS_PATHS: '/allure-results',
+        RESULTS_PATHS: ['/allure-results'],
         REPORTS_DIR: "/app/allure-reports",
         RESULTS_STAGING_PATH: "/app/allure-results",
         fileProcessingConcurrency: 10,
