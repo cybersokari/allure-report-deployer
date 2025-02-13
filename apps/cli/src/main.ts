@@ -16,7 +16,7 @@ import {
     ReportStatistic,
     readJsonFile,
     copyFiles,
-    AllureConfig
+    AllureConfig, GoogleStorageConfig
 } from "allure-deployer-shared";
 import {Command} from "commander";
 import {addDeployCommand} from "./commands/deploy.command.js";
@@ -115,7 +115,17 @@ async function initializeCloudStorage(args: ArgsInterface): Promise<GoogleStorag
             console.log(`Storage Bucket '${args.storageBucket}' does not exist. History and Retries will be disabled`);
             return undefined;
         }
-        return new GoogleStorage(new GoogleStorageService(bucket, args.prefix), args);
+        let config: GoogleStorageConfig = {
+            ARCHIVE_DIR: args.ARCHIVE_DIR,
+            RESULTS_PATHS: args.RESULTS_PATHS,
+            REPORTS_DIR: args.REPORTS_DIR,
+            RESULTS_STAGING_PATH: args.RESULTS_STAGING_PATH,
+            fileProcessingConcurrency: args.fileProcessingConcurrency,
+            showHistory: args.showHistory ?? false,
+            retries: args.retries ?? 0,
+            clean: args.clean?? false,
+        }
+        return new GoogleStorage(new GoogleStorageService(bucket, args.prefix), config);
     } catch (error) {
         handleStorageError(error);
         throw error;

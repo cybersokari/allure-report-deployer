@@ -93,7 +93,7 @@ export class GoogleStorage implements IStorage{
             fsSync.createReadStream(zipFilePath)
                 .pipe(this.unzipper.Parse())
                 .on("entry", async (entry: Entry) => {
-                    const fullPath = path.join(outputDir, entry.path);
+                    const fullPath = path.posix.join(outputDir, entry.path);
                     entry.pipe(fsSync.createWriteStream(fullPath));
                 })
                 .on("close", () => resolve(true))

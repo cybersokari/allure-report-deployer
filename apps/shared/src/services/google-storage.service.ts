@@ -9,11 +9,11 @@ export class GoogleStorageService implements StorageProvider {
 
     constructor(storageBucket: Bucket, prefix: string | undefined) {
         this.bucket = storageBucket;
-        this.prefix = prefix? path.normalize(prefix + '/'): undefined;
+        this.prefix = prefix? path.posix.normalize(prefix + '/'): undefined;
     }
 
     public async upload(filePath: string, destination: string) {
-        await this.bucket.upload(filePath, {validation: true, destination: path.join(this.prefix ?? '', destination)})
+        await this.bucket.upload(filePath, {validation: true, destination: path.posix.join(this.prefix ?? '', destination)})
     }
 
     async getFiles({matchGlob, order = Order.byNewestToOldest, maxResults, endOffset}: {
@@ -36,7 +36,7 @@ export class GoogleStorageService implements StorageProvider {
         for (const file of files) {
             downloadPromises.push(limit(async () => {
                 // Remove the preceding storageHomeDir path from the downloaded file
-                const finalDestination = path.join(destination, path.basename(file.name));
+                const finalDestination = path.posix.join(destination, path.basename(file.name));
                 await file.download({destination: finalDestination, validation: true});
                 return finalDestination;
             }))

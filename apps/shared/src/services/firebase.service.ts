@@ -94,7 +94,7 @@ export class FirebaseService implements FirebaseInterface{
             }
         };
         await fs.mkdir(this.rootDir, {recursive: true});
-        const configPath = path.join(this.rootDir, 'firebase.json')
+        const configPath = path.posix.join(this.rootDir, 'firebase.json')
         await fs.writeFile(configPath, JSON.stringify(config), {mode: 0o755, encoding: 'utf-8'});
         return configPath;
     }

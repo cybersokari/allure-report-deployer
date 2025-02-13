@@ -137,7 +137,7 @@ export async function validateResultsPaths(commaSeparatedResultPaths: string): P
 }
 
 export async function getReportStats(reportDir: string): Promise<ReportStatistic> {
-    const summaryJson = await readJsonFile(path.join(reportDir, "widgets/summary.json"))
+    const summaryJson = await readJsonFile(path.posix.join(reportDir, "widgets/summary.json"))
     return summaryJson.statistic as ReportStatistic;
 }
 

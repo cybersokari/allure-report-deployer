@@ -8,7 +8,7 @@ import pLimit from "p-limit";
 export async function readJsonFile(filePath: string): Promise<any> {
     try {
         // Resolve the absolute path (optional, for robustness)
-        const absolutePath = path.resolve(filePath);
+        const absolutePath = path.posix.resolve(filePath);
 
         // Read the file contents as a string
         const fileContents = await fs.readFile(absolutePath, 'utf-8');
@@ -23,7 +23,7 @@ export async function readJsonFile(filePath: string): Promise<any> {
 
 export async function getRuntimeDirectory(): Promise<string> {
     // Create a subdirectory specific to your CLI
-    const runtimeDir = path.join(os.tmpdir(), 'allure-report-deployer');
+    const runtimeDir = path.posix.join(os.tmpdir(), 'allure-report-deployer');
     // Delete if already exist
     await fs.rm(runtimeDir, {recursive: true, force: true});
     await fs.mkdir(runtimeDir, {recursive: true});
@@ -31,7 +31,7 @@ export async function getRuntimeDirectory(): Promise<string> {
 }
 
 export async function getUserAppDirectory(): Promise<string> {
-    const appDir = path.join(os.homedir(), '.allure-report-deployer');
+    const appDir = path.posix.join(os.homedir(), '.allure-report-deployer');
     if (!fsSync.existsSync(appDir)) {
         await fs.mkdir(appDir, {recursive: true});
     }
@@ -41,7 +41,7 @@ export async function getUserAppDirectory(): Promise<string> {
 export function isJavaInstalled(additionalDirectories: string[] = []): boolean {
     const javaHome = process.env.JAVA_HOME;
     if (javaHome) {
-        return fsSync.existsSync(path.join(javaHome, 'bin/java'))
+        return fsSync.existsSync(path.posix.join(javaHome, 'bin/java'))
     } else {
         // Check common system paths
         const commonPaths = ["/usr/bin/java", "/usr/local/bin/java", ...additionalDirectories];
@@ -81,8 +81,8 @@ export async function copyFiles({
                 copyPromises.push(
                     limit(async () => {
                         try {
-                            const fileToCopy = path.join(dir, file.name);
-                            const destination = path.join(to, file.name);
+                            const fileToCopy = path.posix.join(dir, file.name);
+                            const destination = path.posix.join(to, file.name);
                             await fs.cp(fileToCopy, destination, {force: overwrite, errorOnExist: false});
                             successCount++;
                         } catch (error) {

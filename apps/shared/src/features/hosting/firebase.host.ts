@@ -14,10 +14,12 @@ export class FirebaseHost implements HostingProvider {
     public command: string | undefined;
     private hostedSiteUrl: string | undefined;
     private readonly service: FirebaseInterface;
+    private readonly keep : number
 
     // Initialize class properties from input arguments
-    constructor(service: FirebaseInterface) {
+    constructor(service: FirebaseInterface, keep = maxFirebaseAllowedSites) {
         this.service = service
+        this.keep = keep > maxFirebaseAllowedSites ? maxFirebaseAllowedSites : keep;
     }
 
     // Deploys the Firebase hosting site
@@ -56,7 +58,7 @@ export class FirebaseHost implements HostingProvider {
     // Creates a new Firebase hosting site, deleting the oldest if the limit is reached
     private async createFirebaseSite(): Promise<any> {
         const sites = await this.getExistingFirebaseSiteIds();
-        if (sites.length >= maxFirebaseAllowedSites) {
+        if (sites.length >= this.keep) {
             const configPath = await this.service.createConfigJson();
             await this.deleteFirebaseSite(sites[0], configPath);
             console.log(`Oldest report deleted to create new report. Max. ${maxFirebaseAllowedSites}`);
